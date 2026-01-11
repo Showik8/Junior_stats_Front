@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getUserRole } from "../utils/auth";
-import ClubDashboard from "./dashboard/ClubDashboard";
+import TeamDashboard from "./dashboard/TeamDashboard";
 import TournamentDashboard from "./dashboard/TournamentDashboard";
-import Header from "./ui/Header";
 
 
 const AdminLayout = () => {
@@ -28,14 +27,12 @@ const AdminLayout = () => {
 
   if (role === "CLUB_ADMIN") {
     return <>
-    <Header/>
-    <ClubDashboard />
+    <TeamDashboard />
     </>;
   }
 
   if (role === "TOURNAMENT_ADMIN") {
     return <>
-      <Header/>
       <TournamentDashboard />
     </>;
   }
