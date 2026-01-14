@@ -24,16 +24,23 @@ export default function SignInPage() {
     };
 
     try {
-      const response = await axiosInstance.post(API_PATHS.ADMIN.LOGIN, signInData);
-      const { token, role } = response.data;
+      const response = await axiosInstance.post<{ success: boolean; data?: { token: string; role: string }; error?: { message: string } }>(API_PATHS.ADMIN.LOGIN, signInData);
       
-      if (token) {
-        setToken(token);
-        if (role) setUserRole(role);
-        router.push("/admin" )
+      if (response.data.success && response.data.data) {
+        const { token, role } = response.data.data;
+        if (token) {
+          setToken(token);
+          if (role) setUserRole(role);
+          router.push("/admin");
+        }
+      } else {
+        const errorMessage = response.data.error?.message || "Login failed";
+        alert(errorMessage);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed:", error);
+      const errorMessage = error.response?.data?.error?.message || error.message || "Login failed. Please try again.";
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -14,6 +14,10 @@ export const API_PATHS = {
     LOG_OUT: "/api/admin/logout",
     GET_ADMIN: "/api/admin",
     DASHBOARD: "/api/admin/dashboard",
+    // Admin CRUD
+    LIST: "/api/admin/list",
+    CREATE: "/api/admin",
+    DELETE: (id: number) => `/api/admin/${id}`,
   },
 
   TOURNAMENT: {
@@ -30,8 +34,10 @@ export const API_PATHS = {
     // GET /api/tournaments/:id/stats - Get tournament stats
     GET_TOURNAMENT_STATS: (id: string) => `/api/tournaments/${id}/stats`,
   },
-  
+
   TEAMS: {
+    // Base teams path
+    BASE: "/api/teams",
     // GET /api/teams - Get teams (with query params: tournamentId, ageCategory, etc.)
     GET_TEAMS: "/api/teams",
     // POST /api/teams - Create team
@@ -47,7 +53,7 @@ export const API_PATHS = {
     // GET /api/teams/:id/stats - Get team stats
     GET_TEAM_STATS: (id: string) => `/api/teams/${id}/stats`,
   },
-  
+
   PLAYERS: {
     // GET /api/players - Get players (with query param: teamId)
     GET_PLAYERS: "/api/players",
@@ -62,7 +68,7 @@ export const API_PATHS = {
     // GET /api/players/team/:teamId/count - Get player count for team
     GET_PLAYER_COUNT: (teamId: string) => `/api/players/team/${teamId}/count`,
   },
-  
+
   MATCH: {
     // GET /api/matches - Get matches (with query params: tournamentId, ageCategory, teamId)
     GET_MATCHES: "/api/matches",
@@ -79,6 +85,7 @@ export const API_PATHS = {
     // PATCH /api/matches/:id/cancel - Cancel match
     CANCEL_MATCH: (id: string) => `/api/matches/${id}/cancel`,
     // GET /api/matches/tournament/:tournamentId/stats - Get match stats for tournament
-    GET_MATCH_STATS: (tournamentId: string) => `/api/matches/tournament/${tournamentId}/stats`,
+    GET_MATCH_STATS: (tournamentId: string) =>
+      `/api/matches/tournament/${tournamentId}/stats`,
   },
 };

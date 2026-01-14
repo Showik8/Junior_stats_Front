@@ -1,132 +1,162 @@
 /**
  * Age categories matching backend validation
- * Backend accepts any string for ageCategory, but frontend restricts to common values
+ * Backend expects values like U_10, U_12 etc.
  */
-export type AgeCategory = "U-10" | "U-12" | "U-14" | "U-16" | "U-18" | "U-21";
+export type AgeCategory = 
+  | "U_10" 
+  | "U_11" 
+  | "U_12" 
+  | "U_13" 
+  | "U_14" 
+  | "U_15" 
+  | "U_16" 
+  | "U_17" 
+  | "U_18" 
+  | "U_19" 
+  | "U_20" 
+  | "U_21";
+
+export const AGE_CATEGORIES: AgeCategory[] = [
+  "U_10", "U_11", "U_12", "U_13", "U_14", "U_15", 
+  "U_16", "U_17", "U_18", "U_19", "U_20", "U_21"
+];
+
+/**
+ * Roles matching backend Enum
+ */
+export type Role = "SUPER_ADMIN" | "CLUB_ADMIN" | "TOURNAMENT_ADMIN";
 
 /**
  * Match status values from backend Prisma schema
  * Default: "SCHEDULED"
  */
-export type MatchStatus = "SCHEDULED" | "CANCELED" | "COMPLETED";
+export type MatchStatus = "SCHEDULED" | "CANCELLED" | "FINISHED";
 
 /**
  * Tournament status values from backend Prisma schema
  * Default: "ACTIVE"
  */
-export type TournamentStatus = "ACTIVE" | "INACTIVE" | "COMPLETED";
+export type TournamentStatus = "ACTIVE" | "INACTIVE" | "FINISHED";
 
 /**
  * Team interface matching backend Prisma Team model
- * All fields match exactly with backend schema
  */
 export interface Team {
-  id: string; // UUID from backend
-  name: string; // Required
-  logo?: string | null; // Optional, nullable
-  coach?: string | null; // Optional, nullable
-  ageCategory: string; // Required - age category string
-  tournamentId: string; // Required - UUID reference
-  createdAt?: string; // ISO date string from backend
-  updatedAt?: string; // ISO date string from backend
-  // Optional nested relations (when includePlayers=true)
+  id: string; // UUID
+  name: string;
+  logo?: string | null;
+  coach?: string | null;
+  ageCategory: AgeCategory; // Single age category per team
+  tournamentId?: string; // Optional - only if strictly tied to one tournament context
+  createdAt?: string;
+  updatedAt?: string;
+  
+  // Relations
   players?: Player[];
-  // Optional nested tournament (when includeTournament=true)
-  tournament?: Tournament;
+  // M:N relation structure from Prisma
+  tournaments?: { tournament: Tournament; status: string; joinedAt: string }[];
+  
+  scheduledMatches?: Match[];
+  finishedMatches?: Match[];
 }
 
 /**
  * Player interface matching backend Prisma Player model
  */
 export interface Player {
-  id: string; // UUID from backend
-  name: string; // Required
-  position?: string | null; // Optional, nullable
-  shirtNumber?: number | null; // Optional, nullable (Int in Prisma)
-  teamId: string; // Required - UUID reference
-  createdAt?: string; // ISO date string from backend
-  updatedAt?: string; // ISO date string from backend
-  // Optional nested team (when includeTeam=true)
+  id: string;
+  name: string;
+  position?: string | null;
+  shirtNumber?: number | null;
+  teamId: string;
+  createdAt?: string;
+  updatedAt?: string;
   team?: Team;
 }
 
 /**
  * Match interface matching backend Prisma Match model
- * Backend includes nested homeTeam and awayTeam when includeTeams=true
  */
 export interface Match {
-  id: string; // UUID from backend
-  date: string; // ISO date string (DateTime in Prisma)
-  status: MatchStatus; // Default: "SCHEDULED"
-  homeTeamId: string; // Required - UUID reference
-  awayTeamId: string; // Required - UUID reference
-  tournamentId: string; // Required - UUID reference
-  ageCategory: string; // Required - matches teams' age category
-  createdAt?: string; // ISO date string from backend
-  updatedAt?: string; // ISO date string from backend
-  // Nested relations (when includeTeams=true, which is default for matches)
+  id: string;
+  date: string;
+  status: MatchStatus;
+  homeTeamId: string;
+  awayTeamId: string;
+  tournamentId: string;
+  ageCategory: AgeCategory;
+  createdAt?: string;
+  updatedAt?: string;
+  
   homeTeam?: Team;
   awayTeam?: Team;
   tournament?: Tournament;
 }
 
 /**
+ * TournamentAgeCategory Join Model
+ */
+export interface TournamentAgeCategory {
+  tournamentId: string;
+  ageCategory: AgeCategory;
+}
+
+/**
  * Tournament interface matching backend Prisma Tournament model
  */
 export interface Tournament {
-  id: string; // UUID from backend
-  name: string; // Required
-  status: TournamentStatus; // Default: "ACTIVE"
-  createdAt?: string; // ISO date string from backend
-  updatedAt?: string; // ISO date string from backend
-  // Optional nested relations (when includeTeams/includeMatches/includeAdmins=true)
-  teams?: Team[];
+  id: string;
+  name: string;
+  status: TournamentStatus;
+  
+  // Relations
+  ageCategories?: TournamentAgeCategory[]; // Changed to match Prisma output
+  /** @deprecated Backend may still return this for legacy reasons */
+  ageCategory?: string | null; 
+  teams?: { teamId: string; tournamentId: string; status: string }[]; // Simplified for type
   matches?: Match[];
+  admins?: { admin: Admin; role: Role; joinedAt: string }[];
+  
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 /**
- * CreatePlayerPayload - matches backend CreatePlayerData interface
- * Required: name, teamId
- * Optional: position, shirtNumber
+ * CreatePlayerPayload
  */
 export interface CreatePlayerPayload {
-  name: string; // Required - validated on backend
-  teamId: string; // Required - UUID, validated on backend
-  position?: string | null; // Optional
-  shirtNumber?: number | null; // Optional - validated for uniqueness within team on backend
+  name: string;
+  teamId: string;
+  position?: string | null;
+  shirtNumber?: number | null;
 }
 
 /**
- * CreateTeamPayload - matches backend CreateTeamData interface
- * Required: name, tournamentId, ageCategory
- * Optional: logo, coach
+ * CreateTeamPayload
  */
 export interface CreateTeamPayload {
-  name: string; // Required - validated on backend
-  tournamentId: string; // Required - UUID, validated on backend
-  ageCategory: AgeCategory | string; // Required - validated on backend
-  logo?: string | null; // Optional
-  coach?: string | null; // Optional
+  name: string;
+  tournamentId?: string;
+  ageCategory: AgeCategory;
+  logo?: string | null;
+  coach?: string | null;
+  adminEmail?: string;
 }
 
 /**
- * CreateMatchPayload - matches backend CreateMatchData interface
- * Required: homeTeamId, awayTeamId, date, tournamentId
- * Optional: status, ageCategory (auto-derived from teams)
- * Backend validates: teams exist, same tournament, same age category, not same team
+ * CreateMatchPayload
  */
 export interface CreateMatchPayload {
-  homeTeamId: string; // Required - UUID, validated on backend
-  awayTeamId: string; // Required - UUID, validated on backend
-  date: string; // Required - ISO date string, converted to DateTime on backend
-  tournamentId: string; // Required - UUID, validated on backend
-  status?: MatchStatus; // Optional - defaults to "SCHEDULED" on backend
-  ageCategory?: string; // Optional - auto-derived from teams on backend
+  homeTeamId: string;
+  awayTeamId: string;
+  date: string;
+  tournamentId: string;
+  status?: MatchStatus;
+  ageCategory?: AgeCategory;
 }
 
 /**
  * Backend API Response wrapper
- * All backend responses follow this format
  */
 export interface ApiResponse<T> {
   success: boolean;
@@ -140,6 +170,36 @@ export interface ApiResponse<T> {
   error?: {
     message: string;
     code?: string;
-    details?: unknown; // Backend may return various error detail formats
+    details?: unknown;
   };
+}
+
+/**
+ * Admin interface
+ */
+export interface Admin {
+  id: number;
+  email: string;
+  role: Role;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * CreateAdminPayload
+ */
+export interface CreateAdminPayload {
+  email: string;
+  password: string;
+  role: Role;
+}
+
+/**
+ * CreateTournamentPayload
+ */
+export interface CreateTournamentPayload {
+  name: string;
+  status?: TournamentStatus;
+  adminEmail?: string;
+  ageCategories: AgeCategory[]; // Must be array now
 }

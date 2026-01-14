@@ -1,508 +1,234 @@
-"use client";
-import { useEffect, useState } from "react";
-import { adminService } from "@/services/adminService";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Tournament, Team, Match, AgeCategory } from "@/types/admin";
-import Table from "../components/Table";
-import Modal from "../components/Modal";
-import Button from "../components/Button";
-import Header from "../components/Header";
-import AgeCategorySelector from "../components/AgeCategorySelector";
+import { adminService } from "@/services/adminService";
+import { removeToken } from "@/app/utils/auth";
+import TournamentInfo from "../components/TournamentInfo";
+import MembersManagement from "../components/MembersManagement";
+import MatchManagement from "../components/MatchManagement";
+// import { FaSignOutAlt, FaHome } from "react-icons/fa";
 
-const TournamentDashboard = () => {
+const TournamentDashboard: React.FC = () => {
+  const router = useRouter();
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [activeTab, setActiveTab] = useState<"teams" | "matches">("teams");
-  const [selectedCategory, setSelectedCategory] = useState<AgeCategory>("U-10");
-  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Modal States
-  const [isAddTeamOpen, setIsAddTeamOpen] = useState(false);
-  const [isAddMatchOpen, setIsAddMatchOpen] = useState(false);
-
-  // Form States with validation
-  const [newTeamName, setNewTeamName] = useState("");
-  const [teamNameError, setTeamNameError] = useState<string | null>(null);
   
-  const [newMatchData, setNewMatchData] = useState({
-    homeTeamId: "",
-    awayTeamId: "",
-    date: "",
-  });
-  const [matchErrors, setMatchErrors] = useState<{
-    homeTeamId?: string;
-    awayTeamId?: string;
-    date?: string;
-    general?: string;
-  }>({});
+  const [activeAgeCategory, setActiveAgeCategory] = useState<AgeCategory | null>(null);
 
-  // Loading states for actions
-  const [isAddingTeam, setIsAddingTeam] = useState(false);
-  const [isCreatingMatch, setIsCreatingMatch] = useState(false);
-  const [removingTeamId, setRemovingTeamId] = useState<string | null>(null);
-  const [cancelingMatchId, setCancelingMatchId] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchInitialData();
-  }, [selectedCategory]); // Refetch when category changes
-
-  const fetchInitialData = async () => {
+  const fetchTournamentInfo = async () => {
     try {
-      setLoading(true);
-      setError(null);
-      const tournamentData = await adminService.getTournamentInfo();
+      const fetchedTournament = await adminService.getTournamentInfo();
+      setTournament(fetchedTournament);
       
-      if (tournamentData) {
-        setTournament(tournamentData);
-        await Promise.all([
-          fetchTeams(tournamentData.id),
-          fetchMatches(tournamentData.id)
-        ]);
-      } else {
-        setError("No active tournament found");
+      // Set default active category if not set
+      if (!activeAgeCategory && fetchedTournament) {
+        if (fetchedTournament.ageCategories && fetchedTournament.ageCategories.length > 0) {
+            setActiveAgeCategory(fetchedTournament.ageCategories[0].ageCategory);
+        } else if (fetchedTournament.ageCategory) {
+            // Fallback for old schema
+             setActiveAgeCategory(fetchedTournament.ageCategory as AgeCategory);
+        }
       }
+      return fetchedTournament;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.error("Failed to fetch tournament data:", err);
-      setError(err.message || "Failed to fetch tournament data");
-    } finally {
-      setLoading(false);
+       console.error("Tournament info fetch error:", err);
+       setError(err.message || "Failed to load tournament info");
+       return null;
     }
   };
 
-  const fetchTeams = async (tournamentId: string) => {
-    try {
-      const data = await adminService.getTeams(tournamentId, selectedCategory);
-      setTeams(data || []);
-    } catch (e: any) {
-      console.error("Failed to fetch teams:", e);
-      setError(e.message || "Failed to fetch teams");
-    }
-  };
-
-  const fetchMatches = async (tournamentId: string) => {
-    try {
-      const data = await adminService.getMatches(tournamentId, selectedCategory);
-      setMatches(data || []);
-    } catch (e: any) {
-      console.error("Failed to fetch matches:", e);
-      setError(e.message || "Failed to fetch matches");
-    }
-  };
-
-  // Validation functions
-  const validateTeamName = (name: string): string | null => {
-    if (!name || !name.trim()) {
-      return "Team name is required";
-    }
-    if (name.trim().length < 2) {
-      return "Team name must be at least 2 characters";
-    }
-    if (name.trim().length > 100) {
-      return "Team name must be less than 100 characters";
-    }
-    return null;
-  };
-
-  const validateMatchData = (): { isValid: boolean; errors: typeof matchErrors } => {
-    const errors: typeof matchErrors = {};
-    
-    if (!newMatchData.homeTeamId) {
-      errors.homeTeamId = "Home team is required";
-    }
-    if (!newMatchData.awayTeamId) {
-      errors.awayTeamId = "Away team is required";
-    }
-    if (newMatchData.homeTeamId === newMatchData.awayTeamId && newMatchData.homeTeamId) {
-      errors.general = "A team cannot play against itself";
-    }
-    if (!newMatchData.date) {
-      errors.date = "Match date and time is required";
-    } else {
-      const selectedDate = new Date(newMatchData.date);
-      const now = new Date();
-      if (isNaN(selectedDate.getTime())) {
-        errors.date = "Invalid date format";
-      } else if (selectedDate < now) {
-        errors.date = "Match date cannot be in the past";
+  const fetchCategoryData = async (tournId: string, category: AgeCategory) => {
+      try {
+        setLoading(true);
+        const [fetchedTeams, fetchedMatches] = await Promise.all([
+             adminService.getTeams(tournId, category),
+             adminService.getMatches(tournId, category)
+        ]);
+        setTeams(fetchedTeams);
+        setMatches(fetchedMatches);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+          console.error("Category data fetch error:", err);
+          // Don't block UI, just log or show partial error
+      } finally {
+          setLoading(false);
       }
-    }
+  }
 
-    return {
-      isValid: Object.keys(errors).length === 0,
-      errors,
+  // Initial Load
+  useEffect(() => {
+    const init = async () => {
+        setLoading(true);
+        const tourn = await fetchTournamentInfo();
+        // If we have tournament and active category is set (by fetchTournamentInfo logic), fetch data
+        // note: activeAgeCategory is state, might not be updated immediately in this closure?
+        // Actually, let's rely on the effect below dependent on activeAgeCategory
+        setLoading(false);
     };
+    init();
+  }, []);
+
+  // Fetch data when active category changes
+  useEffect(() => {
+      if (tournament && activeAgeCategory) {
+          fetchCategoryData(tournament.id, activeAgeCategory);
+      }
+  }, [activeAgeCategory, tournament]); // tournament dependency ensures if it's set later
+
+  const handleRefresh = () => {
+      if (tournament && activeAgeCategory) {
+          fetchCategoryData(tournament.id, activeAgeCategory);
+      }
   };
 
-  const handleAddTeam = async () => {
-    if (!tournament) return;
-
-    // Validate team name
-    const nameError = validateTeamName(newTeamName);
-    if (nameError) {
-      setTeamNameError(nameError);
-      return;
-    }
-
-    setIsAddingTeam(true);
-    setTeamNameError(null);
-
-    try {
-      await adminService.addTeam({
-        name: newTeamName.trim(),
-        tournamentId: tournament.id,
-        ageCategory: selectedCategory,
-      });
-      setNewTeamName("");
-      setIsAddTeamOpen(false);
-      await fetchTeams(tournament.id);
-    } catch (e: any) {
-      setTeamNameError(e.message || "Failed to add team. Please try again.");
-    } finally {
-      setIsAddingTeam(false);
-    }
+  const handleLogout = () => {
+    removeToken();
+    router.push("/sign-in");
   };
 
-  const handleRemoveTeam = async (id: string) => {
-    if (!tournament || !confirm("Are you sure you want to remove this team? This action cannot be undone.")) return;
-    
-    setRemovingTeamId(id);
-    try {
-      await adminService.removeTeam(id);
-      await fetchTeams(tournament.id);
-    } catch (e: any) {
-      alert(e.message || "Failed to remove team. Please try again.");
-    } finally {
-      setRemovingTeamId(null);
-    }
+  const handleExit = () => {
+    router.push("/");
   };
 
-  const handleCreateMatch = async () => {
-    if (!tournament) return;
-
-    // Validate match data
-    const validation = validateMatchData();
-    if (!validation.isValid) {
-      setMatchErrors(validation.errors);
-      return;
-    }
-
-    setIsCreatingMatch(true);
-    setMatchErrors({});
-
-    try {
-      await adminService.createMatch({
-        ...newMatchData,
-        tournamentId: tournament.id,
-      });
-      setNewMatchData({ homeTeamId: "", awayTeamId: "", date: "" });
-      setIsAddMatchOpen(false);
-      await fetchMatches(tournament.id);
-    } catch (e: any) {
-      setMatchErrors({ general: e.message || "Failed to create match. Please try again." });
-    } finally {
-      setIsCreatingMatch(false);
-    }
-  };
-
-  const handleCancelMatch = async (id: string) => {
-    if (!tournament || !confirm("Are you sure you want to cancel this match?")) return;
-    
-    setCancelingMatchId(id);
-    try {
-      await adminService.cancelMatch(id);
-      await fetchMatches(tournament.id);
-    } catch (e: any) {
-      alert(e.message || "Failed to cancel match. Please try again.");
-    } finally {
-      setCancelingMatchId(null);
-    }
-  };
-
-  // Reset form errors when modal closes
-  const handleCloseTeamModal = () => {
-    setIsAddTeamOpen(false);
-    setNewTeamName("");
-    setTeamNameError(null);
-  };
-
-  const handleCloseMatchModal = () => {
-    setIsAddMatchOpen(false);
-    setNewMatchData({ homeTeamId: "", awayTeamId: "", date: "" });
-    setMatchErrors({});
-  };
-
-  if (loading) return <div className="p-8 text-center">Loading dashboard...</div>;
-  if (error && !tournament) {
+  if (loading && !tournament) {
     return (
-      <div className="p-8 text-center">
-        <div className="text-red-500 mb-4">{error}</div>
-        <Button onClick={fetchInitialData}>Retry</Button>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
-  if (!tournament) return <div className="p-8 text-center text-red-500">No active tournament found.</div>;
+
+  if (error) {
+     return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+            <div className="bg-white p-8 rounded-xl shadow-md max-w-md w-full text-center">
+                <div className="text-red-500 text-5xl mb-4">⚠️</div>
+                <h2 className="text-xl font-bold text-gray-800 mb-2">Something went wrong</h2>
+                <p className="text-gray-600 mb-6">{error}</p>
+                <button 
+                    onClick={() => window.location.reload()}
+                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    Reload Page
+                </button>
+                 <div className="mt-4 pt-4 border-t border-gray-100">
+                    <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-gray-700">
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+        </div>
+     )
+  }
+
+  // Helper to get available categories list
+  const availableCategories: AgeCategory[] = tournament?.ageCategories?.map(c => c.ageCategory) || 
+                                            (tournament?.ageCategory ? [tournament.ageCategory as AgeCategory] : []);
 
   return (
-  <>
-    <Header tournament={tournament}/>
-    <main className="max-w-7xl mx-auto p-6">
-      {/* Header Section */}
-     
-      <AgeCategorySelector 
-        selectedCategory={selectedCategory} 
-        onSelectCategory={setSelectedCategory} 
-      />
-
-      {/* Tabs */}
-      <div className="flex space-x-4 mb-6 border-b border-gray-200">
-        <button
-          onClick={() => setActiveTab("teams")}
-          className={`pb-2 px-4 ${activeTab === "teams" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500 hover:text-gray-700"}`}
-        >
-          Teams Management
-        </button>
-        <button
-          onClick={() => setActiveTab("matches")}
-          className={`pb-2 px-4 ${activeTab === "matches" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500 hover:text-gray-700"}`}
-        >
-          Matches Management
-        </button>
-      </div>
-
-      {/* Teams Content */}
-      {activeTab === "teams" && (
-        <div>
-          <div className="flex justify-end mb-4">
-            <Button onClick={() => setIsAddTeamOpen(true)}>+ Add Team</Button>
-          </div>
-          <Table headers={["Team Name", "Coach", "Actions"]}>
-            {teams.length === 0 ? (
-               <tr><td colSpan={3} className="px-6 py-4 text-center text-gray-500">No teams found for {selectedCategory}</td></tr>
-            ) : (
-              teams.map((team) => (
-                <tr key={team.id}>
-                  <td className="px-6 py-4 font-medium text-gray-900">{team.name}</td>
-                  <td className="px-6 py-4 text-gray-500">{team.coach || "-"}</td>
-                  <td className="px-6 py-4">
-                    <Button 
-                      variant="danger" 
-                      onClick={() => handleRemoveTeam(team.id)}
-                      disabled={removingTeamId === team.id}
-                    >
-                      {removingTeamId === team.id ? "Removing..." : "Remove"}
-                    </Button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </Table>
-        </div>
-      )}
-
-      {/* Matches Content */}
-      {activeTab === "matches" && (
-        <div>
-          <div className="flex justify-end mb-4">
-            <Button onClick={() => setIsAddMatchOpen(true)}>+ Schedule Match</Button>
-          </div>
-          <Table headers={["Date", "Home Team", "Away Team", "Status", "Actions"]}>
-            {matches.length === 0 ? (
-               <tr><td colSpan={5} className="px-6 py-4 text-center text-gray-500">No matches scheduled for {selectedCategory}</td></tr>
-            ) : (
-              matches.map((match) => (
-                <tr key={match.id}>
-                  <td className="px-6 py-4 text-gray-900">
-                    {new Date(match.date).toLocaleString(undefined, {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </td>
-                  <td className="px-6 py-4 font-medium text-gray-900">
-                    {match.homeTeam?.name || "Unknown Team"}
-                  </td>
-                  <td className="px-6 py-4 font-medium text-gray-900">
-                    {match.awayTeam?.name || "Unknown Team"}
-                  </td>
-                  <td className="px-6 py-4">
-                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                       match.status === 'CANCELED' ? 'bg-red-100 text-red-800' : 
-                       match.status === 'COMPLETED' ? 'bg-gray-100 text-gray-800' : 
-                       'bg-blue-100 text-blue-800'
-                     }`}>
-                       {match.status}
-                     </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    {match.status !== 'CANCELED' && match.status !== 'COMPLETED' && (
-                      <Button 
-                        variant="danger" 
-                        onClick={() => handleCancelMatch(match.id)}
-                        disabled={cancelingMatchId === match.id}
-                      >
-                        {cancelingMatchId === match.id ? "Canceling..." : "Cancel"}
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </Table>
-        </div>
-      )}
-
-      {/* Error Display */}
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-800">{error}</p>
-        </div>
-      )}
-
-      {/* Add Team Modal */}
-      <Modal isOpen={isAddTeamOpen} onClose={handleCloseTeamModal} title="Add New Team">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Team Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm p-2 border ${
-                teamNameError 
-                  ? "border-red-300 focus:border-red-500 focus:ring-red-500" 
-                  : "border-gray-300 focus:border-blue-500"
-              }`}
-              value={newTeamName}
-              onChange={(e) => {
-                setNewTeamName(e.target.value);
-                setTeamNameError(null);
-              }}
-              placeholder="Enter team name"
-              maxLength={100}
-            />
-            {teamNameError && (
-              <p className="mt-1 text-sm text-red-600">{teamNameError}</p>
-            )}
-            <p className="mt-1 text-xs text-gray-500">Required. 2-100 characters.</p>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="secondary" onClick={handleCloseTeamModal} disabled={isAddingTeam}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddTeam} disabled={!newTeamName.trim() || isAddingTeam}>
-              {isAddingTeam ? "Adding..." : "Add Team"}
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Add Match Modal */}
-      <Modal isOpen={isAddMatchOpen} onClose={handleCloseMatchModal} title="Schedule Match">
-        <div className="space-y-4">
-          {matchErrors.general && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-800">{matchErrors.general}</p>
+    <div className="min-h-screen bg-gray-50 pb-20 font-sans">
+      {/* Header / Nav */}
+      <nav className="shadow-sm border-b border-gray-200 sticky top-0 z-10 backdrop-blur-md bg-white/90">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center gap-3">
+               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                   JA
+               </div>
+               <div>
+                  <h1 className="text-lg font-bold text-gray-900 tracking-tight leading-none">
+                    Junior Stats
+                  </h1>
+                  <span className="text-xs text-gray-500 font-medium">Tournament Admin</span>
+               </div>
             </div>
-          )}
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Home Team <span className="text-red-500">*</span>
-              </label>
-              <select
-                className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 p-2 border ${
-                  matchErrors.homeTeamId 
-                    ? "border-red-300 focus:border-red-500 focus:ring-red-500" 
-                    : "border-gray-300 focus:border-blue-500"
-                }`}
-                value={newMatchData.homeTeamId}
-                onChange={(e) => {
-                  setNewMatchData({...newMatchData, homeTeamId: e.target.value});
-                  setMatchErrors({...matchErrors, homeTeamId: undefined, general: undefined});
-                }}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleExit}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                title="Go to Home"
               >
-                <option value="">Select Team</option>
-                {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </select>
-              {matchErrors.homeTeamId && (
-                <p className="mt-1 text-sm text-red-600">{matchErrors.homeTeamId}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Away Team <span className="text-red-500">*</span>
-              </label>
-              <select
-                className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 p-2 border ${
-                  matchErrors.awayTeamId 
-                    ? "border-red-300 focus:border-red-500 focus:ring-red-500" 
-                    : "border-gray-300 focus:border-blue-500"
-                }`}
-                value={newMatchData.awayTeamId}
-                onChange={(e) => {
-                  setNewMatchData({...newMatchData, awayTeamId: e.target.value});
-                  setMatchErrors({...matchErrors, awayTeamId: undefined, general: undefined});
-                }}
+               <span className="hidden sm:inline">View Site</span>
+              </button>
+              <div className="h-6 w-px bg-gray-200 mx-1"></div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                title="Sign Out"
               >
-                <option value="">Select Team</option>
-                {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </select>
-              {matchErrors.awayTeamId && (
-                <p className="mt-1 text-sm text-red-600">{matchErrors.awayTeamId}</p>
-              )}
+                <span className="hidden sm:inline">Sign Out</span>
+              </button>
             </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Date & Time <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="datetime-local"
-              className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 p-2 border ${
-                matchErrors.date 
-                  ? "border-red-300 focus:border-red-500 focus:ring-red-500" 
-                  : "border-gray-300 focus:border-blue-500"
-              }`}
-              value={newMatchData.date}
-              onChange={(e) => {
-                setNewMatchData({...newMatchData, date: e.target.value});
-                setMatchErrors({...matchErrors, date: undefined});
-              }}
-              min={new Date().toISOString().slice(0, 16)}
-            />
-            {matchErrors.date && (
-              <p className="mt-1 text-sm text-red-600">{matchErrors.date}</p>
-            )}
-            <p className="mt-1 text-xs text-gray-500">Select a future date and time.</p>
-          </div>
-
-          <div className="flex justify-end space-x-2">
-            <Button variant="secondary" onClick={handleCloseMatchModal} disabled={isCreatingMatch}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleCreateMatch} 
-              disabled={
-                !newMatchData.homeTeamId || 
-                !newMatchData.awayTeamId || 
-                !newMatchData.date || 
-                newMatchData.homeTeamId === newMatchData.awayTeamId ||
-                isCreatingMatch
-              }
-            >
-              {isCreatingMatch ? "Scheduling..." : "Schedule Match"}
-            </Button>
           </div>
         </div>
-      </Modal>
+      </nav>
 
-    </main></>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        {/* Tournament Info Section */}
+        <section>
+            <TournamentInfo tournament={tournament} loading={loading} />
+        </section>
+
+        {tournament && (
+            <div>
+                {/* Age Category Tabs */}
+                <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-1">
+                   {availableCategories.length > 0 ? availableCategories.map(cat => (
+                       <button
+                          key={cat}
+                          onClick={() => setActiveAgeCategory(cat)}
+                          className={`px-4 py-2 rounded-t-lg font-medium text-sm transition-all relative top-[1px] ${
+                              activeAgeCategory === cat 
+                                ? "bg-white text-blue-600 border border-gray-200 border-b-white shadow-sm" 
+                                : "bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-transparent"
+                          }`}
+                       >
+                           {cat.replace('_', '-')}
+                       </button>
+                   )) : (
+                       <div className="px-4 py-2 text-sm text-gray-400">No age categories defined</div>
+                   )}
+                </div>
+
+                {activeAgeCategory ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        {/* Members Section */}
+                        <section className="h-[600px]">
+                            <MembersManagement 
+                                tournament={tournament}
+                                teams={teams}
+                                activeAgeCategory={activeAgeCategory}
+                                onTeamUpdate={handleRefresh} 
+                            />
+                        </section>
+
+                        {/* Match Management Section */}
+                        <section className="h-[600px]">
+                            <MatchManagement 
+                                tournament={tournament}
+                                teams={teams}
+                                matches={matches}
+                                activeAgeCategory={activeAgeCategory}
+                                onMatchUpdate={handleRefresh}
+                            />
+                        </section>
+                    </div>
+                ) : (
+                    <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
+                        <p className="text-gray-500">Please select an age category to manage teams and matches.</p>
+                    </div>
+                )}
+            </div>
+        )}
+
+      </main>
+    </div>
   );
 };
 
