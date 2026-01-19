@@ -33,8 +33,9 @@ const TournamentInfo: React.FC<TournamentInfoProps> = ({
           </h2>
           <div className="flex items-center gap-3 text-sm text-gray-500">
             <span className="bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full font-medium">
-              Category: {tournament.ageCategories?.length 
-                ? tournament.ageCategories.join(", ") 
+              Category:{" "}
+              {tournament.ageCategories?.length
+                ? tournament.ageCategories.join(", ")
                 : tournament.ageCategory || "N/A"}
             </span>
             <span className="text-gray-400">|</span>

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getUserRole } from "../utils/auth";
-import TeamDashboard from "./dashboard/TeamDashboard";
+import ClubDashboard from "./dashboard/ClubDashboard";
 import TournamentDashboard from "./dashboard/TournamentDashboard";
 import SuperAdminDashboard from "./dashboard/SuperAdminDashboard";
 
@@ -34,7 +34,7 @@ const AdminLayout = () => {
   }
 
   if (role === "CLUB_ADMIN") {
-    return <TeamDashboard />;
+    return <ClubDashboard />;
   }
 
   if (role === "TOURNAMENT_ADMIN") {

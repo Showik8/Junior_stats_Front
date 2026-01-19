@@ -224,6 +224,42 @@ export const adminService = {
   },
 
   /**
+   * Update a team
+   * Backend: PUT /api/teams/:id
+   */
+  updateTeam: async (
+    teamId: string,
+    payload: Partial<CreateTeamPayload>
+  ): Promise<Team> => {
+    try {
+      if (!teamId) throw new Error("Team ID is required");
+
+      const cleanPayload: Partial<CreateTeamPayload> = {};
+      
+      if (payload.name?.trim()) cleanPayload.name = payload.name.trim();
+      if (payload.logo !== undefined) cleanPayload.logo = payload.logo; // allow null
+      if (payload.coach !== undefined) cleanPayload.coach = payload.coach; // allow null
+      // Age category is usually immutable but if allowed:
+      if (payload.ageCategory) cleanPayload.ageCategory = payload.ageCategory;
+
+      const response = await axiosInstance.put<ApiResponse<Team>>(
+        API_PATHS.TEAMS.UPDATE_TEAM(teamId),
+        cleanPayload
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to update team"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to update team"));
+    }
+  },
+
+  /**
    * Assign a team to a tournament
    * Backend: POST /api/teams/:id/join
    */

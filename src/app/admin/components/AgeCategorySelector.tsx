@@ -6,7 +6,7 @@ interface AgeCategorySelectorProps {
   onSelectCategory: (category: AgeCategory) => void;
 }
 
-const CATEGORIES: AgeCategory[] = ["U-10", "U-12", "U-14", "U-16", "U-18", "U-21"];
+const CATEGORIES: AgeCategory[] = ["U_10", "U_12", "U_14", "U_16", "U_18", "U_21"];
 
 const AgeCategorySelector: React.FC<AgeCategorySelectorProps> = ({
   selectedCategory,
