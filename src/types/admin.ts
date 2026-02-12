@@ -68,6 +68,8 @@ export interface Player {
   name: string;
   position?: string | null;
   shirtNumber?: number | null;
+  photoUrl?: string | null;
+  birthDate?: string | null;
   teamId: string;
   createdAt?: string;
   updatedAt?: string;
@@ -87,6 +89,9 @@ export interface Match {
   ageCategory: AgeCategory;
   createdAt?: string;
   updatedAt?: string;
+  
+  homeScore?: number | null;
+  awayScore?: number | null;
   
   homeTeam?: Team;
   awayTeam?: Team;
@@ -129,6 +134,8 @@ export interface CreatePlayerPayload {
   teamId: string;
   position?: string | null;
   shirtNumber?: number | null;
+  photoUrl?: string | null;
+  birthDate?: string | null;
 }
 
 /**
@@ -202,4 +209,51 @@ export interface CreateTournamentPayload {
   status?: TournamentStatus;
   adminEmail?: string;
   ageCategories: AgeCategory[]; // Must be array now
+}
+
+// --- Match Report Types ---
+
+export enum EventType {
+  GOAL = "GOAL",
+  YELLOW_CARD = "YELLOW_CARD",
+  RED_CARD = "RED_CARD",
+  SUBSTITUTION = "SUBSTITUTION",
+  PENALTY = "PENALTY",
+  OWN_GOAL = "OWN_GOAL"
+}
+
+export interface MatchReportEvent {
+  playerId?: string;
+  eventType: EventType;
+  minute: number;
+  teamId: string;
+  assistPlayerId?: string;
+  description?: string;
+}
+
+export interface MatchReportPlayerStat {
+  playerId: string;
+  played: boolean;
+  minutesPlayed?: number;
+  goals: number;
+  assists: number;
+  yellowCards: number;
+  redCards: number;
+  shots?: number;
+  shotsOnTarget?: number;
+  fouls?: number;
+  saves?: number;
+}
+
+export interface SubmitMatchReportPayload {
+  matchId: string;
+  homeScore: number;
+  awayScore: number;
+  referee?: string;
+  venue?: string;
+  attendees?: number;
+  weatherNotes?: string;
+  notes?: string;
+  events: MatchReportEvent[];
+  playerStats: MatchReportPlayerStat[];
 }

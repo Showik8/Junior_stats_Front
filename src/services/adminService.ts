@@ -13,6 +13,7 @@ import {
   Admin,
   CreateAdminPayload,
   CreateTournamentPayload,
+  SubmitMatchReportPayload,
 } from "@/types/admin";
 
 /**
@@ -472,6 +473,18 @@ export const adminService = {
         cleanPayload.shirtNumber = null;
       }
 
+      if (payload.photoUrl?.trim()) {
+        cleanPayload.photoUrl = payload.photoUrl.trim();
+      } else {
+        cleanPayload.photoUrl = null;
+      }
+
+      if (payload.birthDate) {
+        cleanPayload.birthDate = payload.birthDate;
+      } else {
+        cleanPayload.birthDate = null;
+      }
+
       const response = await axiosInstance.post<ApiResponse<Player>>(
         API_PATHS.PLAYERS.ADD_PLAYER,
         cleanPayload
@@ -748,4 +761,25 @@ export const adminService = {
       throw new Error(extractErrorMessage(error, "Failed to delete match"));
     }
   },
+
+  /**
+   * Submit match report
+   * Backend: POST /api/match-reports/:matchId/submit
+   */
+  submitMatchReport: async (matchId: string, payload: SubmitMatchReportPayload): Promise<void> => {
+     try {
+         if (!matchId) throw new Error("Match ID is required");
+         
+         // Use the new path structure if defined, or construct it here
+         const url = `/api/match-reports/${matchId}/submit`;
+         
+         const response = await axiosInstance.post<ApiResponse<any>>(url, payload);
+
+         if (!response.data.success) {
+             throw new Error(response.data.error?.message || "Failed to submit match report");
+         }
+     } catch (error: unknown) {
+         throw new Error(extractErrorMessage(error, "Failed to submit match report"));
+     }
+  }
 };

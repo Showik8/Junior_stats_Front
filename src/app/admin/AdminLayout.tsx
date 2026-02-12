@@ -12,13 +12,17 @@ const AdminLayout = () => {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    const userRole = getUserRole();
-    if (!userRole) {
-      router.push("/sign-in");
-    } else {
-      setRole(userRole);
-    }
-    setIsChecking(false);
+    const checkAuth = () => {
+      const userRole = getUserRole();
+      if (!userRole) {
+        router.push("/sign-in");
+      } else {
+        setRole(userRole);
+      }
+      setIsChecking(false);
+    };
+
+    checkAuth();
   }, [router]);
 
   if (isChecking) {

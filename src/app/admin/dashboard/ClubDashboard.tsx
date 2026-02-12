@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Team } from "@/types/admin";
 import { adminService } from "@/services/adminService";
 import { removeToken } from "@/app/utils/auth";

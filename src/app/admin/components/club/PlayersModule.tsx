@@ -17,7 +17,9 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
   const [newPlayer, setNewPlayer] = useState({
     name: "",
     shirtNumber: "",
-    position: ""
+    position: "",
+    photoUrl: "",
+    birthDate: ""
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -49,10 +51,12 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
             name: newPlayer.name,
             teamId: team.id,
             shirtNumber: newPlayer.shirtNumber ? parseInt(newPlayer.shirtNumber) : null,
-            position: newPlayer.position
+            position: newPlayer.position,
+            photoUrl: newPlayer.photoUrl,
+            birthDate: newPlayer.birthDate
         });
         setIsAddModalOpen(false);
-        setNewPlayer({ name: "", shirtNumber: "", position: "" });
+        setNewPlayer({ name: "", shirtNumber: "", position: "", photoUrl: "", birthDate: "" });
         fetchPlayers();
     } catch (err: any) {
         alert("Failed to add player: " + err.message);
@@ -132,12 +136,20 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
                                <tr key={player.id} className="hover:bg-gray-50 transition">
                                    <td className="px-6 py-4">
                                        <div className="flex items-center gap-3">
-                                           <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                                               <FaUser />
-                                           </div>
+                                           {player.photoUrl ? (
+                                             <img src={player.photoUrl} alt={player.name} className="h-10 w-10 rounded-full object-cover" />
+                                           ) : (
+                                             <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                                 <FaUser />
+                                             </div>
+                                           )}
                                            <div>
                                                <p className="font-semibold text-gray-900">{player.name}</p>
-                                               {/* Birth year would go here if available */}
+                                               {player.birthDate && (
+                                                 <p className="text-xs text-gray-500">
+                                                   Born: {new Date(player.birthDate).getFullYear()}
+                                                 </p>
+                                               )}
                                            </div>
                                        </div>
                                    </td>
@@ -230,6 +242,27 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
                                   <option value="Forward">Forward</option>
                               </select>
                           </div>
+                      </div>
+
+                      <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Photo URL (Optional)</label>
+                          <input 
+                              type="url"
+                              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                              value={newPlayer.photoUrl}
+                              onChange={e => setNewPlayer({...newPlayer, photoUrl: e.target.value})}
+                              placeholder="https://example.com/photo.jpg"
+                          />
+                      </div>
+
+                      <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Birth Date (Optional)</label>
+                          <input 
+                              type="date"
+                              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                              value={newPlayer.birthDate}
+                              onChange={e => setNewPlayer({...newPlayer, birthDate: e.target.value})}
+                          />
                       </div>
                       
                       <div className="flex justify-end gap-3 mt-6">

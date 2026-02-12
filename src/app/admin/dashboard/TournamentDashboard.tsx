@@ -183,7 +183,7 @@ const TournamentDashboard: React.FC = () => {
                        <button
                           key={cat}
                           onClick={() => setActiveAgeCategory(cat)}
-                          className={`px-4 py-2 rounded-t-lg font-medium text-sm transition-all relative top-[1px] ${
+                          className={`px-4 py-2 rounded-t-lg font-medium text-sm transition-all relative top-[1] ${
                               activeAgeCategory === cat 
                                 ? "bg-white text-blue-600 border border-gray-200 border-b-white shadow-sm" 
                                 : "bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-transparent"
