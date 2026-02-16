@@ -51,7 +51,7 @@ const ClubHeader: React.FC<ClubHeaderProps> = ({ team, onLogout }) => {
             </button>
             
             {/* Dropdown */}
-            <div className="absolute right-0 top-full mt-2 w-48 origin-top-right rounded-lg bg-white p-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transition opacity-0 invisible group-hover:opacity-100 group-hover:visible z-50">
+            <div className="absolute right-0 top-full mt-2 w-48 origin-top-right rounded-lg bg-white p-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transition opacity-0 invisible group-hover:opacity-100 group-hover:visible z-50 before:absolute before:-top-2 before:left-0 before:h-2 before:w-full">
                 <button className="block w-full rounded-md px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">
                     Edit Profile
                 </button>

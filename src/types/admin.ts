@@ -39,6 +39,34 @@ export type MatchStatus = "SCHEDULED" | "CANCELLED" | "FINISHED";
 export type TournamentStatus = "ACTIVE" | "INACTIVE" | "FINISHED";
 
 /**
+ * Tournament format values from backend Prisma schema
+ * Default: "LEAGUE"
+ */
+export type TournamentFormat = "LEAGUE" | "KNOCKOUT" | "GROUP_KNOCKOUT";
+
+export const TOURNAMENT_FORMATS: { value: TournamentFormat; label: string }[] = [
+  { value: "LEAGUE", label: "League" },
+  { value: "KNOCKOUT", label: "Knockout" },
+  { value: "GROUP_KNOCKOUT", label: "Group + Knockout" },
+];
+
+/**
+ * Sponsor tier values from backend Prisma schema
+ */
+export type SponsorTier = "MAIN" | "GOLD" | "SILVER" | "BRONZE";
+
+// --- Match Report Types ---
+
+export enum EventType {
+  GOAL = "GOAL",
+  YELLOW_CARD = "YELLOW_CARD",
+  RED_CARD = "RED_CARD",
+  SUBSTITUTION = "SUBSTITUTION",
+  PENALTY = "PENALTY",
+  OWN_GOAL = "OWN_GOAL"
+}
+
+/**
  * Team interface matching backend Prisma Team model
  */
 export interface Team {
@@ -55,6 +83,7 @@ export interface Team {
   players?: Player[];
   // M:N relation structure from Prisma
   tournaments?: { tournament: Tournament; status: string; joinedAt: string }[];
+  standings?: Standing[];
   
   scheduledMatches?: Match[];
   finishedMatches?: Match[];
@@ -77,6 +106,76 @@ export interface Player {
 }
 
 /**
+ * Group interface matching backend Prisma Group model
+ */
+export interface Group {
+  id: string;
+  name: string;
+  tournamentId: string;
+  ageCategory: AgeCategory;
+  
+  // Relations
+  tournament?: Tournament;
+  matches?: Match[];
+  standings?: Standing[];
+  
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Standing interface matching backend Prisma Standing model
+ */
+export interface Standing {
+  id: string;
+  teamId: string;
+  tournamentId: string;
+  groupId?: string | null;
+  ageCategory: AgeCategory;
+  
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  points: number;
+  
+  // Relations
+  team?: Team;
+  tournament?: Tournament;
+  group?: Group;
+  
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Sponsor interface matching backend Prisma Sponsor model
+ */
+export interface Sponsor {
+  id: string;
+  name: string;
+  logoUrl: string;
+  website?: string | null;
+  tournaments?: TournamentSponsor[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * TournamentSponsor join interface
+ */
+export interface TournamentSponsor {
+  tournamentId: string;
+  sponsorId: string;
+  tier: SponsorTier;
+  tournament?: Tournament;
+  sponsor?: Sponsor;
+  assignedAt?: string;
+}
+
+/**
  * Match interface matching backend Prisma Match model
  */
 export interface Match {
@@ -87,15 +186,32 @@ export interface Match {
   awayTeamId: string;
   tournamentId: string;
   ageCategory: AgeCategory;
-  createdAt?: string;
-  updatedAt?: string;
   
+  // Score
   homeScore?: number | null;
   awayScore?: number | null;
   
+  // Match details
+  venue?: string | null;
+  referee?: string | null;
+  notes?: string | null;
+  attendees?: number | null;
+  weatherNotes?: string | null;
+  finishedAt?: string | null;
+  
+  // Group relation
+  groupId?: string | null;
+  group?: Group | null;
+  
+  // Relations
   homeTeam?: Team;
   awayTeam?: Team;
   tournament?: Tournament;
+  playerStats?: MatchPlayerStatistic[];
+  events?: MatchEvent[];
+  
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 /**
@@ -114,13 +230,26 @@ export interface Tournament {
   name: string;
   status: TournamentStatus;
   
+  // New fields from backend
+  format: TournamentFormat;
+  description?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  location?: string | null;
+  rules?: string | null;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
+  
   // Relations
-  ageCategories?: TournamentAgeCategory[]; // Changed to match Prisma output
+  ageCategories?: TournamentAgeCategory[];
   /** @deprecated Backend may still return this for legacy reasons */
   ageCategory?: string | null; 
-  teams?: { teamId: string; tournamentId: string; status: string }[]; // Simplified for type
+  teams?: { teamId: string; tournamentId: string; status: string }[];
   matches?: Match[];
   admins?: { admin: Admin; role: Role; joinedAt: string }[];
+  groups?: Group[];
+  standings?: Standing[];
+  sponsors?: TournamentSponsor[];
   
   createdAt?: string;
   updatedAt?: string;
@@ -160,6 +289,8 @@ export interface CreateMatchPayload {
   tournamentId: string;
   status?: MatchStatus;
   ageCategory?: AgeCategory;
+  venue?: string;
+  groupId?: string;
 }
 
 /**
@@ -208,18 +339,41 @@ export interface CreateTournamentPayload {
   name: string;
   status?: TournamentStatus;
   adminEmail?: string;
-  ageCategories: AgeCategory[]; // Must be array now
+  ageCategories: AgeCategory[];
+  format?: TournamentFormat;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  location?: string;
+  rules?: string;
+  logoUrl?: string;
+  bannerUrl?: string;
 }
 
-// --- Match Report Types ---
+/**
+ * UpdateTournamentPayload
+ */
+export interface UpdateTournamentPayload {
+  name?: string;
+  status?: TournamentStatus;
+  ageCategories?: AgeCategory[];
+  format?: TournamentFormat;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  location?: string;
+  rules?: string;
+  logoUrl?: string;
+  bannerUrl?: string;
+}
 
-export enum EventType {
-  GOAL = "GOAL",
-  YELLOW_CARD = "YELLOW_CARD",
-  RED_CARD = "RED_CARD",
-  SUBSTITUTION = "SUBSTITUTION",
-  PENALTY = "PENALTY",
-  OWN_GOAL = "OWN_GOAL"
+/**
+ * CreateGroupPayload
+ */
+export interface CreateGroupPayload {
+  name: string;
+  tournamentId: string;
+  ageCategory: AgeCategory;
 }
 
 export interface MatchReportEvent {
@@ -256,4 +410,68 @@ export interface SubmitMatchReportPayload {
   notes?: string;
   events: MatchReportEvent[];
   playerStats: MatchReportPlayerStat[];
+}
+
+/**
+ * MatchPlayerStatistic interface
+ */
+export interface MatchPlayerStatistic {
+  id: string;
+  matchId: string;
+  playerId: string;
+  played: boolean;
+  minutesPlayed?: number | null;
+  goals: number;
+  assists: number;
+  yellowCards: number;
+  redCards: number;
+  shots?: number | null;
+  shotsOnTarget?: number | null;
+  fouls?: number | null;
+  saves?: number | null;
+  player?: Player;
+}
+
+/**
+ * MatchEvent interface
+ */
+export interface MatchEvent {
+  id: string;
+  matchId: string;
+  playerId?: string | null;
+  eventType: EventType;
+  minute: number;
+  teamId: string;
+  description?: string | null;
+  assistPlayerId?: string | null;
+}
+
+/**
+ * Tournament Statistics types (from /statistics/summary endpoint)
+ */
+export interface PlayerStatEntry {
+  rank: number;
+  player: Player;
+  team: Team;
+  statistics: {
+    goals: number;
+    assists: number;
+    matchesPlayed: number;
+    minutesPlayed: number;
+    yellowCards: number;
+    redCards: number;
+    goalsPerMatch: number;
+    assistsPerMatch: number;
+  };
+}
+
+export interface TournamentStatsSummary {
+  tournamentId: string;
+  filters: {
+    year?: number;
+    ageCategory?: string;
+  };
+  topScorers: PlayerStatEntry[];
+  topAssists: PlayerStatEntry[];
+  mostMatchesPlayed: PlayerStatEntry[];
 }

@@ -6,7 +6,11 @@ import { removeToken } from "@/app/utils/auth";
 import TournamentInfo from "../components/TournamentInfo";
 import MembersManagement from "../components/MembersManagement";
 import MatchManagement from "../components/MatchManagement";
-// import { FaSignOutAlt, FaHome } from "react-icons/fa";
+import StandingsTable from "../components/StandingsTable";
+import GroupManagement from "../components/GroupManagement";
+import TournamentStatistics from "../components/TournamentStatistics";
+
+type DashboardTab = "matches" | "members" | "standings" | "statistics" | "groups";
 
 const TournamentDashboard: React.FC = () => {
   const router = useRouter();
@@ -17,18 +21,17 @@ const TournamentDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   const [activeAgeCategory, setActiveAgeCategory] = useState<AgeCategory | null>(null);
+  const [activeTab, setActiveTab] = useState<DashboardTab>("matches");
 
   const fetchTournamentInfo = async () => {
     try {
       const fetchedTournament = await adminService.getTournamentInfo();
       setTournament(fetchedTournament);
       
-      // Set default active category if not set
       if (!activeAgeCategory && fetchedTournament) {
         if (fetchedTournament.ageCategories && fetchedTournament.ageCategories.length > 0) {
             setActiveAgeCategory(fetchedTournament.ageCategories[0].ageCategory);
         } else if (fetchedTournament.ageCategory) {
-            // Fallback for old schema
              setActiveAgeCategory(fetchedTournament.ageCategory as AgeCategory);
         }
       }
@@ -53,31 +56,27 @@ const TournamentDashboard: React.FC = () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
           console.error("Category data fetch error:", err);
-          // Don't block UI, just log or show partial error
       } finally {
           setLoading(false);
       }
   }
 
-  // Initial Load
   useEffect(() => {
     const init = async () => {
         setLoading(true);
-        const tourn = await fetchTournamentInfo();
-        // If we have tournament and active category is set (by fetchTournamentInfo logic), fetch data
-        // note: activeAgeCategory is state, might not be updated immediately in this closure?
-        // Actually, let's rely on the effect below dependent on activeAgeCategory
+        await fetchTournamentInfo();
         setLoading(false);
     };
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch data when active category changes
   useEffect(() => {
       if (tournament && activeAgeCategory) {
           fetchCategoryData(tournament.id, activeAgeCategory);
       }
-  }, [activeAgeCategory, tournament]); // tournament dependency ensures if it's set later
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeAgeCategory, tournament]);
 
   const handleRefresh = () => {
       if (tournament && activeAgeCategory) {
@@ -125,9 +124,18 @@ const TournamentDashboard: React.FC = () => {
      )
   }
 
-  // Helper to get available categories list
   const availableCategories: AgeCategory[] = tournament?.ageCategories?.map(c => c.ageCategory) || 
                                             (tournament?.ageCategory ? [tournament.ageCategory as AgeCategory] : []);
+
+  const isGroupFormat = tournament?.format === "GROUP_KNOCKOUT";
+
+  const tabs: { key: DashboardTab; label: string; show: boolean }[] = [
+    { key: "matches", label: "Matches", show: true },
+    { key: "members", label: "Members", show: true },
+    { key: "standings", label: "Standings", show: true },
+    { key: "statistics", label: "Statistics", show: true },
+    { key: "groups", label: "Groups", show: isGroupFormat },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 font-sans">
@@ -197,27 +205,77 @@ const TournamentDashboard: React.FC = () => {
                 </div>
 
                 {activeAgeCategory ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {/* Members Section */}
-                        <section className="h-[600px]">
-                            <MembersManagement 
-                                tournament={tournament}
-                                teams={teams}
-                                activeAgeCategory={activeAgeCategory}
-                                onTeamUpdate={handleRefresh} 
-                            />
-                        </section>
+                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        {/* Content Tabs */}
+                        <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
+                            {tabs.filter(t => t.show).map(tab => (
+                                <button
+                                    key={tab.key}
+                                    onClick={() => setActiveTab(tab.key)}
+                                    className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all ${
+                                        activeTab === tab.key
+                                            ? "bg-white text-blue-600 shadow-sm"
+                                            : "text-gray-500 hover:text-gray-700"
+                                    }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
 
-                        {/* Match Management Section */}
-                        <section className="h-[600px]">
-                            <MatchManagement 
-                                tournament={tournament}
-                                teams={teams}
-                                matches={matches}
-                                activeAgeCategory={activeAgeCategory}
-                                onMatchUpdate={handleRefresh}
-                            />
-                        </section>
+                        {/* Tab Content */}
+                        <div className="min-h-[500px]">
+                            {activeTab === "matches" && (
+                                <section className="h-[600px]">
+                                    <MatchManagement 
+                                        tournament={tournament}
+                                        teams={teams}
+                                        matches={matches}
+                                        activeAgeCategory={activeAgeCategory}
+                                        onMatchUpdate={handleRefresh}
+                                    />
+                                </section>
+                            )}
+
+                            {activeTab === "members" && (
+                                <section className="h-[600px]">
+                                    <MembersManagement 
+                                        tournament={tournament}
+                                        teams={teams}
+                                        activeAgeCategory={activeAgeCategory}
+                                        onTeamUpdate={handleRefresh} 
+                                    />
+                                </section>
+                            )}
+
+                            {activeTab === "standings" && (
+                                <section>
+                                    <StandingsTable
+                                        tournamentId={tournament.id}
+                                        ageCategory={activeAgeCategory}
+                                        format={tournament.format}
+                                    />
+                                </section>
+                            )}
+
+                            {activeTab === "statistics" && (
+                                <section>
+                                    <TournamentStatistics
+                                        tournamentId={tournament.id}
+                                        ageCategory={activeAgeCategory}
+                                    />
+                                </section>
+                            )}
+
+                            {activeTab === "groups" && isGroupFormat && (
+                                <section>
+                                    <GroupManagement
+                                        tournamentId={tournament.id}
+                                        ageCategory={activeAgeCategory}
+                                    />
+                                </section>
+                            )}
+                        </div>
                     </div>
                 ) : (
                     <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">

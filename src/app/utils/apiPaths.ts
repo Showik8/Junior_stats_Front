@@ -35,6 +35,21 @@ export const API_PATHS = {
     GET_TOURNAMENT_STATS: (id: string) => `/api/tournaments/${id}/stats`,
   },
 
+  TOURNAMENT_STATS: {
+    // GET /api/tournaments/:id/statistics/top-scorers
+    TOP_SCORERS: (tournamentId: string) =>
+      `/api/tournaments/${tournamentId}/statistics/top-scorers`,
+    // GET /api/tournaments/:id/statistics/top-assists
+    TOP_ASSISTS: (tournamentId: string) =>
+      `/api/tournaments/${tournamentId}/statistics/top-assists`,
+    // GET /api/tournaments/:id/statistics/most-matches
+    MOST_MATCHES: (tournamentId: string) =>
+      `/api/tournaments/${tournamentId}/statistics/most-matches`,
+    // GET /api/tournaments/:id/statistics/summary
+    SUMMARY: (tournamentId: string) =>
+      `/api/tournaments/${tournamentId}/statistics/summary`,
+  },
+
   TEAMS: {
     // Base teams path
     BASE: "/api/teams",
@@ -87,5 +102,32 @@ export const API_PATHS = {
     // GET /api/matches/tournament/:tournamentId/stats - Get match stats for tournament
     GET_MATCH_STATS: (tournamentId: string) =>
       `/api/matches/tournament/${tournamentId}/stats`,
+  },
+
+  GROUPS: {
+    // GET /api/groups - Get groups (?tournamentId=X&ageCategory=Y)
+    GET_GROUPS: "/api/groups",
+    // POST /api/groups - Create group
+    CREATE_GROUP: "/api/groups",
+    // GET /api/groups/:id - Get group by ID
+    GET_GROUP: (id: string) => `/api/groups/${id}`,
+    // PUT /api/groups/:id - Update group
+    UPDATE_GROUP: (id: string) => `/api/groups/${id}`,
+    // DELETE /api/groups/:id - Delete group
+    DELETE_GROUP: (id: string) => `/api/groups/${id}`,
+  },
+
+  STANDINGS: {
+    // GET /api/standings - Get standings (?tournamentId=X&ageCategory=Y&groupId=Z)
+    GET_STANDINGS: "/api/standings",
+    // GET /api/standings/:id - Get standing by ID
+    GET_STANDING: (id: string) => `/api/standings/${id}`,
+    // POST /api/standings/recalculate
+    RECALCULATE: "/api/standings/recalculate",
+  },
+
+  MATCH_REPORTS: {
+    // POST /api/match-reports/:matchId/submit
+    SUBMIT: (matchId: string) => `/api/match-reports/${matchId}/submit`,
   },
 };

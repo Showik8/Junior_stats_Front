@@ -13,7 +13,12 @@ import {
   Admin,
   CreateAdminPayload,
   CreateTournamentPayload,
+  UpdateTournamentPayload,
   SubmitMatchReportPayload,
+  Group,
+  CreateGroupPayload,
+  Standing,
+  TournamentStatsSummary,
 } from "@/types/admin";
 
 /**
@@ -52,6 +57,10 @@ const extractErrorMessage = (error: any, defaultMessage: string): string => {
 };
 
 export const adminService = {
+  // =============================
+  // TOURNAMENT
+  // =============================
+
   /**
    * Get tournament information
    * Backend returns active tournament if no query params, or list with pagination
@@ -88,6 +97,122 @@ export const adminService = {
   },
 
   /**
+   * Get all tournaments (for list view)
+   */
+  getAllTournaments: async (): Promise<Tournament[]> => {
+    try {
+      const response = await axiosInstance.get<ApiResponse<Tournament[]>>(
+        `${API_PATHS.TOURNAMENT.GET_TOURNAMENTS}?limit=100`
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to fetch tournaments"
+        );
+      }
+
+      const data = response.data.data;
+      return Array.isArray(data) ? data : [data];
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to fetch tournaments"));
+    }
+  },
+
+  /**
+   * Create a new tournament
+   * Backend: POST /api/tournaments
+   */
+  createTournament: async (
+    payload: CreateTournamentPayload
+  ): Promise<Tournament> => {
+    try {
+      if (!payload.name?.trim()) {
+        throw new Error("Tournament name is required");
+      }
+      if (!payload.ageCategories || payload.ageCategories.length === 0) {
+        throw new Error("At least one age category is required");
+      }
+
+      const cleanPayload: Partial<CreateTournamentPayload> = {
+        name: payload.name.trim(),
+        ageCategories: payload.ageCategories,
+      };
+
+      if (payload.status) cleanPayload.status = payload.status;
+      if (payload.adminEmail?.trim()) cleanPayload.adminEmail = payload.adminEmail.trim();
+      if (payload.format) cleanPayload.format = payload.format;
+      if (payload.description?.trim()) cleanPayload.description = payload.description.trim();
+      if (payload.startDate) cleanPayload.startDate = payload.startDate;
+      if (payload.endDate) cleanPayload.endDate = payload.endDate;
+      if (payload.location?.trim()) cleanPayload.location = payload.location.trim();
+      if (payload.rules?.trim()) cleanPayload.rules = payload.rules.trim();
+      if (payload.logoUrl?.trim()) cleanPayload.logoUrl = payload.logoUrl.trim();
+      if (payload.bannerUrl?.trim()) cleanPayload.bannerUrl = payload.bannerUrl.trim();
+
+      const response = await axiosInstance.post<ApiResponse<Tournament>>(
+        API_PATHS.TOURNAMENT.CREATE_TOURNAMENT,
+        cleanPayload
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to create tournament"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to create tournament"));
+    }
+  },
+
+  /**
+   * Update a tournament
+   * Backend: PUT /api/tournaments/:id
+   */
+  updateTournament: async (
+    tournamentId: string,
+    payload: UpdateTournamentPayload
+  ): Promise<Tournament> => {
+    try {
+      if (!tournamentId) throw new Error("Tournament ID is required");
+
+      const response = await axiosInstance.put<ApiResponse<Tournament>>(
+        API_PATHS.TOURNAMENT.UPDATE_TOURNAMENT(tournamentId),
+        payload
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to update tournament"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to update tournament"));
+    }
+  },
+
+  /**
+   * Delete a tournament
+   * Backend: DELETE /api/tournaments/:id
+   */
+  deleteTournament: async (id: string): Promise<void> => {
+    try {
+      if (!id) throw new Error("Tournament ID is required");
+
+      await axiosInstance.delete(API_PATHS.TOURNAMENT.DELETE_TOURNAMENT(id));
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to delete tournament"));
+    }
+  },
+
+  // =============================
+  // TEAMS
+  // =============================
+
+  /**
    * Search teams
    * Backend: GET /api/teams?search=X&ageCategory=Y
    */
@@ -118,7 +243,6 @@ export const adminService = {
   /**
    * Get teams by tournament and age category
    * Backend: GET /api/teams?tournamentId=X&ageCategory=Y
-   * Returns array of teams (with nested players if includePlayers=true)
    */
   getTeams: async (
     tournamentId: string,
@@ -169,12 +293,9 @@ export const adminService = {
   /**
    * Add a new team
    * Backend: POST /api/teams
-   * Required: name, tournamentId, ageCategory
-   * Optional: logo, coach
    */
   addTeam: async (payload: CreateTeamPayload): Promise<Team> => {
     try {
-      // Frontend validation
       if (!payload.name?.trim()) {
         throw new Error("Team name is required");
       }
@@ -182,7 +303,6 @@ export const adminService = {
         throw new Error("Age category is required");
       }
 
-      // Clean payload
       const cleanPayload: Partial<CreateTeamPayload> = {
         name: payload.name.trim(),
         ageCategory: payload.ageCategory,
@@ -238,9 +358,8 @@ export const adminService = {
       const cleanPayload: Partial<CreateTeamPayload> = {};
       
       if (payload.name?.trim()) cleanPayload.name = payload.name.trim();
-      if (payload.logo !== undefined) cleanPayload.logo = payload.logo; // allow null
-      if (payload.coach !== undefined) cleanPayload.coach = payload.coach; // allow null
-      // Age category is usually immutable but if allowed:
+      if (payload.logo !== undefined) cleanPayload.logo = payload.logo;
+      if (payload.coach !== undefined) cleanPayload.coach = payload.coach;
       if (payload.ageCategory) cleanPayload.ageCategory = payload.ageCategory;
 
       const response = await axiosInstance.put<ApiResponse<Team>>(
@@ -291,7 +410,6 @@ export const adminService = {
   /**
    * Remove a team
    * Backend: DELETE /api/teams/:id
-   * Returns 204 No Content on success
    */
   removeTeam: async (teamId: string): Promise<void> => {
     try {
@@ -306,98 +424,25 @@ export const adminService = {
   },
 
   /**
-   * Get matches by tournament and age category
-   * Backend: GET /api/matches?tournamentId=X&ageCategory=Y
-   * Returns array of matches (with nested homeTeam and awayTeam by default)
+   * Remove a team from a tournament
+   * Backend: DELETE /api/teams/:id/tournaments/:tournamentId
    */
-  getMatches: async (
-    tournamentId: string,
-    ageCategory: AgeCategory
-  ): Promise<Match[]> => {
+  removeTeamFromTournament: async (
+    teamId: string,
+    tournamentId: string
+  ): Promise<void> => {
     try {
-      const response = await axiosInstance.get<ApiResponse<Match[]>>(
-        `${API_PATHS.MATCH.GET_MATCHES}?tournamentId=${tournamentId}&ageCategory=${ageCategory}`
+      if (!teamId || !tournamentId) {
+        throw new Error("Team ID and Tournament ID are required");
+      }
+
+      await axiosInstance.delete(
+        `${API_PATHS.TEAMS.BASE}/${teamId}/tournaments/${tournamentId}`
       );
-
-      if (!response.data.success || !response.data.data) {
-        throw new Error(
-          response.data.error?.message || "Failed to fetch matches"
-        );
-      }
-
-      return response.data.data;
     } catch (error: unknown) {
-      throw new Error(extractErrorMessage(error, "Failed to fetch matches"));
-    }
-  },
-
-  /**
-   * Create a new match
-   * Backend: POST /api/matches
-   */
-  createMatch: async (payload: CreateMatchPayload): Promise<Match> => {
-    try {
-      // Frontend validation
-      if (!payload.homeTeamId) throw new Error("Home team is required");
-      if (!payload.awayTeamId) throw new Error("Away team is required");
-      if (payload.homeTeamId === payload.awayTeamId) throw new Error("A team cannot play against itself");
-      if (!payload.date) throw new Error("Match date is required");
-      if (!payload.tournamentId) throw new Error("Tournament ID is required");
-
-      const dateValue = payload.date;
-      let isoDate: string;
-
-      if (dateValue.includes("T")) {
-        const parts = dateValue.split("T");
-        const timePart = parts[1];
-        const timeWithSeconds =
-          timePart.split(":").length === 2 ? `${timePart}:00` : timePart;
-        isoDate = `${parts[0]}T${timeWithSeconds}`;
-      } else {
-        isoDate = `${dateValue}T00:00:00`;
-      }
-
-      const response = await axiosInstance.post<ApiResponse<Match>>(
-        API_PATHS.MATCH.CREATE_MATCH,
-        {
-          ...payload,
-          date: isoDate,
-        }
+      throw new Error(
+        extractErrorMessage(error, "Failed to remove team from tournament")
       );
-
-      if (!response.data.success || !response.data.data) {
-        throw new Error(
-          response.data.error?.message || "Failed to create match"
-        );
-      }
-
-      return response.data.data;
-    } catch (error: unknown) {
-      throw new Error(extractErrorMessage(error, "Failed to create match"));
-    }
-  },
-
-  /**
-   * Cancel a match
-   * Backend: PATCH /api/matches/:id/cancel
-   */
-  cancelMatch: async (matchId: string): Promise<Match> => {
-    try {
-      if (!matchId) throw new Error("Match ID is required");
-
-      const response = await axiosInstance.patch<ApiResponse<Match>>(
-        API_PATHS.MATCH.CANCEL_MATCH(matchId)
-      );
-
-      if (!response.data.success || !response.data.data) {
-        throw new Error(
-          response.data.error?.message || "Failed to cancel match"
-        );
-      }
-
-      return response.data.data;
-    } catch (error: unknown) {
-      throw new Error(extractErrorMessage(error, "Failed to cancel match"));
     }
   },
 
@@ -422,6 +467,10 @@ export const adminService = {
       throw new Error(extractErrorMessage(error, "Failed to fetch team info"));
     }
   },
+
+  // =============================
+  // PLAYERS
+  // =============================
 
   /**
    * Get players by team ID
@@ -514,6 +563,104 @@ export const adminService = {
     }
   },
 
+  // =============================
+  // MATCHES
+  // =============================
+
+  /**
+   * Get matches by tournament and age category
+   * Backend: GET /api/matches?tournamentId=X&ageCategory=Y
+   */
+  getMatches: async (
+    tournamentId: string,
+    ageCategory: AgeCategory
+  ): Promise<Match[]> => {
+    try {
+      const response = await axiosInstance.get<ApiResponse<Match[]>>(
+        `${API_PATHS.MATCH.GET_MATCHES}?tournamentId=${tournamentId}&ageCategory=${ageCategory}`
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to fetch matches"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to fetch matches"));
+    }
+  },
+
+  /**
+   * Create a new match
+   * Backend: POST /api/matches
+   */
+  createMatch: async (payload: CreateMatchPayload): Promise<Match> => {
+    try {
+      if (!payload.homeTeamId) throw new Error("Home team is required");
+      if (!payload.awayTeamId) throw new Error("Away team is required");
+      if (payload.homeTeamId === payload.awayTeamId) throw new Error("A team cannot play against itself");
+      if (!payload.date) throw new Error("Match date is required");
+      if (!payload.tournamentId) throw new Error("Tournament ID is required");
+
+      const dateValue = payload.date;
+      let isoDate: string;
+
+      if (dateValue.includes("T")) {
+        const parts = dateValue.split("T");
+        const timePart = parts[1];
+        const timeWithSeconds =
+          timePart.split(":").length === 2 ? `${timePart}:00` : timePart;
+        isoDate = `${parts[0]}T${timeWithSeconds}`;
+      } else {
+        isoDate = `${dateValue}T00:00:00`;
+      }
+
+      const response = await axiosInstance.post<ApiResponse<Match>>(
+        API_PATHS.MATCH.CREATE_MATCH,
+        {
+          ...payload,
+          date: isoDate,
+        }
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to create match"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to create match"));
+    }
+  },
+
+  /**
+   * Cancel a match
+   * Backend: PATCH /api/matches/:id/cancel
+   */
+  cancelMatch: async (matchId: string): Promise<Match> => {
+    try {
+      if (!matchId) throw new Error("Match ID is required");
+
+      const response = await axiosInstance.patch<ApiResponse<Match>>(
+        API_PATHS.MATCH.CANCEL_MATCH(matchId)
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to cancel match"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to cancel match"));
+    }
+  },
+
   /**
    * Get matches for a specific team
    * Backend: GET /api/matches/team?teamId=X
@@ -535,174 +682,6 @@ export const adminService = {
       return response.data.data;
     } catch (error: unknown) {
       throw new Error(extractErrorMessage(error, "Failed to fetch team matches"));
-    }
-  },
-
-  /**
-   * Super Admin: Get all admins
-   * Backend: GET /api/admin/list
-   */
-  getAdmins: async (): Promise<Admin[]> => {
-    try {
-      const response = await axiosInstance.get<ApiResponse<Admin[]>>(
-        API_PATHS.ADMIN.LIST
-      );
-
-      if (!response.data.success || !response.data.data) {
-        throw new Error(
-          response.data.error?.message || "Failed to fetch admins"
-        );
-      }
-
-      return response.data.data;
-    } catch (error: unknown) {
-      throw new Error(extractErrorMessage(error, "Failed to fetch admins"));
-    }
-  },
-
-  /**
-   * Super Admin: Create a new admin
-   * Backend: POST /api/admin
-   */
-  createAdmin: async (payload: CreateAdminPayload): Promise<Admin> => {
-    try {
-      if (!payload.email || !payload.password || !payload.role) {
-        throw new Error("Email, password and role are required");
-      }
-
-      const response = await axiosInstance.post<ApiResponse<Admin>>(
-        API_PATHS.ADMIN.CREATE,
-        payload
-      );
-
-      if (!response.data.success || !response.data.data) {
-        throw new Error(
-          response.data.error?.message || "Failed to create admin"
-        );
-      }
-
-      return response.data.data;
-    } catch (error: unknown) {
-      throw new Error(extractErrorMessage(error, "Failed to create admin"));
-    }
-  },
-
-  /**
-   * Super Admin: Delete an admin
-   * Backend: DELETE /api/admin/:id
-   */
-  deleteAdmin: async (id: number): Promise<void> => {
-    try {
-      if (!id) throw new Error("Admin ID is required");
-
-      await axiosInstance.delete(API_PATHS.ADMIN.DELETE(id));
-    } catch (error: unknown) {
-      throw new Error(extractErrorMessage(error, "Failed to delete admin"));
-    }
-  },
-
-  /**
-   * Super Admin / Tournament Admin: Create a new tournament
-   * Backend: POST /api/tournaments
-   */
-  createTournament: async (
-    payload: CreateTournamentPayload
-  ): Promise<Tournament> => {
-    try {
-      if (!payload.name?.trim()) {
-        throw new Error("Tournament name is required");
-      }
-      if (!payload.ageCategories || payload.ageCategories.length === 0) {
-        throw new Error("At least one age category is required");
-      }
-
-      const cleanPayload: Partial<CreateTournamentPayload> = {
-        name: payload.name.trim(),
-        ageCategories: payload.ageCategories,
-      };
-
-      if (payload.status) {
-        cleanPayload.status = payload.status;
-      }
-
-      if (payload.adminEmail?.trim()) {
-        cleanPayload.adminEmail = payload.adminEmail.trim();
-      }
-
-      const response = await axiosInstance.post<ApiResponse<Tournament>>(
-        API_PATHS.TOURNAMENT.CREATE_TOURNAMENT,
-        cleanPayload
-      );
-
-      if (!response.data.success || !response.data.data) {
-        throw new Error(
-          response.data.error?.message || "Failed to create tournament"
-        );
-      }
-
-      return response.data.data;
-    } catch (error: unknown) {
-      throw new Error(extractErrorMessage(error, "Failed to create tournament"));
-    }
-  },
-
-  /**
-   * Get all tournaments (for list view)
-   */
-  getAllTournaments: async (): Promise<Tournament[]> => {
-    try {
-      // Pass limit=100 to ensure we get a list and bypass the "single active tournament"
-      // default behavior in the backend controller
-      const response = await axiosInstance.get<ApiResponse<Tournament[]>>(
-        `${API_PATHS.TOURNAMENT.GET_TOURNAMENTS}?limit=100`
-      );
-
-      if (!response.data.success || !response.data.data) {
-        throw new Error(
-          response.data.error?.message || "Failed to fetch tournaments"
-        );
-      }
-
-      const data = response.data.data;
-      return Array.isArray(data) ? data : [data];
-    } catch (error: unknown) {
-      throw new Error(extractErrorMessage(error, "Failed to fetch tournaments"));
-    }
-  },
-  /**
-   * Super Admin / Tournament Admin: Delete a tournament
-   * Backend: DELETE /api/tournaments/:id
-   */
-  deleteTournament: async (id: string): Promise<void> => {
-    try {
-      if (!id) throw new Error("Tournament ID is required");
-
-      await axiosInstance.delete(API_PATHS.TOURNAMENT.DELETE_TOURNAMENT(id));
-    } catch (error: unknown) {
-      throw new Error(extractErrorMessage(error, "Failed to delete tournament"));
-    }
-  },
-
-  /**
-   * Remove a team from a tournament
-   * Backend: DELETE /api/teams/:id/tournaments/:tournamentId
-   */
-  removeTeamFromTournament: async (
-    teamId: string,
-    tournamentId: string
-  ): Promise<void> => {
-    try {
-      if (!teamId || !tournamentId) {
-        throw new Error("Team ID and Tournament ID are required");
-      }
-
-      await axiosInstance.delete(
-        `${API_PATHS.TEAMS.BASE}/${teamId}/tournaments/${tournamentId}`
-      );
-    } catch (error: unknown) {
-      throw new Error(
-        extractErrorMessage(error, "Failed to remove team from tournament")
-      );
     }
   },
 
@@ -766,14 +745,15 @@ export const adminService = {
    * Submit match report
    * Backend: POST /api/match-reports/:matchId/submit
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   submitMatchReport: async (matchId: string, payload: SubmitMatchReportPayload): Promise<void> => {
      try {
          if (!matchId) throw new Error("Match ID is required");
          
-         // Use the new path structure if defined, or construct it here
-         const url = `/api/match-reports/${matchId}/submit`;
-         
-         const response = await axiosInstance.post<ApiResponse<any>>(url, payload);
+         const response = await axiosInstance.post<ApiResponse<any>>(
+           API_PATHS.MATCH_REPORTS.SUBMIT(matchId),
+           payload
+         );
 
          if (!response.data.success) {
              throw new Error(response.data.error?.message || "Failed to submit match report");
@@ -781,5 +761,278 @@ export const adminService = {
      } catch (error: unknown) {
          throw new Error(extractErrorMessage(error, "Failed to submit match report"));
      }
-  }
+  },
+
+  // =============================
+  // ADMINS
+  // =============================
+
+  /**
+   * Get all admins
+   * Backend: GET /api/admin/list
+   */
+  getAdmins: async (): Promise<Admin[]> => {
+    try {
+      const response = await axiosInstance.get<ApiResponse<Admin[]>>(
+        API_PATHS.ADMIN.LIST
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to fetch admins"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to fetch admins"));
+    }
+  },
+
+  /**
+   * Create a new admin
+   * Backend: POST /api/admin
+   */
+  createAdmin: async (payload: CreateAdminPayload): Promise<Admin> => {
+    try {
+      if (!payload.email || !payload.password || !payload.role) {
+        throw new Error("Email, password and role are required");
+      }
+
+      const response = await axiosInstance.post<ApiResponse<Admin>>(
+        API_PATHS.ADMIN.CREATE,
+        payload
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to create admin"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to create admin"));
+    }
+  },
+
+  /**
+   * Delete an admin
+   * Backend: DELETE /api/admin/:id
+   */
+  deleteAdmin: async (id: number): Promise<void> => {
+    try {
+      if (!id) throw new Error("Admin ID is required");
+
+      await axiosInstance.delete(API_PATHS.ADMIN.DELETE(id));
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to delete admin"));
+    }
+  },
+
+  // =============================
+  // GROUPS
+  // =============================
+
+  /**
+   * Get groups for a tournament
+   * Backend: GET /api/groups?tournamentId=X&ageCategory=Y
+   */
+  getGroups: async (
+    tournamentId: string,
+    ageCategory?: AgeCategory
+  ): Promise<Group[]> => {
+    try {
+      if (!tournamentId) throw new Error("Tournament ID is required");
+
+      const params = new URLSearchParams({ tournamentId });
+      if (ageCategory) params.append("ageCategory", ageCategory);
+
+      const response = await axiosInstance.get<ApiResponse<Group[]>>(
+        `${API_PATHS.GROUPS.GET_GROUPS}?${params.toString()}`
+      );
+
+      if (!response.data.success || !response.data.data) {
+        return [];
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to fetch groups"));
+    }
+  },
+
+  /**
+   * Create a new group
+   * Backend: POST /api/groups
+   */
+  createGroup: async (payload: CreateGroupPayload): Promise<Group> => {
+    try {
+      if (!payload.name?.trim()) throw new Error("Group name is required");
+      if (!payload.tournamentId) throw new Error("Tournament ID is required");
+      if (!payload.ageCategory) throw new Error("Age category is required");
+
+      const response = await axiosInstance.post<ApiResponse<Group>>(
+        API_PATHS.GROUPS.CREATE_GROUP,
+        {
+          name: payload.name.trim(),
+          tournamentId: payload.tournamentId,
+          ageCategory: payload.ageCategory,
+        }
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to create group"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to create group"));
+    }
+  },
+
+  /**
+   * Update a group
+   * Backend: PUT /api/groups/:id
+   */
+  updateGroup: async (
+    groupId: string,
+    payload: { name?: string }
+  ): Promise<Group> => {
+    try {
+      if (!groupId) throw new Error("Group ID is required");
+
+      const response = await axiosInstance.put<ApiResponse<Group>>(
+        API_PATHS.GROUPS.UPDATE_GROUP(groupId),
+        payload
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to update group"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to update group"));
+    }
+  },
+
+  /**
+   * Delete a group
+   * Backend: DELETE /api/groups/:id
+   */
+  deleteGroup: async (groupId: string): Promise<void> => {
+    try {
+      if (!groupId) throw new Error("Group ID is required");
+
+      await axiosInstance.delete(API_PATHS.GROUPS.DELETE_GROUP(groupId));
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to delete group"));
+    }
+  },
+
+  // =============================
+  // STANDINGS
+  // =============================
+
+  /**
+   * Get standings for a tournament
+   * Backend: GET /api/standings?tournamentId=X&ageCategory=Y&groupId=Z
+   */
+  getStandings: async (
+    tournamentId: string,
+    ageCategory?: AgeCategory,
+    groupId?: string
+  ): Promise<Standing[]> => {
+    try {
+      if (!tournamentId) throw new Error("Tournament ID is required");
+
+      const params = new URLSearchParams({ tournamentId });
+      if (ageCategory) params.append("ageCategory", ageCategory);
+      if (groupId) params.append("groupId", groupId);
+
+      const response = await axiosInstance.get<ApiResponse<Standing[]>>(
+        `${API_PATHS.STANDINGS.GET_STANDINGS}?${params.toString()}`
+      );
+
+      if (!response.data.success || !response.data.data) {
+        return [];
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to fetch standings"));
+    }
+  },
+
+  /**
+   * Recalculate standings
+   * Backend: POST /api/standings/recalculate
+   */
+  recalculateStandings: async (
+    tournamentId: string,
+    ageCategory: AgeCategory
+  ): Promise<Standing[]> => {
+    try {
+      if (!tournamentId || !ageCategory) {
+        throw new Error("Tournament ID and age category are required");
+      }
+
+      const response = await axiosInstance.post<ApiResponse<Standing[]>>(
+        API_PATHS.STANDINGS.RECALCULATE,
+        { tournamentId, ageCategory }
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to recalculate standings"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to recalculate standings"));
+    }
+  },
+
+  // =============================
+  // TOURNAMENT STATISTICS
+  // =============================
+
+  /**
+   * Get tournament statistics summary
+   * Backend: GET /api/tournaments/:id/statistics/summary
+   */
+  getTournamentStatsSummary: async (
+    tournamentId: string,
+    ageCategory?: AgeCategory,
+    limit?: number
+  ): Promise<TournamentStatsSummary> => {
+    try {
+      if (!tournamentId) throw new Error("Tournament ID is required");
+
+      const params = new URLSearchParams();
+      if (ageCategory) params.append("ageCategory", ageCategory);
+      if (limit) params.append("limit", limit.toString());
+
+      const queryString = params.toString();
+      const url = `${API_PATHS.TOURNAMENT_STATS.SUMMARY(tournamentId)}${queryString ? `?${queryString}` : ""}`;
+
+      const response = await axiosInstance.get<ApiResponse<TournamentStatsSummary>>(url);
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to fetch tournament statistics"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to fetch tournament statistics"));
+    }
+  },
 };

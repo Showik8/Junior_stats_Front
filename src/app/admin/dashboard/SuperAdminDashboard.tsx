@@ -159,15 +159,30 @@ const SuperAdminDashboard = () => {
       {viewMode === "create" ? (
         <CreateTournamentForm admins={admins} onSuccess={refreshData} />
       ) : (
-        <div className="animate-in fade-in slide-in-from-bottom-2">
-           <Table headers={["Name", "Status", "Categories", "Created At", "Actions"]}>
+         <div className="animate-in fade-in slide-in-from-bottom-2">
+           <Table headers={["Name", "Status", "Format", "Dates", "Categories", "Actions"]}>
              {tournaments.map((tournament) => (
                <tr key={tournament.id} className="hover:bg-gray-50 transition-colors">
                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{tournament.name}</td>
                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${tournament.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                    <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${tournament.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : tournament.status === 'FINISHED' ? 'bg-gray-100 text-gray-800' : 'bg-amber-100 text-amber-800'}`}>
                       {tournament.status}
                     </span>
+                 </td>
+                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+                      {tournament.format === "GROUP_KNOCKOUT" ? "Group+KO" : tournament.format === "KNOCKOUT" ? "Knockout" : "League"}
+                    </span>
+                 </td>
+                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {tournament.startDate ? (
+                      <span className="text-xs font-mono">
+                        {new Date(tournament.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        {tournament.endDate && ` - ${new Date(tournament.endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`}
+                      </span>
+                    ) : (
+                      <span className="text-gray-300">—</span>
+                    )}
                  </td>
                  <td className="px-6 py-4 text-sm text-gray-500">
                      <div className="flex flex-wrap gap-1 max-w-xs">
@@ -182,7 +197,6 @@ const SuperAdminDashboard = () => {
                          )}
                      </div>
                  </td>
-                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tournament.createdAt ? new Date(tournament.createdAt).toLocaleDateString() : 'N/A'}</td>
                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                    <button 
                      onClick={() => handleDeleteTournament(tournament.id)}
@@ -195,7 +209,7 @@ const SuperAdminDashboard = () => {
                </tr>
              ))}
              {tournaments.length === 0 && (
-               <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500 italic">No tournaments found</td></tr>
+               <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500 italic">No tournaments found</td></tr>
              )}
            </Table>
         </div>
