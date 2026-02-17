@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import SuperAdminHeader from "../components/SuperAdminHeader";
 import CreateAdminForm from "../components/CreateAdminForm";
+import EditAdminForm from "../components/EditAdminForm";
 import CreateTournamentForm from "../components/CreateTournamentForm";
+import EditTournamentForm from "../components/EditTournamentForm";
 import CreateClubForm from "../components/CreateClubForm";
+import EditClubForm from "../components/EditClubForm";
 import Table from "../components/Table";
 import { adminService } from "@/services/adminService";
 import { Admin, Tournament, Team } from "@/types/admin";
@@ -15,7 +18,10 @@ const SuperAdminDashboard = () => {
   
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "admins" | "tournaments" | "clubs">("overview");
-  const [viewMode, setViewMode] = useState<"list" | "create">("list");
+  const [viewMode, setViewMode] = useState<"list" | "create" | "edit">("list");
+  const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
+  const [editingTournament, setEditingTournament] = useState<Tournament | null>(null);
+  const [editingClub, setEditingClub] = useState<Team | null>(null);
   
   const [notification, setNotification] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -45,6 +51,24 @@ const SuperAdminDashboard = () => {
   const refreshData = () => {
     fetchAllData();
     setViewMode("list");
+    setEditingAdmin(null);
+    setEditingTournament(null);
+    setEditingClub(null);
+  };
+
+  const handleEditAdmin = (admin: Admin) => {
+    setEditingAdmin(admin);
+    setViewMode("edit");
+  };
+
+  const handleEditTournament = (tournament: Tournament) => {
+    setEditingTournament(tournament);
+    setViewMode("edit");
+  };
+
+  const handleEditClub = (club: Team) => {
+    setEditingClub(club);
+    setViewMode("edit");
   };
 
   const handleDeleteAdmin = async (id: number) => {
@@ -108,6 +132,12 @@ const SuperAdminDashboard = () => {
 
       {viewMode === "create" ? (
         <CreateAdminForm onSuccess={refreshData} />
+      ) : viewMode === "edit" && editingAdmin ? (
+        <EditAdminForm 
+            admin={editingAdmin} 
+            onSuccess={refreshData} 
+            onCancel={() => { setViewMode("list"); setEditingAdmin(null); }} 
+        />
       ) : (
         <div className="animate-in fade-in slide-in-from-bottom-2">
            <Table headers={["Email", "Role", "Created At", "Actions"]}>
@@ -125,13 +155,22 @@ const SuperAdminDashboard = () => {
                  </td>
                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(admin.createdAt).toLocaleDateString()}</td>
                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                   <button 
-                     onClick={() => handleDeleteAdmin(admin.id)}
-                     className="text-gray-400 hover:text-red-600 transition-colors"
-                     title="Delete"
-                   >
-                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                   </button>
+                   <div className="flex space-x-2">
+                       <button 
+                         onClick={() => handleEditAdmin(admin)}
+                         className="text-gray-400 hover:text-blue-600 transition-colors"
+                         title="Edit"
+                       >
+                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                       </button>
+                       <button 
+                         onClick={() => handleDeleteAdmin(admin.id)}
+                         className="text-gray-400 hover:text-red-600 transition-colors"
+                         title="Delete"
+                       >
+                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                       </button>
+                   </div>
                  </td>
                </tr>
              ))}
@@ -158,6 +197,13 @@ const SuperAdminDashboard = () => {
 
       {viewMode === "create" ? (
         <CreateTournamentForm admins={admins} onSuccess={refreshData} />
+      ) : viewMode === "edit" && editingTournament ? (
+        <EditTournamentForm 
+            tournament={editingTournament} 
+            admins={admins} 
+            onSuccess={refreshData} 
+            onCancel={() => { setViewMode("list"); setEditingTournament(null); }} 
+        />
       ) : (
          <div className="animate-in fade-in slide-in-from-bottom-2">
            <Table headers={["Name", "Status", "Format", "Dates", "Categories", "Actions"]}>
@@ -198,13 +244,22 @@ const SuperAdminDashboard = () => {
                      </div>
                  </td>
                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                   <button 
-                     onClick={() => handleDeleteTournament(tournament.id)}
-                     className="text-gray-400 hover:text-red-600 transition-colors"
-                     title="Delete"
-                   >
-                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                   </button>
+                   <div className="flex space-x-2">
+                       <button 
+                         onClick={() => handleEditTournament(tournament)}
+                         className="text-gray-400 hover:text-blue-600 transition-colors"
+                         title="Edit"
+                       >
+                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                       </button>
+                       <button 
+                         onClick={() => handleDeleteTournament(tournament.id)}
+                         className="text-gray-400 hover:text-red-600 transition-colors"
+                         title="Delete"
+                       >
+                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                       </button>
+                   </div>
                  </td>
                </tr>
              ))}
@@ -231,6 +286,13 @@ const SuperAdminDashboard = () => {
 
       {viewMode === "create" ? (
         <CreateClubForm admins={admins} onSuccess={refreshData} />
+      ) : viewMode === "edit" && editingClub ? (
+        <EditClubForm 
+            club={editingClub} 
+            admins={admins} 
+            onSuccess={refreshData} 
+            onCancel={() => { setViewMode("list"); setEditingClub(null); }} 
+        />
       ) : (
         <div className="animate-in fade-in slide-in-from-bottom-2">
            <Table headers={["Name", "Cat.", "Coach", "Created At", "Actions"]}>
@@ -241,13 +303,22 @@ const SuperAdminDashboard = () => {
                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{club.coach || "-"}</td>
                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{club.createdAt ? new Date(club.createdAt).toLocaleDateString() : 'N/A'}</td>
                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                   <button 
-                     onClick={() => handleDeleteClub(club.id)}
-                     className="text-gray-400 hover:text-red-600 transition-colors"
-                     title="Delete"
-                   >
-                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                   </button>
+                   <div className="flex space-x-2">
+                       <button 
+                         onClick={() => handleEditClub(club)}
+                         className="text-gray-400 hover:text-blue-600 transition-colors"
+                         title="Edit"
+                       >
+                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                       </button>
+                       <button 
+                         onClick={() => handleDeleteClub(club.id)}
+                         className="text-gray-400 hover:text-red-600 transition-colors"
+                         title="Delete"
+                       >
+                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                       </button>
+                   </div>
                  </td>
                </tr>
              ))}

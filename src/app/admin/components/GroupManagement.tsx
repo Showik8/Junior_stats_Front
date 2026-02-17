@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { adminService } from "@/services/adminService";
 import { Group, AgeCategory } from "@/types/admin";
-import { FaPlus, FaTrash, FaTimes } from "react-icons/fa";
+import { FaPlus, FaTrash, FaTimes, FaExclamationTriangle } from "react-icons/fa";
 
 interface GroupManagementProps {
   tournamentId: string;
@@ -15,6 +15,9 @@ const GroupManagement: React.FC<GroupManagementProps> = ({ tournamentId, ageCate
   const [newGroupName, setNewGroupName] = useState("");
   const [processing, setProcessing] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Confirmation modal state
+  const [confirmDelete, setConfirmDelete] = useState<Group | null>(null);
 
   const fetchGroups = async () => {
     setLoading(true);
@@ -57,9 +60,9 @@ const GroupManagement: React.FC<GroupManagementProps> = ({ tournamentId, ageCate
   };
 
   const handleDelete = async (groupId: string) => {
-    if (!window.confirm("Are you sure you want to delete this group? Related matches and standings may be affected.")) return;
     setProcessing(groupId);
     setError(null);
+    setConfirmDelete(null);
     try {
       await adminService.deleteGroup(groupId);
       fetchGroups();
@@ -149,7 +152,7 @@ const GroupManagement: React.FC<GroupManagementProps> = ({ tournamentId, ageCate
                 <div className="text-xs text-gray-400 mt-0.5">{group.matches?.length || 0} matches • {group.standings?.length || 0} teams</div>
               </div>
               <button
-                onClick={() => handleDelete(group.id)}
+                onClick={() => setConfirmDelete(group)}
                 disabled={processing === group.id}
                 className="p-2 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover/card:opacity-100"
                 title="Delete group"
@@ -162,6 +165,42 @@ const GroupManagement: React.FC<GroupManagementProps> = ({ tournamentId, ageCate
               </button>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <FaExclamationTriangle className="text-red-500" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900">Delete Group</h3>
+                <p className="text-xs text-gray-500">Related matches and standings may be affected</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to delete{" "}
+              <span className="font-bold text-gray-900">{confirmDelete.name}</span>? 
+              This will affect {confirmDelete.matches?.length || 0} matches and {confirmDelete.standings?.length || 0} team standings.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(confirmDelete.id)}
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition flex items-center justify-center gap-2"
+              >
+                <FaTrash className="text-xs" /> Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

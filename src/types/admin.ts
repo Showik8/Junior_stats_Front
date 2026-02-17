@@ -333,6 +333,15 @@ export interface CreateAdminPayload {
 }
 
 /**
+ * UpdateAdminPayload
+ */
+export interface UpdateAdminPayload {
+  email?: string;
+  password?: string;
+  role?: Role;
+}
+
+/**
  * CreateTournamentPayload
  */
 export interface CreateTournamentPayload {
@@ -365,6 +374,7 @@ export interface UpdateTournamentPayload {
   rules?: string;
   logoUrl?: string;
   bannerUrl?: string;
+  adminEmail?: string;
 }
 
 /**
@@ -475,3 +485,42 @@ export interface TournamentStatsSummary {
   topAssists: PlayerStatEntry[];
   mostMatchesPlayed: PlayerStatEntry[];
 }
+
+/**
+ * Update Player payload (for PUT /api/players/:id)
+ */
+export interface UpdatePlayerPayload {
+  name?: string;
+  position?: string | null;
+  shirtNumber?: number | null;
+  photoUrl?: string | null;
+  birthDate?: string | null;
+  teamId?: string;
+}
+
+/**
+ * Tournament Admin assignment (for /api/tournament-admins endpoints)
+ */
+export interface TournamentAdminAssignment {
+  id: number;
+  adminId: number;
+  tournamentId: string;
+  role: Role;
+  admin?: Admin;
+  tournament?: Tournament;
+  createdAt?: string;
+}
+
+/**
+ * Team Admin assignment (for /api/team-admins endpoints)
+ */
+export interface TeamAdminAssignment {
+  id: number;
+  adminId: number;
+  teamId: string;
+  role: Role;
+  admin?: Admin;
+  team?: Team;
+  createdAt?: string;
+}
+

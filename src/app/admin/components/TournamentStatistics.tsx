@@ -19,7 +19,7 @@ const StatCard: React.FC<{
     <div className={`px-6 py-4 ${color} border-b`}>
       <div className="flex items-center gap-2">
         {icon}
-        <h3 className="text-sm font-bold uppercase tracking-wider">{title}</h3>
+        <h3 className="text-sm font-bold uppercase tracking-wider text-black">{title}</h3>
       </div>
     </div>
     {entries.length === 0 ? (

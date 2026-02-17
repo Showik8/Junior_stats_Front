@@ -17,6 +17,7 @@ export const API_PATHS = {
     // Admin CRUD
     LIST: "/api/admin/list",
     CREATE: "/api/admin",
+    UPDATE: (id: number) => `/api/admin/${id}`,
     DELETE: (id: number) => `/api/admin/${id}`,
   },
 
@@ -129,5 +130,27 @@ export const API_PATHS = {
   MATCH_REPORTS: {
     // POST /api/match-reports/:matchId/submit
     SUBMIT: (matchId: string) => `/api/match-reports/${matchId}/submit`,
+  },
+
+  TOURNAMENT_ADMINS: {
+    // GET /api/tournament-admins - List all assignments
+    BASE: "/api/tournament-admins",
+    // GET /api/tournament-admins/:id - Get assignment by ID
+    GET_BY_ID: (id: number) => `/api/tournament-admins/${id}`,
+    // GET /api/tournament-admins/admin/:adminId - Get assignments by admin
+    BY_ADMIN: (adminId: number) => `/api/tournament-admins/admin/${adminId}`,
+    // GET /api/tournament-admins/tournament/:tournamentId - Get assignments by tournament
+    BY_TOURNAMENT: (tournamentId: string) => `/api/tournament-admins/tournament/${tournamentId}`,
+  },
+
+  TEAM_ADMINS: {
+    // GET /api/team-admins - List all assignments
+    BASE: "/api/team-admins",
+    // GET /api/team-admins/:id - Get assignment by ID
+    GET_BY_ID: (id: number) => `/api/team-admins/${id}`,
+    // GET /api/team-admins/admin/:adminId - Get assignments by admin
+    BY_ADMIN: (adminId: number) => `/api/team-admins/admin/${adminId}`,
+    // GET /api/team-admins/team/:teamId - Get assignments by team
+    BY_TEAM: (teamId: string) => `/api/team-admins/team/${teamId}`,
   },
 };

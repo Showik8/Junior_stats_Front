@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Match, Team, CreateMatchPayload, Tournament, AgeCategory } from "@/types/admin";
 import { adminService } from "@/services/adminService";
-import { FaCalendar, FaEdit, FaTrash, FaCheck, FaTimes, FaPlus, FaFileAlt, FaSearch, FaMapMarkerAlt } from "react-icons/fa";
+import { FaCalendar, FaEdit, FaTrash, FaCheck, FaTimes, FaPlus, FaFileAlt, FaSearch, FaMapMarkerAlt, FaExclamationTriangle } from "react-icons/fa";
 import MatchReportForm from "./MatchReportForm";
 
 interface MatchManagementProps {
@@ -33,12 +33,15 @@ const MatchManagement: React.FC<MatchManagementProps> = ({
   const [reportingMatch, setReportingMatch] = useState<Match | null>(null);
   
   // UI State
-  const [processing, setProcessing] = useState<string | null>(null); // "create" or matchId
+  const [processing, setProcessing] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Filter & Tab State
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<"upcoming" | "finished">("upcoming");
+
+  // Confirmation modal state
+  const [confirmDelete, setConfirmDelete] = useState<Match | null>(null);
 
   // Filter Matches
   const filteredMatches = matches.filter(m => {
@@ -79,10 +82,9 @@ const MatchManagement: React.FC<MatchManagementProps> = ({
       await adminService.createMatch(payload);
       resetForm();
       onMatchUpdate();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setError(err.message || "Failed to create match");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to create match";
+      setError(msg);
     } finally {
         setProcessing(null);
     }
@@ -101,32 +103,29 @@ const MatchManagement: React.FC<MatchManagementProps> = ({
            awayTeamId,
            date,
            tournamentId: tournament.id,
-           ageCategory: activeAgeCategory, // Keep context
+           ageCategory: activeAgeCategory,
            venue: venue || undefined,
        });
 
        resetForm();
        onMatchUpdate();
-       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setError(err.message || "Failed to update match");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to update match";
+      setError(msg);
     } finally {
         setProcessing(null);
     }
   }
 
   const handleDeleteMatch = async (matchId: string) => {
-      if(!window.confirm("Are you sure you want to delete this match?")) return;
-      
       setProcessing(matchId);
+      setConfirmDelete(null);
       try {
           await adminService.deleteMatch(matchId);
           onMatchUpdate();
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (err: any) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          setError(err.message || "Failed to delete match");
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Failed to delete match";
+        setError(msg);
       } finally {
           setProcessing(null);
       }
@@ -186,7 +185,7 @@ const MatchManagement: React.FC<MatchManagementProps> = ({
       )}
 
       {(isCreating || editingMatch) && (
-        <form onSubmit={editingMatch ? handleUpdateMatch : handleCreateMatch} className="mb-8 p-6 bg-blue-50/50 rounded-2xl border border-blue-100 animate-in fade-in slide-in-from-top-2">
+        <form onSubmit={editingMatch ? handleUpdateMatch : handleCreateMatch} className="mb-8 p-6 bg-blue-50/50 rounded-2xl border border-blue-100 animate-in fade-in slide-in-from-top-2 text-black">
             <h3 className="font-bold text-gray-800 mb-6 flex items-center gap-2 text-lg">
                 {editingMatch ? <FaEdit className="text-blue-500" /> : <FaCalendar className="text-blue-500" />}
                 {editingMatch ? "Edit Match Details" : "Schedule New Match"}
@@ -321,7 +320,6 @@ const MatchManagement: React.FC<MatchManagementProps> = ({
                 
                 <div className="grid grid-cols-1 gap-4">
                     {plannedMatches.length === 0 ? (
-                         // Only show empty state if we are explicitly on the tab OR searching and finding nothing in this category
                         (activeTab === "upcoming" || searchTerm) && (
                             <div className="text-sm text-gray-400 italic bg-gray-50/50 p-8 rounded-2xl text-center border-2 border-dashed border-gray-100">
                                 {searchTerm ? "No upcoming matches found" : "No upcoming matches scheduled"}
@@ -362,7 +360,7 @@ const MatchManagement: React.FC<MatchManagementProps> = ({
                                                 <FaFileAlt size={14} />
                                             </button>
                                             <button onClick={() => startEdit(match)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit"><FaEdit size={14} /></button>
-                                            <button onClick={() => handleDeleteMatch(match.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete"><FaTrash size={14} /></button>
+                                            <button onClick={() => setConfirmDelete(match)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete"><FaTrash size={14} /></button>
                                         </div>
                                     </div>
                                 </div>
@@ -425,6 +423,43 @@ const MatchManagement: React.FC<MatchManagementProps> = ({
             </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <FaExclamationTriangle className="text-red-500" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900">Delete Match</h3>
+                <p className="text-xs text-gray-500">This action cannot be undone</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to delete the match between{" "}
+              <span className="font-bold text-gray-900">{confirmDelete.homeTeam?.name}</span>
+              {" "}and{" "}
+              <span className="font-bold text-gray-900">{confirmDelete.awayTeam?.name}</span>?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteMatch(confirmDelete.id)}
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition flex items-center justify-center gap-2"
+              >
+                <FaTrash className="text-xs" /> Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Match Report Modal */}
       {reportingMatch && (

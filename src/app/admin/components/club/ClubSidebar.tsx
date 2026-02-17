@@ -1,11 +1,14 @@
-import React from "react";
-import { 
-  FaChartPie, 
-  FaUsers, 
-  FaFutbol, 
-  FaTrophy, 
-  FaCog, 
-  FaInfoCircle 
+"use client";
+import React, { useState } from "react";
+import {
+  FaChartPie,
+  FaUsers,
+  FaFutbol,
+  FaTrophy,
+  FaCog,
+  FaInfoCircle,
+  FaBars,
+  FaTimes,
 } from "react-icons/fa";
 
 interface ClubSidebarProps {
@@ -13,59 +16,125 @@ interface ClubSidebarProps {
   setActiveTab: (tab: string) => void;
 }
 
-const ClubSidebar: React.FC<ClubSidebarProps> = ({ activeTab, setActiveTab }) => {
+const ClubSidebar: React.FC<ClubSidebarProps> = ({
+  activeTab,
+  setActiveTab,
+}) => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   const menuItems = [
     { id: "overview", label: "Dashboard", icon: FaChartPie },
-    { id: "players", label: "Players", icon: FaUsers },
+    { id: "players", label: "Squad", icon: FaUsers },
     { id: "matches", label: "Matches", icon: FaFutbol },
     { id: "tournaments", label: "Tournaments", icon: FaTrophy },
     { id: "info", label: "Club Info", icon: FaInfoCircle },
     { id: "settings", label: "Settings", icon: FaCog },
   ];
 
-  return (
-    <aside className="hidden h-full w-64 flex-col border-r border-gray-200 bg-white shadow-sm md:flex">
-      <div className="flex h-16 items-center justify-center border-b border-gray-100 px-6">
-        <div className="flex items-center gap-2">
-           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-lg font-bold text-white">
-             JA
-           </div>
-           <span className="text-lg font-bold tracking-tight text-gray-900">Junior Admin</span>
+  const handleSelect = (id: string) => {
+    setActiveTab(id);
+    setMobileOpen(false);
+  };
+
+  const NavContent = () => (
+    <>
+      {/* Logo */}
+      <div className="flex h-16 items-center justify-between px-5 border-b border-gray-100/50">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-sm">
+            JS
+          </div>
+          <div>
+            <span className="text-sm font-bold tracking-tight text-gray-900 block leading-tight">
+              Junior Stats
+            </span>
+            <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+              Club Panel
+            </span>
+          </div>
         </div>
+        {/* Mobile close */}
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="md:hidden p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition"
+        >
+          <FaTimes />
+        </button>
       </div>
 
-      <nav className="flex-1 space-y-1 p-4">
+      {/* Nav items */}
+      <nav className="flex-1 space-y-1 px-3 py-4">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
-          
+
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+              onClick={() => handleSelect(item.id)}
+              className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-200 ${
                 isActive
-                  ? "bg-blue-50 text-blue-600 shadow-sm"
+                  ? "bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-100"
                   : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
               }`}
             >
-              <Icon className={`text-lg ${isActive ? "text-blue-500" : "text-gray-400"}`} />
+              <Icon
+                className={`text-base ${
+                  isActive ? "text-blue-500" : "text-gray-400"
+                }`}
+              />
               {item.label}
+              {isActive && (
+                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-500" />
+              )}
             </button>
           );
         })}
       </nav>
 
+      {/* Footer */}
       <div className="border-t border-gray-100 p-4">
-        <div className="rounded-lg bg-linear-to-r from-blue-50 to-indigo-50 p-4">
-           <p className="text-xs font-semibold text-blue-800">Support</p>
-           <p className="mb-2 mt-1 text-xs text-blue-600">Need help? Contact support.</p>
-           <button className="w-full rounded bg-white py-1.5 text-xs font-medium text-blue-600 shadow-sm transition hover:bg-blue-50">
-             Contact Us
-           </button>
+        <div className="rounded-xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 ring-1 ring-blue-100/50">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+            <p className="text-xs font-semibold text-gray-700">System Status</p>
+          </div>
+          <p className="text-[11px] text-gray-500 leading-relaxed">
+            All systems operational. Last sync: just now.
+          </p>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile hamburger button */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="fixed top-4 left-4 z-40 md:hidden p-2.5 rounded-xl bg-white shadow-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+      >
+        <FaBars className="text-lg" />
+      </button>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden h-full w-[260px] flex-col bg-white border-r border-gray-100 shadow-sm md:flex">
+        <NavContent />
+      </aside>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
+          <aside className="fixed inset-y-0 left-0 w-[280px] bg-white z-50 flex flex-col shadow-2xl md:hidden animate-slide-in-right">
+            <NavContent />
+          </aside>
+        </>
+      )}
+    </>
   );
 };
 
