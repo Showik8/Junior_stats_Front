@@ -209,7 +209,7 @@ const MembersManagement: React.FC<MembersManagementProps> = ({
               className="flex justify-between items-center p-5 bg-white border border-gray-100 rounded-2xl hover:shadow-lg hover:shadow-gray-100/50 hover:border-blue-100 transition-all duration-300 group"
             >
               <div className="flex items-center gap-5">
-                <div className="w-12 h-12 bg-gradient-to-br from-white to-gray-50 rounded-full flex items-center justify-center text-gray-400 font-bold overflow-hidden border border-gray-100 shadow-sm relative group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 bg-linear-to-br from-white to-gray-50 rounded-full flex items-center justify-center text-gray-400 font-bold overflow-hidden border border-gray-100 shadow-sm relative group-hover:scale-105 transition-transform">
                   {team.logo ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img

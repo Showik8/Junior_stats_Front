@@ -41,7 +41,7 @@ const ClubSidebar: React.FC<ClubSidebarProps> = ({
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-5 border-b border-gray-100/50">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-sm">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-sm">
             JS
           </div>
           <div>
@@ -94,7 +94,7 @@ const ClubSidebar: React.FC<ClubSidebarProps> = ({
 
       {/* Footer */}
       <div className="border-t border-gray-100 p-4">
-        <div className="rounded-xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 ring-1 ring-blue-100/50">
+        <div className="rounded-xl bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 ring-1 ring-blue-100/50">
           <div className="flex items-center gap-2 mb-2">
             <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
             <p className="text-xs font-semibold text-gray-700">System Status</p>

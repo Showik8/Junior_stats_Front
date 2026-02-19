@@ -456,7 +456,7 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
                         className="h-16 w-16 rounded-full object-cover ring-3 ring-gray-100 shadow-sm"
                       />
                     ) : (
-                      <div className="h-16 w-16 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-sm">
+                      <div className="h-16 w-16 rounded-full bg-linear-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-sm">
                         <span className="text-xl font-bold text-white">
                           {player.name.charAt(0).toUpperCase()}
                         </span>
@@ -480,7 +480,7 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
                     </p>
                   )}
                 </div>
-                <div className="absolute inset-x-0 bottom-0 flex justify-center gap-2 p-3 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-white via-white/90 to-transparent rounded-b-2xl">
+                <div className="absolute inset-x-0 bottom-0 flex justify-center gap-2 p-3 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-t from-white via-white/90 to-transparent rounded-b-2xl">
                   <button
                     className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition text-xs"
                     title="Edit"
@@ -546,7 +546,7 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
                               className="h-9 w-9 rounded-full object-cover ring-2 ring-gray-100"
                             />
                           ) : (
-                            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
+                            <div className="h-9 w-9 rounded-full bg-linear-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
                               <span className="text-sm font-bold text-white">
                                 {player.name.charAt(0).toUpperCase()}
                               </span>

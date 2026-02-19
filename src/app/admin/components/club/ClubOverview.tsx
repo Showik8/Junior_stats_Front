@@ -149,7 +149,7 @@ const ClubOverview: React.FC<ClubOverviewProps> = ({ team, onNavigate }) => {
               className="group relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm transition-all hover:shadow-md border border-gray-100"
             >
               <div
-                className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${card.gradient} opacity-0 group-hover:opacity-100 transition-opacity`}
+                className={`absolute top-0 left-0 right-0 h-1 bg-linear-to-r ${card.gradient} opacity-0 group-hover:opacity-100 transition-opacity`}
               />
               <div className="flex items-start justify-between">
                 <div>
@@ -174,7 +174,7 @@ const ClubOverview: React.FC<ClubOverviewProps> = ({ team, onNavigate }) => {
       {/* Performance Stats Row */}
       {stats.completed > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 text-white shadow-sm">
+          <div className="bg-linear-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 text-white shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <FaPercentage className="text-emerald-200 text-sm" />
               <span className="text-xs font-medium text-emerald-100 uppercase tracking-wider">
@@ -187,7 +187,7 @@ const ClubOverview: React.FC<ClubOverviewProps> = ({ team, onNavigate }) => {
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white shadow-sm">
+          <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <FaFutbol className="text-blue-200 text-sm" />
               <span className="text-xs font-medium text-blue-100 uppercase tracking-wider">
@@ -205,7 +205,7 @@ const ClubOverview: React.FC<ClubOverviewProps> = ({ team, onNavigate }) => {
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl p-5 text-white shadow-sm">
+          <div className="bg-linear-to-br from-purple-500 to-indigo-600 rounded-2xl p-5 text-white shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <FaShieldAlt className="text-purple-200 text-sm" />
               <span className="text-xs font-medium text-purple-100 uppercase tracking-wider">
@@ -223,7 +223,7 @@ const ClubOverview: React.FC<ClubOverviewProps> = ({ team, onNavigate }) => {
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-5 text-white shadow-sm">
+          <div className="bg-linear-to-br from-amber-500 to-orange-500 rounded-2xl p-5 text-white shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <FaTrophy className="text-amber-200 text-sm" />
               <span className="text-xs font-medium text-amber-100 uppercase tracking-wider">
@@ -278,8 +278,8 @@ const ClubOverview: React.FC<ClubOverviewProps> = ({ team, onNavigate }) => {
           <h3 className="text-sm font-bold text-gray-900 mb-4">
             Coach Information
           </h3>
-          <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-blue-50/50 rounded-xl">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">
+          <div className="flex items-center gap-4 p-4 bg-linear-to-r from-gray-50 to-blue-50/50 rounded-xl">
+            <div className="h-12 w-12 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">
               {team.coach ? team.coach.charAt(0).toUpperCase() : "?"}
             </div>
             <div>

@@ -153,4 +153,20 @@ export const API_PATHS = {
     // GET /api/team-admins/team/:teamId - Get assignments by team
     BY_TEAM: (teamId: string) => `/api/team-admins/team/${teamId}`,
   },
+
+  PUBLIC: {
+    TOURNAMENTS: "/api/public/tournaments",
+    TOURNAMENT_DETAIL: (id: string) => `/api/public/tournaments/${id}`,
+    TEAM_DETAIL: (id: string) => `/api/public/teams/${id}`,
+    PLAYER_DETAIL: (id: string) => `/api/public/players/${id}`,
+    MATCH_DETAIL: (id: string) => `/api/public/matches/${id}`,
+  },
+
+  SPONSORS: {
+    BASE: "/api/sponsors",
+    GET_BY_ID: (id: string) => `/api/sponsors/${id}`,
+    ASSIGN_TOURNAMENT: (id: string) => `/api/sponsors/${id}/tournaments`,
+    REMOVE_TOURNAMENT: (id: string, tournamentId: string) =>
+      `/api/sponsors/${id}/tournaments/${tournamentId}`,
+  },
 };

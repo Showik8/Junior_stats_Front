@@ -1,6 +1,6 @@
-import React from "react";
+import Link from "next/link";
 import { Team } from "@/types/admin";
-import { FaBell, FaUserCircle, FaSignOutAlt } from "react-icons/fa";
+import { FaBell, FaUserCircle, FaSignOutAlt, FaHome } from "react-icons/fa";
 
 interface ClubHeaderProps {
   team: Team | null;
@@ -20,7 +20,7 @@ const ClubHeader: React.FC<ClubHeaderProps> = ({ team, onLogout }) => {
             className="h-9 w-9 rounded-full object-cover ring-2 ring-white shadow-sm"
           />
         ) : (
-          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+          <div className="h-9 w-9 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
             {team?.name?.substring(0, 2).toUpperCase() || "CL"}
           </div>
         )}
@@ -43,6 +43,15 @@ const ClubHeader: React.FC<ClubHeaderProps> = ({ team, onLogout }) => {
 
       {/* Right — Actions */}
       <div className="flex items-center gap-2">
+        {/* Home Button */}
+        <Link 
+          href="/" 
+          className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-blue-600"
+          title="Go to Home"
+        >
+          <FaHome className="text-lg" />
+        </Link>
+
         {/* Notification bell */}
         <button className="relative rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600">
           <FaBell className="text-base" />

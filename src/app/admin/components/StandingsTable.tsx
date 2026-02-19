@@ -243,7 +243,7 @@ const StandingsTable: React.FC<StandingsTableProps> = ({
                       {/* Team */}
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-linear-to-br from-gray-100 to-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
                             {standing.team?.logo ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img

@@ -1,21 +1,21 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import Navbar from "@/app/components/public/Navbar";
+import Footer from "@/app/components/public/Footer";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Junior Stats — ახალგაზრდული ფეხბურთის სტატისტიკა",
   description: "ტურნირები, გუნდები, მოთამაშეები — ახალგაზრდული ფეხბურთის სრული სტატისტიკა",
 };
 
-export default function RootLayout({
+export default function PublicLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="ka">
-      <body className="antialiased">
-        {children}
-      </body>
-    </html>
+    <div className="flex flex-col min-h-screen text-slate-200">
+      <Navbar />
+      <main className="flex-1 w-full relative z-10">{children}</main>
+      <Footer />
+    </div>
   );
 }

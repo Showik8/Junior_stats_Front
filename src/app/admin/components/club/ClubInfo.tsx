@@ -26,6 +26,7 @@ const ClubInfo: React.FC<ClubInfoProps> = ({ team, onUpdate }) => {
     name: "",
     coach: "",
     ageCategory: "" as AgeCategory | "",
+    logo: "",
   });
 
   const startEditing = () => {
@@ -34,6 +35,7 @@ const ClubInfo: React.FC<ClubInfoProps> = ({ team, onUpdate }) => {
         name: team.name,
         coach: team.coach || "",
         ageCategory: team.ageCategory,
+        logo: team.logo || "",
       });
       setIsEditing(true);
       setError(null);
@@ -49,6 +51,7 @@ const ClubInfo: React.FC<ClubInfoProps> = ({ team, onUpdate }) => {
       await adminService.updateTeam(team.id, {
         name: formData.name,
         coach: formData.coach,
+        logo: formData.logo,
       });
       onUpdate();
       setIsEditing(false);
@@ -159,22 +162,31 @@ const ClubInfo: React.FC<ClubInfoProps> = ({ team, onUpdate }) => {
         {/* Left — Club Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           {/* Banner */}
-          <div className="h-28 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 relative">
+          <div className="h-28 bg-linear-to-br from-blue-500 via-indigo-500 to-purple-600 relative">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L3N2Zz4=')] opacity-50" />
           </div>
 
           {/* Avatar */}
           <div className="px-6 -mt-12 relative">
-            <div className="h-24 w-24 rounded-2xl bg-white shadow-lg border-4 border-white overflow-hidden flex items-center justify-center">
-              {team.logo ? (
+            <div className="h-24 w-24 rounded-2xl bg-white shadow-lg border-4 border-white overflow-hidden flex items-center justify-center group relative">
+              {isEditing ? (
+                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10 pointer-events-none">
+                   <span className="text-white text-xs font-bold">Edit URL below</span>
+                 </div>
+              ) : null}
+              {team.logo || formData.logo ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={team.logo}
+                  src={isEditing ? formData.logo : (team.logo || "")}
                   alt={team.name}
                   className="h-full w-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = ""; // Fallback
+                    (e.target as HTMLImageElement).parentElement?.classList.add("bg-linear-to-br", "from-blue-100", "to-indigo-100");
+                  }}
                 />
               ) : (
-                <div className="h-full w-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                <div className="h-full w-full bg-linear-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
                   <span className="text-3xl font-bold text-blue-600">
                     {team.name.substring(0, 2).toUpperCase()}
                   </span>
@@ -187,11 +199,23 @@ const ClubInfo: React.FC<ClubInfoProps> = ({ team, onUpdate }) => {
           <div className="p-6 pt-4 space-y-4">
             <div>
               <h2 className="text-xl font-bold text-gray-900">{team.name}</h2>
+              {isEditing && (
+                <div className="mt-2">
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">Logo URL</label>
+                    <input
+                      type="text"
+                      placeholder="https://example.com/logo.png"
+                      className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                      value={formData.logo}
+                      onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                    />
+                </div>
+              )}
               <div className="flex items-center gap-2 mt-1.5">
                 <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-600/10">
                   {team.ageCategory.replace("_", " ")}
                 </span>
-                {team.coach && (
+                {team.coach && !isEditing && (
                   <span className="text-xs text-gray-400">
                     Coach: {team.coach}
                   </span>
@@ -243,6 +267,8 @@ const ClubInfo: React.FC<ClubInfoProps> = ({ team, onUpdate }) => {
         {/* Right — Details */}
         <div className="lg:col-span-2 space-y-4">
           {infoFields.map((field) => {
+            if (!field.key) return null; // ID field logic handled separately if needed, or mapped differently
+
             const Icon = field.icon;
             return (
               <div
@@ -259,11 +285,11 @@ const ClubInfo: React.FC<ClubInfoProps> = ({ team, onUpdate }) => {
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
                     {field.label}
                   </p>
-                  {isEditing && field.editable && field.key ? (
+                  {isEditing && field.editable ? (
                     <input
                       type="text"
                       className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-900 font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                      value={formData[field.key]}
+                      value={formData[field.key as keyof typeof formData]}
                       onChange={(e) =>
                         setFormData({ ...formData, [field.key!]: e.target.value })
                       }
@@ -281,6 +307,29 @@ const ClubInfo: React.FC<ClubInfoProps> = ({ team, onUpdate }) => {
               </div>
             );
           })}
+          
+           {/* ID Field (Read only always) */}
+           <div
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4"
+              >
+                <div
+                  className={`h-11 w-11 rounded-xl bg-gray-50 flex items-center justify-center shrink-0`}
+                >
+                  <FaHashtag className={`text-base text-gray-400`} />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                    Team ID
+                  </p>
+                  <p className="text-gray-900 font-semibold">{team.id}</p>
+                </div>
+
+                 <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full font-medium shrink-0">
+                    Read only
+                 </span>
+            </div>
+
 
           {/* Save button */}
           {isEditing && (
