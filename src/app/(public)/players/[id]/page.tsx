@@ -5,8 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { publicService } from "@/services/public.service";
 import {
-  FiUser, FiActivity, FiTarget, FiClock,
-  FiInfo, FiTrendingUp, FiArrowLeft, FiAward
+  FiUser, FiArrowLeft, FiAward, FiMapPin
 } from "react-icons/fi";
 import { GiSoccerBall, GiRunningShoe, GiShield } from "react-icons/gi";
 
@@ -55,200 +54,229 @@ export default function PlayerProfilePage() {
     );
   }
 
-  const AttributeBar = ({ label, value, color, delay = 0 }: { label: string; value: number; color: string; delay?: number }) => {
-    const colorMap: Record<string, { bar: string; text: string; glow: string }> = {
-      emerald: { bar: "bg-emerald-500", text: "text-emerald-400", glow: "shadow-emerald-500/30" },
-      blue:    { bar: "bg-blue-500",    text: "text-blue-400",    glow: "shadow-blue-500/30" },
-      amber:   { bar: "bg-amber-500",   text: "text-amber-400",   glow: "shadow-amber-500/30" },
-      purple:  { bar: "bg-purple-500",  text: "text-purple-400",  glow: "shadow-purple-500/30" },
-      red:     { bar: "bg-red-500",     text: "text-red-400",     glow: "shadow-red-500/30" },
-      slate:   { bar: "bg-slate-500",   text: "text-slate-400",   glow: "shadow-slate-500/30" },
-    };
-    const c = colorMap[color] || colorMap.emerald;
+  const overallRating = data.attributes
+    ? Math.round(
+        (data.attributes.pace +
+          data.attributes.shooting +
+          data.attributes.passing +
+          data.attributes.dribbling +
+          data.attributes.defense +
+          data.attributes.physical) / 6
+      )
+    : null;
 
-    return (
-      <div className="mb-5 animate-slide-in-right" style={{ animationDelay: `${delay}ms` }}>
-        <div className="flex justify-between items-end mb-2">
-          <span className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">{label}</span>
-          <span className={`${c.text} font-black text-sm tabular-nums`}>{value}</span>
-        </div>
-        <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
-          <div 
-            className={`h-full ${c.bar} rounded-full animate-bar-fill shadow-lg ${c.glow}`}
-            style={{ width: `${value}%`, animationDelay: `${delay + 200}ms` }}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const statItems = [
-    { label: "გოლი", value: data.stats?.goals || 0, icon: GiSoccerBall, gradient: "from-emerald-500/20 to-emerald-600/5", iconColor: "text-emerald-400", border: "border-emerald-500/15" },
-    { label: "ასისტი", value: data.stats?.assists || 0, icon: GiRunningShoe, gradient: "from-blue-500/20 to-blue-600/5", iconColor: "text-blue-400", border: "border-blue-500/15" },
-    { label: "მატჩი", value: data.stats?.matches || 0, icon: FiActivity, gradient: "from-amber-500/20 to-amber-600/5", iconColor: "text-amber-400", border: "border-amber-500/15" },
-    { label: "წუთი", value: `${data.stats?.minutes || 0}'`, icon: FiClock, gradient: "from-purple-500/20 to-purple-600/5", iconColor: "text-purple-400", border: "border-purple-500/15" },
-  ];
+  const attributes = data.attributes
+    ? [
+        { label: "სისწრაფე", key: "pace", value: data.attributes.pace },
+        { label: "დარტყმა", key: "shooting", value: data.attributes.shooting },
+        { label: "პასი", key: "passing", value: data.attributes.passing },
+        { label: "დრიბლინგი", key: "dribbling", value: data.attributes.dribbling },
+        { label: "დაცვა", key: "defense", value: data.attributes.defense },
+        { label: "ფიზიკური", key: "physical", value: data.attributes.physical },
+      ]
+    : [];
 
   return (
-    <div className="min-h-screen lg:h-[calc(100vh-80px)] overflow-hidden flex flex-col lg:flex-row">
+    <div className="relative overflow-hidden">
+      {/* ── Background ── */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
+        style={{ backgroundImage: "url('/images/player_bg.jpeg')" }}
+      />
+      <div className="fixed inset-0 bg-gradient-to-b from-[#060c1a]/80 via-[#060c1a]/90 to-[#060c1a]/98 z-0" />
 
-      {/* ──────── LEFT: FULL-BODY IMAGE ──────── */}
-      <div className="w-full lg:w-[38%] lg:h-full relative overflow-hidden bg-[#070e1f] flex items-end justify-center">
-        {/* Ambient glow */}
-        <div className="absolute top-[30%] left-1/2 -translate-x-1/2 w-[140%] h-[80%] bg-emerald-500/8 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-linear-to-t from-[#070e1f] to-transparent z-10 pointer-events-none" />
+      {/* ── Content ── */}
+      <div className="relative z-10">
 
-        {/* Giant number watermark */}
-        <div className="absolute top-6 left-6 text-[280px] font-black text-white/[0.03] leading-none select-none z-0 tracking-tighter">
-          {data.shirtNumber}
-        </div>
-
-        {/* Player Image — full body */}
-        <div className="relative z-[5] h-[100%] w-full flex items-end justify-center animate-slide-in-left">
-          {data.photoUrl ? (
-            <img
-              src={data.photoUrl}
-              alt={data.name}
-              className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-[0_20px_50px_rgba(16,185,129,0.15)]"
-            />
-          ) : (
-            <div className="flex flex-col items-center mb-20 animate-fade-in">
-              <div className="w-40 h-40 rounded-full bg-slate-800/60 flex items-center justify-center border-2 border-white/5 mb-4">
-                <FiUser size={64} className="text-slate-700" />
-              </div>
-              <span className="text-7xl font-black text-white/10">#{data.shirtNumber}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Mobile name overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 z-20 lg:hidden bg-linear-to-t from-[#070e1f] via-[#070e1f]/95 to-transparent">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-              {data.position}
-            </span>
-            <span className="text-white/30 text-xs">•</span>
-            <span className="text-white text-xs font-bold flex items-center gap-1.5">
-              <GiShield className="text-emerald-500" size={12} />
-              {data.teamName}
-            </span>
-          </div>
-          <h1 className="text-3xl font-black text-white uppercase tracking-tight">{data.name}</h1>
-        </div>
-
-        {/* Back button */}
+        {/* ── Back Button ── */}
         <Link
-          href={data.teamId ? `/teams/${data.teamId}` : '/'}
-          className="absolute top-4 left-4 z-20 w-10 h-10 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+          href={data.teamId ? `/teams/${data.teamId}` : "/"}
+          className="fixed top-24 left-6 z-30 w-10 h-10 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all"
         >
           <FiArrowLeft size={18} />
         </Link>
-      </div>
 
-      {/* ──────── RIGHT: STATS & INFO ──────── */}
-      <div className="flex-1 lg:h-full lg:overflow-y-auto relative">
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:48px_48px] pointer-events-none" />
+        {/* ── HERO SECTION ── */}
+        <div className="flex flex-col lg:flex-row items-center lg:items-end gap-8 lg:gap-14 max-w-6xl mx-auto px-6 pt-12 pb-8 lg:pt-16 lg:pb-0">
 
-        <div className="relative px-6 py-10 lg:px-14 lg:py-14 max-w-3xl mx-auto">
-
-          {/* ── HEADER (Desktop) ── */}
-          <div className="hidden lg:block mb-14 animate-slide-in-right">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest">
-                {data.position}
-              </span>
-              <span className="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest">
-                {data.nationality}
-              </span>
-              {data.stats?.mom > 0 && (
-                <span className="px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
-                  <FiAward size={12} /> MOM ×{data.stats.mom}
-                </span>
-              )}
+          {/* Player Image */}
+          <div className="relative w-64 lg:w-[380px] shrink-0 animate-slide-in-left">
+            {/* Giant Number */}
+            <div className="absolute -top-4 -left-2 text-[200px] lg:text-[380px] font-black text-white/[0.2] leading-none select-none z-0 tracking-tighter pointer-events-none">
+              {data.shirtNumber}
             </div>
-            <h1 className="text-5xl xl:text-6xl font-black text-white mb-3 uppercase tracking-tight leading-[0.95] text-gradient-hero">
-              {data.name}
-            </h1>
-            <div className="flex items-center gap-5 text-sm mt-5 flex-wrap">
-              <div className="flex items-center gap-2 bg-white/[0.03] px-3 py-2 rounded-xl border border-white/5">
-                <GiShield className="text-emerald-500" size={16} />
-                <span className="font-bold text-white">{data.teamName}</span>
-                <span className="text-[10px] bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-400 font-bold">U-{data.age}</span>
-              </div>
-              {data.height && (
-                <div className="flex items-center gap-2 text-slate-400">
-                  <FiUser className="text-slate-500" size={14} />
-                  <span className="font-semibold text-slate-300">{data.height} სმ</span>
-                  {data.weight && <span className="text-slate-600">/ {data.weight} კგ</span>}
-                </div>
-              )}
-              {data.preferredFoot && (
-                <div className="flex items-center gap-2 text-slate-400">
-                  <FiTrendingUp className="text-slate-500" size={14} />
-                  <span className="font-semibold text-slate-300">{data.preferredFoot} ფეხი</span>
+            {/* Ambient glow */}
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[200%] h-[60%] bg-emerald-500/8 blur-[100px] rounded-full pointer-events-none" />
+
+            <div className="relative z-10">
+              {data.photoUrl ? (
+                <img
+                  src={data.photoUrl}
+                  alt={data.name}
+                  className="w-full h-auto object-contain drop-shadow-[0_20px_60px_rgba(16,185,129,0.12)]"
+                />
+              ) : (
+                <div className="flex flex-col items-center py-16">
+                  <div className="w-36 h-36 rounded-full bg-slate-800/60 flex items-center justify-center border-2 border-white/5 mb-4">
+                    <FiUser size={56} className="text-slate-700" />
+                  </div>
+                  <span className="text-6xl font-black text-white/10">#{data.shirtNumber}</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* ── KEY STATS ── */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-12">
-            {statItems.map((stat, idx) => (
-              <div
-                key={idx}
-                className={`relative overflow-hidden rounded-2xl p-5 text-center bg-linear-to-b ${stat.gradient} border ${stat.border} animate-reveal-up group`}
-                style={{ animationDelay: `${(idx + 1) * 100}ms` }}
+          {/* Player Info */}
+          <div className="flex-1 pb-6 lg:pb-14 text-center lg:text-left animate-fade-in-up">
+            {/* Badges */}
+            <div className="flex items-center gap-2 mb-4 justify-center lg:justify-start flex-wrap">
+              <span className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/70 text-[10px] font-bold uppercase tracking-widest">
+                {data.position}
+              </span>
+              {data.nationality && (
+                <span className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/70 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                  <FiMapPin size={10} />
+                  {data.nationality}
+                </span>
+              )}
+              {data.stats?.mom > 0 && (
+                <span className="px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                  <FiAward size={11} /> MOM ×{data.stats.mom}
+                </span>
+              )}
+            </div>
+
+            {/* Name */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight leading-[0.95] mb-5">
+              {data.name}
+            </h1>
+
+            {/* Team & Bio info */}
+            <div className="flex items-center gap-4 justify-center lg:justify-start flex-wrap text-sm mb-6">
+              <Link
+                href={`/teams/${data.teamId}`}
+                className="flex items-center gap-2 bg-white/[0.04] px-4 py-2.5 rounded-xl border border-white/8 hover:border-emerald-500/30 transition-all group"
               >
-                <div className={`w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300`}>
-                  <stat.icon className={stat.iconColor} size={20} />
+                <GiShield className="text-emerald-500" size={16} />
+                <span className="font-bold text-white group-hover:text-emerald-400 transition-colors">{data.teamName}</span>
+                {data.age && (
+                  <span className="text-[10px] bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-400 font-bold">
+                    U-{data.age}
+                  </span>
+                )}
+              </Link>
+              {data.height && (
+                <span className="text-slate-500 text-sm">
+                  {data.height} სმ {data.weight ? `/ ${data.weight} კგ` : ""}
+                </span>
+              )}
+              {data.preferredFoot && (
+                <span className="text-slate-500 text-sm">
+                  {data.preferredFoot} ფეხი
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ── STATS SECTION ── */}
+        <div className="max-w-6xl mx-auto px-6 pb-8">
+
+          {/* Key Stats Row */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+            {[
+              { label: "გოლი", value: data.stats?.goals || 0, icon: GiSoccerBall },
+              { label: "ასისტი", value: data.stats?.assists || 0, icon: GiRunningShoe },
+              { label: "მატჩი", value: data.stats?.matches || 0, icon: GiShield },
+              { label: "წუთი", value: `${data.stats?.minutes || 0}'`, icon: FiAward },
+            ].map((stat, idx) => (
+              <div
+                key={stat.label}
+                className="relative rounded-xl px-4 py-3.5 bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm group hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 animate-reveal-up flex items-center gap-4"
+                style={{ animationDelay: `${idx * 80}ms` }}
+              >
+                <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <stat.icon className="text-white/40" size={16} />
                 </div>
-                <div className="text-3xl font-black text-white mb-1 tabular-nums">{stat.value}</div>
-                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{stat.label}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{stat.label}</div>
+                  <div className="text-2xl font-black text-white tabular-nums leading-tight">{stat.value}</div>
+                </div>
               </div>
             ))}
           </div>
 
-          {/* ── ATTRIBUTES ── */}
-          <div className="glass-card rounded-3xl p-8 relative overflow-hidden mb-10 animate-reveal-up delay-500">
-            {/* Corner accent */}
-            <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/[0.03] rounded-bl-[120px] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/[0.02] rounded-tr-[80px] pointer-events-none" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-            <h3 className="text-lg font-bold text-white mb-8 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center">
-                <FiTarget className="text-emerald-400" size={16} />
-              </div>
-              მონაცემები
-            </h3>
+            {/* ── Attributes ── */}
+            {data.attributes && (
+              <div className="rounded-2xl p-7 bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm animate-reveal-up delay-300">
+                <div className="flex items-center justify-between mb-7">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                      <GiSoccerBall className="text-white/40" size={14} />
+                    </div>
+                    მონაცემები
+                  </h3>
+                  {overallRating && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">OVR</span>
+                      <span className="text-2xl font-black text-white tabular-nums">{overallRating}</span>
+                    </div>
+                  )}
+                </div>
 
-            {data.attributes ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-1">
-                <AttributeBar label="სისწრაფე" value={data.attributes.pace} color="emerald" delay={600} />
-                <AttributeBar label="პასი" value={data.attributes.passing} color="amber" delay={650} />
-                <AttributeBar label="დარტყმა" value={data.attributes.shooting} color="blue" delay={700} />
-                <AttributeBar label="დრიბლინგი" value={data.attributes.dribbling} color="purple" delay={750} />
-                <AttributeBar label="დაცვა" value={data.attributes.defense} color="red" delay={800} />
-                <AttributeBar label="ფიზიკური" value={data.attributes.physical} color="slate" delay={850} />
+                <div className="space-y-4">
+                  {attributes.map((attr, idx) => (
+                    <div key={attr.key} className="animate-slide-in-right" style={{ animationDelay: `${500 + idx * 60}ms` }}>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">{attr.label}</span>
+                        <span className="text-white font-bold text-sm tabular-nums">{attr.value}</span>
+                      </div>
+                      <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full animate-bar-fill bg-gradient-to-r from-white/20 to-white/40"
+                          style={{
+                            width: `${attr.value}%`,
+                            animationDelay: `${600 + idx * 60}ms`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ) : (
-              <p className="text-slate-500 text-sm">მონაცემები არ არის</p>
             )}
-          </div>
 
-          {/* ── BIO ── */}
-          <div className="animate-reveal-up delay-700">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <FiInfo size={14} />
-              ბიოგრაფია
-            </h3>
-            <div className="glass-card rounded-2xl p-6 border-l-4 border-emerald-500/40">
-              <p className="text-slate-400 leading-relaxed text-sm md:text-base">
+            {/* ── Bio ── */}
+            <div className="rounded-2xl p-7 bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm animate-reveal-up delay-500 flex flex-col">
+              <h3 className="text-base font-bold text-white mb-5 flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                  <FiUser className="text-white/40" size={14} />
+                </div>
+                ბიოგრაფია
+              </h3>
+
+              <p className="text-slate-400 leading-relaxed text-sm flex-1">
                 {data.bio || "ინფორმაცია მოთამაშის შესახებ არ არის ხელმისაწვდომი."}
               </p>
+
+              {/* Quick Facts */}
+              <div className="mt-6 pt-5 border-t border-white/5 grid grid-cols-2 gap-4">
+                {[
+                  { label: "პოზიცია", value: data.position },
+                  { label: "ნომერი", value: `#${data.shirtNumber}` },
+                  { label: "ასაკი", value: data.age ? `${data.age} წელი` : "—" },
+                  { label: "ფეხი", value: data.preferredFoot || "—" },
+                ].map((fact) => (
+                  <div key={fact.label}>
+                    <div className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">{fact.label}</div>
+                    <div className="text-sm font-semibold text-white">{fact.value}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
