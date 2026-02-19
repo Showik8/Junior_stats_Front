@@ -36,7 +36,10 @@ export default function TournamentDetailPage() {
   if (loading) {
     return (
       <div className="min-h-[80vh] flex justify-center items-center">
-        <div className="w-10 h-10 border-[3px] border-white/10 border-t-emerald-500 rounded-full animate-spin" />
+        <div className="relative">
+          <div className="w-16 h-16 border-[3px] border-white/5 border-t-emerald-500 rounded-full animate-spin" />
+          <GiTrophy className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/20" size={20} />
+        </div>
       </div>
     );
   }
@@ -75,11 +78,12 @@ export default function TournamentDetailPage() {
           მატჩები არ არის
         </div>
       ) : (
-        matches.map((m) => (
+        matches.map((m, idx) => (
           <Link
             href={`/matches/${m.id}`}
             key={m.id}
-            className="group flex items-center justify-between p-4 glass-card rounded-xl hover:transform-none!"
+            className="group flex items-center justify-between p-4 glass-card rounded-xl hover:transform-none! animate-reveal-up"
+            style={{ animationDelay: `${idx * 80}ms` }}
           >
             {/* Date */}
             <div className="w-[90px] text-sm text-slate-500 flex flex-col gap-1">
@@ -104,8 +108,12 @@ export default function TournamentDetailPage() {
               </div>
 
               {/* Score */}
-              <div className="bg-black/30 px-4 py-1.5 rounded-lg min-w-[80px] text-center border border-white/5">
-                <span className="text-white font-extrabold text-lg">
+              <div className={`px-4 py-1.5 rounded-lg min-w-[80px] text-center border ${
+                m.status === 'FINISHED' ? 'bg-black/30 border-white/5' : 'bg-emerald-500/5 border-emerald-500/15'
+              }`}>
+                <span className={`font-extrabold text-lg ${
+                  m.status === 'FINISHED' ? 'text-white' : 'text-emerald-400'
+                }`}>
                   {m.status === "FINISHED" ? `${m.homeScore} - ${m.awayScore}` : "VS"}
                 </span>
               </div>
@@ -302,7 +310,7 @@ export default function TournamentDetailPage() {
 
         {/* ── VIEW: OVERVIEW ── */}
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8 animate-fade-in">
+          <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
             <div className="flex flex-col gap-8">
               {/* Latest Matches */}
               <section>
@@ -328,7 +336,7 @@ export default function TournamentDetailPage() {
             {/* Sidebar Stats */}
             <div className="flex flex-col gap-6">
               {/* Top Scorers Widget */}
-              <div className="glass-card transform-none! rounded-2xl p-5">
+              <div className="glass-card transform-none! rounded-2xl p-5 animate-slide-in-right">
                 <h3 className="text-base font-bold text-white mb-5 flex items-center gap-2">
                   <GiSoccerBall className="text-amber-400" size={16} />
                   ბომბარდირები
@@ -404,9 +412,9 @@ export default function TournamentDetailPage() {
 
         {/* ── VIEW: TEAMS ── */}
         {activeTab === "teams" && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 animate-fade-in">
-            {data.teams && data.teams.map((t: any) => (
-              <Link href={`/teams/${t.id}`} key={t.id} className="group block">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {data.teams && data.teams.map((t: any, idx: number) => (
+              <Link href={`/teams/${t.id}`} key={t.id} className="group block animate-reveal-up" style={{ animationDelay: `${idx * 80}ms` }}>
                 <div className="glass-card rounded-2xl p-6 flex flex-col items-center gap-4 text-center">
                   {t.logo ? (
                     <img src={t.logo} alt="" className="w-16 h-16 object-contain group-hover:scale-110 transition-transform duration-500" />

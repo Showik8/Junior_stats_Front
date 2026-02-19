@@ -2,6 +2,14 @@ import axios from "axios";
 import { BASE_URL } from "@/app/utils/apiPaths";
 import { API_PATHS } from "@/app/utils/apiPaths";
 import { ApiResponse } from "@/types/admin";
+import { 
+  MOCK_TOURNAMENTS, 
+  MOCK_TEAMS, 
+  MOCK_MATCHES, 
+  MOCK_PLAYERS,
+  getMockTeamDetail,
+  getMockTournamentDetail 
+} from "@/data/mockData";
 
 /**
  * Public axios instance — no auth token needed
@@ -28,6 +36,26 @@ export const publicService = {
     search?: string;
     ageCategory?: string;
   }): Promise<{ tournaments: any[]; total: number; page: number; limit: number; totalPages: number }> => {
+    // MOCK DATA IMPLEMENTATION
+    let data = [...MOCK_TOURNAMENTS];
+    
+    if (params?.status) {
+      data = data.filter(t => t.status === params.status);
+    }
+    if (params?.search) {
+      const searchTerm = params.search.toLowerCase();
+      data = data.filter(t => t.name.toLowerCase().includes(searchTerm));
+    }
+
+    return {
+      tournaments: data,
+      total: data.length,
+      page: params?.page || 1,
+      limit: params?.limit || 12,
+      totalPages: 1,
+    };
+
+    /* REAL API IMPLEMENTATION (COMMENTED)
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.set("page", String(params.page));
     if (params?.limit) queryParams.set("limit", String(params.limit));
@@ -45,12 +73,18 @@ export const publicService = {
       limit: response.data.meta?.limit || 12,
       totalPages: response.data.meta?.totalPages || 0,
     };
+    */
   },
 
   /**
    * Get full tournament details for public page
    */
   getTournamentDetail: async (id: string): Promise<any> => {
+    // MOCK DATA IMPLEMENTATION
+    const tournament = getMockTournamentDetail(id) || getMockTournamentDetail("t1"); // Fallback to t1 for testing if id not found
+    if(tournament) return tournament;
+
+    /* REAL API IMPLEMENTATION (COMMENTED)
     const response = await publicAxios.get<ApiResponse<any>>(
       API_PATHS.PUBLIC.TOURNAMENT_DETAIL(id)
     );
@@ -58,12 +92,22 @@ export const publicService = {
       throw new Error("Tournament not found");
     }
     return response.data.data;
+    */
+     throw new Error("Tournament not found");
   },
 
   /**
    * Get full team details for public page
    */
   getTeamDetail: async (id: string): Promise<any> => {
+    // MOCK DATA IMPLEMENTATION
+    const team = getMockTeamDetail(id);
+    if (team) return team;
+    
+    // Fallback for testing
+    return getMockTeamDetail("tm1");
+
+    /* REAL API IMPLEMENTATION (COMMENTED)
     const response = await publicAxios.get<ApiResponse<any>>(
       API_PATHS.PUBLIC.TEAM_DETAIL(id)
     );
@@ -71,12 +115,21 @@ export const publicService = {
       throw new Error("Team not found");
     }
     return response.data.data;
+    */
   },
 
   /**
    * Get full player profile for public page
    */
   getPlayerDetail: async (id: string): Promise<any> => {
+    // MOCK DATA IMPLEMENTATION
+    const player = MOCK_PLAYERS.find(p => p.id === id);
+    if (player) return player;
+    
+    // Fallback
+    return MOCK_PLAYERS[0];
+
+    /* REAL API IMPLEMENTATION (COMMENTED)
     const response = await publicAxios.get<ApiResponse<any>>(
       API_PATHS.PUBLIC.PLAYER_DETAIL(id)
     );
@@ -84,12 +137,18 @@ export const publicService = {
       throw new Error("Player not found");
     }
     return response.data.data;
+    */
   },
 
   /**
    * Get full match details for public page
    */
   getMatchDetail: async (id: string): Promise<any> => {
+    // MOCK DATA IMPLEMENTATION
+    const match = MOCK_MATCHES.find(m => m.id === id);
+    if (match) return match;
+
+    /* REAL API IMPLEMENTATION (COMMENTED)
     const response = await publicAxios.get<ApiResponse<any>>(
       API_PATHS.PUBLIC.MATCH_DETAIL(id)
     );
@@ -97,5 +156,7 @@ export const publicService = {
       throw new Error("Match not found");
     }
     return response.data.data;
+    */
+    throw new Error("Match not found");
   },
 };

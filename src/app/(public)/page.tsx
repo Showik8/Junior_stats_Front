@@ -139,7 +139,7 @@ export default function HomePage() {
       </div>
 
       {/* ──────────── FILTERS ──────────── */}
-      <div className="animate-fade-in-up delay-300 glass rounded-2xl p-2.5 mb-12 flex flex-col md:flex-row gap-3 items-center">
+      <div className="animate-scale-in delay-300 glass rounded-2xl p-2.5 mb-12 flex flex-col md:flex-row gap-3 items-center">
         {/* Search */}
         <div className="relative flex-1 w-full group">
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-400 transition-colors" size={18} />
@@ -210,7 +210,7 @@ export default function HomePage() {
                 <Link
                   key={t.id}
                   href={`/tournaments/${t.id}`}
-                  className="group block relative animate-fade-in-up"
+                  className="group block relative animate-reveal-up"
                   style={{ animationDelay: `${idx * 80}ms` }}
                 >
                   {/* Hover glow */}
