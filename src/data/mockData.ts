@@ -115,7 +115,7 @@ export const MOCK_PLAYERS = [
     name: "Luka Parkadze",
     teamId: "tm1",
     teamName: "Dinamo Academy", // In real DB this would be relational
-    photoUrl: "/images/mamardashvil.png",
+    photoUrl: "/images/adamadam.png",
     position: "Forward",
     shirtNumber: 10,
     age: 12,
@@ -174,6 +174,237 @@ export const MOCK_PLAYERS = [
     shirtNumber: 77,
     age: 12,
     stats: { matches: 8, goals: 5, assists: 7 }
+  },
+  {
+    id: "p5",
+    name: "Nika Gelashvili",
+    teamId: "tm1",
+    teamName: "Dinamo Academy",
+    position: "Defender",
+    shirtNumber: 4,
+    age: 12,
+    stats: { matches: 7, goals: 0, assists: 2 }
+  },
+  {
+    id: "p6",
+    name: "Davit Tskhadadze",
+    teamId: "tm2",
+    teamName: "Saburtalo Youth",
+    position: "Defender",
+    shirtNumber: 5,
+    age: 11,
+    stats: { matches: 8, goals: 1, assists: 0 }
+  },
+  {
+    id: "p7",
+    name: "Tornike Kipiani",
+    teamId: "tm2",
+    teamName: "Saburtalo Youth",
+    position: "Forward",
+    shirtNumber: 9,
+    age: 12,
+    stats: { matches: 8, goals: 6, assists: 3 }
+  },
+  {
+    id: "p8",
+    name: "Levan Mchedlishvili",
+    teamId: "tm2",
+    teamName: "Saburtalo Youth",
+    position: "Midfielder",
+    shirtNumber: 6,
+    age: 11,
+    stats: { matches: 7, goals: 2, assists: 4 }
+  },
+  {
+    id: "p9",
+    name: "Giga Arveladze",
+    teamId: "tm3",
+    teamName: "Rustavi FC Youth",
+    position: "Forward",
+    shirtNumber: 11,
+    age: 10,
+    stats: { matches: 8, goals: 4, assists: 2 }
+  },
+  {
+    id: "p10",
+    name: "Beka Chanturia",
+    teamId: "tm3",
+    teamName: "Rustavi FC Youth",
+    position: "Goalkeeper",
+    shirtNumber: 1,
+    age: 10,
+    stats: { matches: 8, goals: 0, assists: 0, cleanSheets: 1 }
+  },
+  {
+    id: "p11",
+    name: "Zurab Lomidze",
+    teamId: "tm3",
+    teamName: "Rustavi FC Youth",
+    position: "Midfielder",
+    shirtNumber: 7,
+    age: 10,
+    stats: { matches: 6, goals: 1, assists: 3 }
+  },
+  {
+    id: "p12",
+    name: "Irakli Janashia",
+    teamId: "tm4",
+    teamName: "Gagra Juniors",
+    position: "Forward",
+    shirtNumber: 9,
+    age: 12,
+    stats: { matches: 8, goals: 3, assists: 1 }
+  },
+  {
+    id: "p13",
+    name: "Gio Abashidze",
+    teamId: "tm4",
+    teamName: "Gagra Juniors",
+    position: "Defender",
+    shirtNumber: 3,
+    age: 11,
+    stats: { matches: 8, goals: 0, assists: 1 }
+  },
+  {
+    id: "p14",
+    name: "Mate Gogiashvili",
+    teamId: "tm4",
+    teamName: "Gagra Juniors",
+    position: "Midfielder",
+    shirtNumber: 8,
+    age: 12,
+    stats: { matches: 7, goals: 2, assists: 2 }
+  },
+  // ── More players for full squads ──
+  {
+    id: "p15",
+    name: "Giorgi Beridze",
+    teamId: "tm1",
+    teamName: "Dinamo Academy",
+    position: "Goalkeeper",
+    shirtNumber: 1,
+    age: 12,
+    stats: { matches: 8, goals: 0, assists: 0, cleanSheets: 4 }
+  },
+  {
+    id: "p16",
+    name: "Dato Kakabadze",
+    teamId: "tm1",
+    teamName: "Dinamo Academy",
+    position: "Defender",
+    shirtNumber: 3,
+    age: 12,
+    stats: { matches: 8, goals: 1, assists: 0 }
+  },
+  {
+    id: "p17",
+    name: "Lasha Dvali",
+    teamId: "tm1",
+    teamName: "Dinamo Academy",
+    position: "Defender",
+    shirtNumber: 5,
+    age: 11,
+    stats: { matches: 7, goals: 0, assists: 1 }
+  },
+  {
+    id: "p18",
+    name: "Sandro Lobjanidze",
+    teamId: "tm2",
+    teamName: "Saburtalo Youth",
+    position: "Defender",
+    shirtNumber: 3,
+    age: 12,
+    stats: { matches: 8, goals: 0, assists: 2 }
+  },
+  {
+    id: "p19",
+    name: "Nika Kapanadze",
+    teamId: "tm2",
+    teamName: "Saburtalo Youth",
+    position: "Midfielder",
+    shirtNumber: 10,
+    age: 12,
+    stats: { matches: 8, goals: 3, assists: 5 }
+  },
+  {
+    id: "p20",
+    name: "Giorgi Tsiklauri",
+    teamId: "tm2",
+    teamName: "Saburtalo Youth",
+    position: "Defender",
+    shirtNumber: 4,
+    age: 11,
+    stats: { matches: 7, goals: 0, assists: 0 }
+  },
+  {
+    id: "p21",
+    name: "Luka Tabatadze",
+    teamId: "tm3",
+    teamName: "Rustavi FC Youth",
+    position: "Defender",
+    shirtNumber: 3,
+    age: 10,
+    stats: { matches: 8, goals: 0, assists: 1 }
+  },
+  {
+    id: "p22",
+    name: "Nika Jikia",
+    teamId: "tm3",
+    teamName: "Rustavi FC Youth",
+    position: "Defender",
+    shirtNumber: 4,
+    age: 10,
+    stats: { matches: 7, goals: 0, assists: 0 }
+  },
+  {
+    id: "p23",
+    name: "Saba Gvelesiani",
+    teamId: "tm3",
+    teamName: "Rustavi FC Youth",
+    position: "Forward",
+    shirtNumber: 9,
+    age: 10,
+    stats: { matches: 6, goals: 3, assists: 1 }
+  },
+  {
+    id: "p24",
+    name: "Tornike Khutsishvili",
+    teamId: "tm4",
+    teamName: "Gagra Juniors",
+    position: "Goalkeeper",
+    shirtNumber: 1,
+    age: 12,
+    stats: { matches: 8, goals: 0, assists: 0, cleanSheets: 1 }
+  },
+  {
+    id: "p25",
+    name: "Davit Chkheidze",
+    teamId: "tm4",
+    teamName: "Gagra Juniors",
+    position: "Defender",
+    shirtNumber: 4,
+    age: 11,
+    stats: { matches: 8, goals: 0, assists: 0 }
+  },
+  {
+    id: "p26",
+    name: "Levan Samkharadze",
+    teamId: "tm4",
+    teamName: "Gagra Juniors",
+    position: "Midfielder",
+    shirtNumber: 6,
+    age: 12,
+    stats: { matches: 7, goals: 1, assists: 3 }
+  },
+  {
+    id: "p27",
+    name: "Gio Tvalchrelidze",
+    teamId: "tm4",
+    teamName: "Gagra Juniors",
+    position: "Forward",
+    shirtNumber: 11,
+    age: 11,
+    stats: { matches: 6, goals: 2, assists: 0 }
   }
 ];
 
@@ -291,5 +522,90 @@ export const getMockTournamentDetail = (id: string) => {
     scheduledMatches: MOCK_MATCHES.filter(m => m.tournament.id === id && m.status !== 'FINISHED'),
     teams: MOCK_TEAMS,
     topScorers
+  };
+};
+
+export const getMockMatchDetail = (id: string) => {
+  const match = MOCK_MATCHES.find(m => m.id === id);
+  if (!match) return null;
+
+  const homePlayers = getTeamPlayers(match.homeTeam.id);
+  const awayPlayers = getTeamPlayers(match.awayTeam.id);
+
+  // Build lineups from team players
+  const homeLineup = homePlayers.map(p => ({
+    id: p.id,
+    playerId: p.id,
+    playerName: p.name,
+    name: p.name,
+    shirtNumber: p.shirtNumber,
+    position: p.position,
+    photoUrl: (p as any).photoUrl,
+    goals: 0,
+    assists: 0,
+    yellowCards: 0,
+    redCard: false,
+  }));
+
+  const awayLineup = awayPlayers.map(p => ({
+    id: p.id,
+    playerId: p.id,
+    playerName: p.name,
+    name: p.name,
+    shirtNumber: p.shirtNumber,
+    position: p.position,
+    photoUrl: (p as any).photoUrl,
+    goals: 0,
+    assists: 0,
+    yellowCards: 0,
+    redCard: false,
+  }));
+
+  // Generate mock events for finished matches
+  const events: any[] = [];
+  if (match.status === 'FINISHED' && match.homeScore !== null) {
+    // Home goals
+    for (let i = 0; i < (match.homeScore || 0); i++) {
+      const scorer = homePlayers[i % homePlayers.length];
+      events.push({
+        type: 'GOAL',
+        minute: 10 + i * 20 + Math.floor(Math.random() * 15),
+        team: match.homeTeam,
+        player: { id: scorer.id, name: scorer.name },
+      });
+      // Mark the goal in lineup
+      const lineupPlayer = homeLineup.find(p => p.id === scorer.id);
+      if (lineupPlayer) lineupPlayer.goals++;
+    }
+    // Away goals
+    for (let i = 0; i < (match.awayScore || 0); i++) {
+      const scorer = awayPlayers[i % awayPlayers.length];
+      events.push({
+        type: 'GOAL',
+        minute: 15 + i * 25 + Math.floor(Math.random() * 10),
+        team: match.awayTeam,
+        player: { id: scorer.id, name: scorer.name },
+      });
+      const lineupPlayer = awayLineup.find(p => p.id === scorer.id);
+      if (lineupPlayer) lineupPlayer.goals++;
+    }
+    // Add a yellow card
+    if (homePlayers.length > 2) {
+      events.push({
+        type: 'YELLOW_CARD',
+        minute: 35 + Math.floor(Math.random() * 20),
+        team: match.homeTeam,
+        player: { id: homePlayers[2].id, name: homePlayers[2].name },
+      });
+      const lp = homeLineup.find(p => p.id === homePlayers[2].id);
+      if (lp) lp.yellowCards++;
+    }
+  }
+
+  return {
+    ...match,
+    homeLineup,
+    awayLineup,
+    events: events.sort((a, b) => a.minute - b.minute),
   };
 };

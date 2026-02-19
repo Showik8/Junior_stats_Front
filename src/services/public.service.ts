@@ -8,7 +8,8 @@ import {
   MOCK_MATCHES, 
   MOCK_PLAYERS,
   getMockTeamDetail,
-  getMockTournamentDetail 
+  getMockTournamentDetail,
+  getMockMatchDetail 
 } from "@/data/mockData";
 
 /**
@@ -145,7 +146,7 @@ export const publicService = {
    */
   getMatchDetail: async (id: string): Promise<any> => {
     // MOCK DATA IMPLEMENTATION
-    const match = MOCK_MATCHES.find(m => m.id === id);
+    const match = getMockMatchDetail(id);
     if (match) return match;
 
     /* REAL API IMPLEMENTATION (COMMENTED)
@@ -158,5 +159,34 @@ export const publicService = {
     return response.data.data;
     */
     throw new Error("Match not found");
+  },
+
+  /**
+   * Get all teams
+   */
+  getAllTeams: async (): Promise<any[]> => {
+    return MOCK_TEAMS;
+  },
+
+  /**
+   * Get all players
+   */
+  getAllPlayers: async (): Promise<any[]> => {
+    return MOCK_PLAYERS;
+  },
+
+  /**
+   * Get all matches across all tournaments
+   */
+  getAllMatches: async (): Promise<any[]> => {
+    // MOCK DATA IMPLEMENTATION
+    return MOCK_MATCHES;
+
+    /* REAL API IMPLEMENTATION (COMMENTED)
+    const response = await publicAxios.get<ApiResponse<any[]>>(
+      API_PATHS.PUBLIC.MATCHES
+    );
+    return response.data.data || [];
+    */
   },
 };
