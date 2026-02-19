@@ -271,7 +271,7 @@ export default function TournamentDetailPage() {
                   href={s.website || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="opacity-60 hover:opacity-100 transition-opacity duration-300"
+                  className="opacity-100 hover:scale-110 transition-all duration-300"
                 >
                   <img
                     src={s.logoUrl}
