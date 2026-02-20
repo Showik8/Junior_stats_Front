@@ -6,80 +6,71 @@ export default function Footer() {
   return (
     <footer className="relative mt-24 border-t border-white/5 bg-[#030812]">
       {/* Animated gradient line */}
-      <div className="absolute top-0 left-0 w-full h-px">
-        <div className="h-full bg-linear-to-r from-transparent via-emerald-500/60 to-transparent animate-gradient bg-size-[200%_100%]" />
-      </div>
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--emerald-glow)]/40 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-6 pt-16 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
-          <div className="md:col-span-1">
+          <div className="md:col-span-1 lg:col-span-2">
             <div className="flex items-center gap-2.5 mb-5">
-              <GiSoccerBall size={24} className="text-emerald-500" />
-              <span className="text-lg font-extrabold tracking-tight text-white">
+              <GiSoccerBall size={24} className="text-[var(--emerald-glow)]" />
+              <span className="text-xl font-black tracking-tight text-white">
                 Junior <span className="text-gradient-gold">Stats</span>
               </span>
             </div>
-            <p className="text-sm text-slate-500 leading-relaxed max-w-xs">
-              ახალგაზრდული ფეხბურთის სტატისტიკის პლატფორმა. ტურნირები, გუნდები,
-              მოთამაშეები — ყველაფერი ერთ სივრცეში.
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed max-w-sm">
+              ახალგაზრდული ფეხბურთის სტატისტიკის პლატფორმა. ტურნირები, გუნდები, მოთამაშეები — ყველაფერი ერთ სივრცეში და დეტალური ანალიტიკით.
             </p>
           </div>
 
           {/* Navigation */}
           <div>
-            <h4 className="text-xs font-bold text-slate-600 uppercase tracking-[0.15em] mb-5">
-              ნავიგაცია
+            <h4 className="text-xs font-black text-white uppercase tracking-widest mb-5">
+              სწრაფი ბმულები
             </h4>
             <div className="flex flex-col gap-3">
-              <Link
-                href="/"
-                className="text-sm text-slate-400 hover:text-emerald-400 transition-colors duration-300"
-              >
-                ტურნირები
+              <Link href="/matches" className="text-sm text-[var(--text-secondary)] hover:text-[var(--emerald-glow)] transition-colors">
+                მიმდინარე მატჩები
               </Link>
-              <Link
-                href="/admin"
-                className="text-sm text-slate-400 hover:text-emerald-400 transition-colors duration-300"
-              >
-                ადმინ პანელი
+              <Link href="/players" className="text-sm text-[var(--text-secondary)] hover:text-[var(--emerald-glow)] transition-colors">
+                მოთამაშეების ბაზა
+              </Link>
+              <Link href="/teams" className="text-sm text-[var(--text-secondary)] hover:text-[var(--emerald-glow)] transition-colors">
+                კლუბები და აკადემიები
+              </Link>
+              <Link href="/tournaments" className="text-sm text-[var(--text-secondary)] hover:text-[var(--emerald-glow)] transition-colors">
+                ჩემპიონატები
               </Link>
             </div>
           </div>
 
-          {/* Contact */}
+          {/* Contact & Socials */}
           <div>
-            <h4 className="text-xs font-bold text-slate-600 uppercase tracking-[0.15em] mb-5">
+            <h4 className="text-xs font-black text-white uppercase tracking-widest mb-5">
               კონტაქტი
             </h4>
-            <div className="flex flex-col gap-3">
-              <a
-                href="mailto:info@juniorstats.ge"
-                className="flex items-center gap-2 text-sm text-slate-400 hover:text-emerald-400 transition-colors duration-300"
-              >
-                <FiMail size={14} />
-                info@juniorstats.ge
+            <div className="flex flex-col gap-4">
+              <a href="mailto:info@juniorstats.ge" className="flex items-center gap-3 text-sm text-[var(--text-secondary)] hover:text-[var(--gold)] transition-colors group">
+                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[var(--gold)]/10">
+                  <FiMail size={14} />
+                </div>
+                <span>info@juniorstats.ge</span>
               </a>
-              <a
-                href="#"
-                className="flex items-center gap-2 text-sm text-slate-400 hover:text-emerald-400 transition-colors duration-300"
-              >
-                <FiGithub size={14} />
-                GitHub
+              <a href="#" className="flex items-center gap-3 text-sm text-[var(--text-secondary)] hover:text-[var(--gold)] transition-colors group">
+                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[var(--gold)]/10">
+                  <FiGithub size={14} />
+                </div>
+                <span>GitHub</span>
               </a>
             </div>
           </div>
         </div>
 
         {/* Bottom */}
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-slate-700">
-            © {new Date().getFullYear()} Junior Stats. All rights reserved.
-          </p>
-          <div className="flex items-center gap-1 text-xs text-slate-700">
-            <span>Built with</span>
-            <span className="text-emerald-600">♥</span>
-            <span>for Georgian youth football</span>
+        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium text-[var(--text-secondary)]">
+          <p>© {new Date().getFullYear()} Junior Stats. All rights reserved.</p>
+          <div className="flex items-center gap-2">
+            <span>Built with <span className="text-[var(--emerald-glow)] animate-pulse">♥</span> for Georgian youth football</span>
           </div>
         </div>
       </div>

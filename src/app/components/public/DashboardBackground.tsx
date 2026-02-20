@@ -5,8 +5,10 @@ import { usePathname } from "next/navigation";
 export default function DashboardBackground() {
   const pathname = usePathname();
   const isPlayerPage = pathname.startsWith("/players/");
+  const isLandingPage = pathname === "/";
 
-  if (isPlayerPage) return null;
+  // Hide on landing page (Hero video handles its own bg) and player detail pages
+  if (isPlayerPage || isLandingPage) return null;
 
   return (
     <>
@@ -18,3 +20,4 @@ export default function DashboardBackground() {
     </>
   );
 }
+
