@@ -59,7 +59,9 @@ export default function DashboardPage() {
     return days;
   }, [calMonth, calYear]);
 
-  const monthLabel = new Date(calYear, calMonth).toLocaleDateString("ka-GE", { month: "long", year: "numeric" });
+  const monthLabel = mounted
+    ? new Date(calYear, calMonth).toLocaleDateString("ka-GE", { month: "long", year: "numeric" })
+    : "";
 
   // Dates that have matches
   const matchDates = useMemo(() => {

@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { publicService } from "@/services/public.service";
-import { FiUser, FiChevronRight, FiGrid, FiUsers, FiClock, FiBarChart2, FiArrowLeft } from "react-icons/fi";
-import { GiSoccerBall, GiWhistle, GiShield, GiRunningShoe } from "react-icons/gi";
+import { FiUser, FiChevronRight, FiGrid, FiUsers, FiClock, FiBarChart2, FiArrowLeft, FiTrendingDown } from "react-icons/fi";
+import { GiSoccerBall, GiWhistle, GiShield, GiRunningShoe, GiTrophy } from "react-icons/gi";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -225,7 +225,7 @@ export default function TeamDetailPage() {
                 <div className="grid grid-cols-3 gap-4">
                   {[
                     { label: "მოგება", value: data.stats.wins, color: "emerald" },
-                    { label: "ფრე", value: data.stats.draws, color: "amber" },
+                    { label: "ფრე", value: data.stats.draws, color: "white" },
                     { label: "წაგება", value: data.stats.losses, color: "red" },
                   ].map((s, i) => (
                     <div
@@ -329,17 +329,25 @@ export default function TeamDetailPage() {
             {/* STATS TAB */}
             {activeTab === "stats" && (
               <div className="animate-fade-in flex flex-col gap-8">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[
-                    { label: "მოგება", value: data.stats.wins, icon: "🏆", color: "emerald" },
-                    { label: "წაგება", value: data.stats.losses, icon: "📉", color: "red" },
-                    { label: "გატ. გოლი", value: data.stats.goalsFor, icon: "⚽", color: "blue" },
-                    { label: "გაშ. გოლი", value: data.stats.goalsAgainst, icon: "🥅", color: "amber" },
-                  ].map((s, i) => (
-                    <div key={i} className="glass-card rounded-2xl p-5 text-center hover:transform-none! animate-reveal-up" style={{ animationDelay: `${i * 100}ms` }}>
-                      <div className="text-2xl mb-2">{s.icon}</div>
-                      <div className={`text-3xl font-black text-${s.color}-400 tabular-nums`}>{s.value}</div>
-                      <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">{s.label}</div>
+                    { label: "მოგება", value: data.stats.wins, icon: GiTrophy, color: "emerald" },
+                    { label: "წაგება", value: data.stats.losses, icon: FiTrendingDown, color: "red" },
+                    { label: "გატ. გოლი", value: data.stats.goalsFor, icon: GiSoccerBall, color: "blue" },
+                    { label: "გაშ. გოლი", value: data.stats.goalsAgainst, icon: GiShield, color: "amber" },
+                  ].map((stat, idx) => (
+                    <div
+                      key={stat.label}
+                      className="relative rounded-xl px-4 py-3.5 bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm group hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 animate-reveal-up flex items-center gap-4"
+                      style={{ animationDelay: `${idx * 80}ms` }}
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                        <stat.icon className={`text-${stat.color}-400/80`} size={16} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{stat.label}</div>
+                        <div className="text-2xl font-black text-white tabular-nums leading-tight">{stat.value}</div>
+                      </div>
                     </div>
                   ))}
                 </div>

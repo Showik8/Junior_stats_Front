@@ -208,7 +208,7 @@ export default function TournamentSidebar() {
             <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
             <input
               type="text"
-              placeholder="ტურნირი, გუნდი, მოთამაშე..."
+              placeholder="ძიება..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-white/3 border border-white/5 focus:border-emerald-500/30 text-white text-sm pl-9 pr-8 py-2.5 rounded-xl outline-none transition-all duration-300 placeholder:text-slate-600 focus:bg-white/5"
