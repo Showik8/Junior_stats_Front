@@ -9,6 +9,9 @@ import {
   FiGrid, FiList, FiChevronRight
 } from "react-icons/fi";
 import { GiTrophy, GiSoccerBall, GiShield } from "react-icons/gi";
+import LoadingSpinner from "@/app/components/public/shared/LoadingSpinner";
+import EmptyState from "@/app/components/public/shared/EmptyState";
+import { formatShortDate } from "@/app/utils/format";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -33,35 +36,13 @@ export default function TournamentDetailPage() {
     fetchTournament();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-[80vh] flex justify-center items-center">
-        <div className="relative">
-          <div className="w-16 h-16 border-[3px] border-white/5 border-t-emerald-500 rounded-full animate-spin" />
-          <GiTrophy className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/20" size={20} />
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner icon={GiTrophy} />;
 
   if (!data) {
-    return (
-      <div className="text-center py-24 animate-fade-in">
-        <GiTrophy size={64} className="text-slate-800 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-white mb-3">ტურნირი არ მოიძებნა</h2>
-        <Link href="/" className="text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors">
-          ← მთავარზე დაბრუნება
-        </Link>
-      </div>
-    );
+    return <EmptyState icon={GiTrophy} title="ტურნირი არ მოიძებნა" />;
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ka-GE", {
-      day: "numeric",
-      month: "long",
-    });
-  };
+
 
   const statusColors: Record<string, string> = {
     ACTIVE: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
@@ -87,7 +68,7 @@ export default function TournamentDetailPage() {
           >
             {/* Date */}
             <div className="w-[90px] text-sm text-slate-500 flex flex-col gap-1">
-              <span className="font-semibold">{formatDate(m.date)}</span>
+              <span className="font-semibold">{formatShortDate(m.date)}</span>
               <span className="text-xs opacity-70">
                 {new Date(m.date).toLocaleTimeString("ka-GE", { hour: "2-digit", minute: "2-digit" })}
               </span>
@@ -247,7 +228,7 @@ export default function TournamentDetailPage() {
               {data.startDate && (
                 <div className="flex items-center gap-2">
                   <FiCalendar size={15} className="text-emerald-500" />
-                  {formatDate(data.startDate)} — {formatDate(data.endDate)}
+                  {formatShortDate(data.startDate)} — {formatShortDate(data.endDate)}
                 </div>
               )}
               <div className="flex items-center gap-2">

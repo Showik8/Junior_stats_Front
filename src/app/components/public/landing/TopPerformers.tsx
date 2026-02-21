@@ -82,12 +82,22 @@ const MOCK_DATA: Record<string, AgeGroupData> = {
   },
 };
 
-export default function TopPerformers() {
+interface TopPerformersProps {
+  mode?: "all" | "players" | "teams";
+}
+
+export default function TopPerformers({ mode = "all" }: TopPerformersProps) {
+  const defaultCategory = mode === "teams" ? "teams" : "players";
   const [activeAge, setActiveAge] = useState("U15");
-  const [activeCategory, setActiveCategory] = useState("players");
+  const [activeCategory, setActiveCategory] = useState(defaultCategory);
   const [animKey, setAnimKey] = useState(0);
 
   const currentData = MOCK_DATA[activeAge] || MOCK_DATA.U15;
+
+  // Filter categories based on mode
+  const visibleCategories = mode === "all"
+    ? CATEGORIES
+    : CATEGORIES.filter((c) => c.id === mode);
 
   const handleAgeChange = (age: string) => {
     setActiveAge(age);
@@ -134,26 +144,28 @@ export default function TopPerformers() {
             ))}
           </div>
 
-          {/* Sub-Tabs (Players vs Teams) */}
-          <div className="flex gap-3">
-            {CATEGORIES.map((cat) => {
-              const Icon = cat.icon;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => handleCategoryChange(cat.id)}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-semibold transition-all duration-200 ${
-                    activeCategory === cat.id
-                      ? "border-white/30 bg-white/10 text-white"
-                      : "border-white/10 text-[var(--text-secondary)] hover:border-white/25 hover:text-white"
-                  }`}
-                >
-                  <Icon className="text-sm" />
-                  <span>{cat.label}</span>
-                </button>
-              );
-            })}
-          </div>
+          {/* Sub-Tabs (Players vs Teams) — hidden when single mode */}
+          {visibleCategories.length > 1 && (
+            <div className="flex gap-3">
+              {visibleCategories.map((cat) => {
+                const Icon = cat.icon;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => handleCategoryChange(cat.id)}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-semibold transition-all duration-200 ${
+                      activeCategory === cat.id
+                        ? "border-white/30 bg-white/10 text-white"
+                        : "border-white/10 text-[var(--text-secondary)] hover:border-white/25 hover:text-white"
+                    }`}
+                  >
+                    <Icon className="text-sm" />
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Content Display — key forces re-mount for animation */}

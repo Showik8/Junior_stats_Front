@@ -6,6 +6,10 @@ import Link from "next/link";
 import { publicService } from "@/services/public.service";
 import { FiUser, FiCalendar, FiClock } from "react-icons/fi";
 import { GiSoccerBall, GiShield, GiWhistle } from "react-icons/gi";
+import LoadingSpinner from "@/app/components/public/shared/LoadingSpinner";
+import EmptyState from "@/app/components/public/shared/EmptyState";
+import TeamLogo from "@/app/components/public/shared/TeamLogo";
+import { formatFullDate } from "@/app/utils/format";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -54,34 +58,13 @@ export default function MatchDetailPage() {
     fetchMatch();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-[80vh] flex justify-center items-center">
-        <div className="w-10 h-10 border-[3px] border-white/10 border-t-emerald-500 rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner icon={GiSoccerBall} />;
 
   if (!data) {
-    return (
-      <div className="text-center py-24 animate-fade-in">
-        <GiSoccerBall size={64} className="text-slate-800 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-white mb-3">მატჩი არ მოიძებნა</h2>
-        <Link href="/" className="text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors">
-          ← მთავარზე დაბრუნება
-        </Link>
-      </div>
-    );
+    return <EmptyState icon={GiSoccerBall} title="მატჩი არ მოიძებნა" />;
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ka-GE", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
+
 
   const sortedEvents = data.events
     ? [...data.events].sort((a: any, b: any) => (a.minute ?? 0) - (b.minute ?? 0))
@@ -103,7 +86,7 @@ export default function MatchDetailPage() {
             </div>
             <div className="text-sm text-slate-500">
               <FiCalendar className="inline-block mr-1" size={13} />
-              {formatDate(data.date)}
+              {formatFullDate(data.date)}
             </div>
           </div>
 
@@ -111,13 +94,7 @@ export default function MatchDetailPage() {
           <div className="flex items-center justify-center gap-8 md:gap-16 mb-8">
             {/* Home Team */}
             <Link href={`/teams/${data.homeTeam.id}`} className="group flex flex-col items-center gap-4 flex-1">
-              <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-[#0a1228] border-2 border-white/8 flex items-center justify-center overflow-hidden group-hover:border-emerald-500/30 transition-colors shadow-xl shadow-black/30">
-                {data.homeTeam.logo ? (
-                  <img src={data.homeTeam.logo} alt="" className="w-[70%] h-[70%] object-contain" />
-                ) : (
-                  <GiShield size={36} className="text-slate-600" />
-                )}
-              </div>
+              <TeamLogo src={data.homeTeam.logo} alt={data.homeTeam.name} size="xl" rounded="2xl" className="group-hover:border-emerald-500/30 shadow-xl shadow-black/30" />
               <div>
                 <div className="text-white font-bold text-sm md:text-base group-hover:text-emerald-400 transition-colors">
                   {data.homeTeam.name}
@@ -142,19 +119,13 @@ export default function MatchDetailPage() {
                 </div>
               )}
               <div className="mt-3 px-3 py-1 rounded-full bg-white/5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                {data.status === "FINISHED" ? "დარულებული" : data.status === "SCHEDULED" ? "გეგმა" : data.status}
+                {data.status === "FINISHED" ? "დასრულებული" : data.status === "SCHEDULED" ? "გეგმა" : data.status}
               </div>
             </div>
 
             {/* Away Team */}
             <Link href={`/teams/${data.awayTeam.id}`} className="group flex flex-col items-center gap-4 flex-1">
-              <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-[#0a1228] border-2 border-white/8 flex items-center justify-center overflow-hidden group-hover:border-emerald-500/30 transition-colors shadow-xl shadow-black/30">
-                {data.awayTeam.logo ? (
-                  <img src={data.awayTeam.logo} alt="" className="w-[70%] h-[70%] object-contain" />
-                ) : (
-                  <GiShield size={36} className="text-slate-600" />
-                )}
-              </div>
+              <TeamLogo src={data.awayTeam.logo} alt={data.awayTeam.name} size="xl" rounded="2xl" className="group-hover:border-emerald-500/30 shadow-xl shadow-black/30" />
               <div>
                 <div className="text-white font-bold text-sm md:text-base group-hover:text-emerald-400 transition-colors">
                   {data.awayTeam.name}
@@ -256,88 +227,60 @@ export default function MatchDetailPage() {
         {/* ── LINEUPS ── */}
         {activeTab === "lineups" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
-            {/* Home */}
-            <div>
-              <div className="flex items-center gap-3 mb-5 pb-3 border-b border-white/5">
-                {data.homeTeam.logo ? (
-                  <img src={data.homeTeam.logo} alt="" className="w-8 h-8 object-contain" />
-                ) : (
-                  <GiShield size={20} className="text-slate-600" />
-                )}
-                <h3 className="text-base font-bold text-white">{data.homeTeam.name}</h3>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                {data.homeLineup && data.homeLineup.map((p: any) => (
-                  <Link
-                    href={`/players/${p.playerId || p.id}`}
-                    key={p.playerId || p.id}
-                    className="group flex items-center gap-3 p-3 rounded-xl hover:bg-white/3 transition-all"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-emerald-400 text-xs font-bold">
-                      {p.shirtNumber || "—"}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-white text-sm font-semibold truncate group-hover:text-emerald-400 transition-colors">
-                        {p.playerName || p.name}
-                      </div>
-                      {p.position && (
-                        <div className="text-slate-600 text-xs">{p.position}</div>
-                      )}
-                    </div>
-                    {/* Per-match stats if available */}
-                    <div className="flex items-center gap-2 text-xs">
-                      {p.goals > 0 && <span className="text-emerald-400 font-bold">⚽ {p.goals}</span>}
-                      {p.assists > 0 && <span className="text-blue-400 font-bold">👟 {p.assists}</span>}
-                      {p.yellowCards > 0 && <span>🟨</span>}
-                      {p.redCard && <span>🟥</span>}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Away */}
-            <div>
-              <div className="flex items-center gap-3 mb-5 pb-3 border-b border-white/5">
-                {data.awayTeam.logo ? (
-                  <img src={data.awayTeam.logo} alt="" className="w-8 h-8 object-contain" />
-                ) : (
-                  <GiShield size={20} className="text-slate-600" />
-                )}
-                <h3 className="text-base font-bold text-white">{data.awayTeam.name}</h3>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                {data.awayLineup && data.awayLineup.map((p: any) => (
-                  <Link
-                    href={`/players/${p.playerId || p.id}`}
-                    key={p.playerId || p.id}
-                    className="group flex items-center gap-3 p-3 rounded-xl hover:bg-white/3 transition-all"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/15 flex items-center justify-center text-blue-400 text-xs font-bold">
-                      {p.shirtNumber || "—"}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-white text-sm font-semibold truncate group-hover:text-emerald-400 transition-colors">
-                        {p.playerName || p.name}
-                      </div>
-                      {p.position && (
-                        <div className="text-slate-600 text-xs">{p.position}</div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      {p.goals > 0 && <span className="text-emerald-400 font-bold">⚽ {p.goals}</span>}
-                      {p.assists > 0 && <span className="text-blue-400 font-bold">👟 {p.assists}</span>}
-                      {p.yellowCards > 0 && <span>🟨</span>}
-                      {p.redCard && <span>🟥</span>}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <LineupList
+              teamName={data.homeTeam.name}
+              teamLogo={data.homeTeam.logo}
+              lineup={data.homeLineup}
+              color="emerald"
+            />
+            <LineupList
+              teamName={data.awayTeam.name}
+              teamLogo={data.awayTeam.logo}
+              lineup={data.awayLineup}
+              color="blue"
+            />
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Extracted sub-component for lineup rendering ── */
+function LineupList({ teamName, teamLogo, lineup, color }: { teamName: string; teamLogo?: string; lineup?: any[]; color: "emerald" | "blue" }) {
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-5 pb-3 border-b border-white/5">
+        <TeamLogo src={teamLogo} alt={teamName} size="sm" />
+        <h3 className="text-base font-bold text-white">{teamName}</h3>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {lineup && lineup.map((p: any) => (
+          <Link
+            href={`/players/${p.playerId || p.id}`}
+            key={p.playerId || p.id}
+            className="group flex items-center gap-3 p-3 rounded-xl hover:bg-white/3 transition-all"
+          >
+            <div className={`w-8 h-8 rounded-lg bg-${color}-500/10 border border-${color}-500/15 flex items-center justify-center text-${color}-400 text-xs font-bold`}>
+              {p.shirtNumber || "—"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-white text-sm font-semibold truncate group-hover:text-emerald-400 transition-colors">
+                {p.playerName || p.name}
+              </div>
+              {p.position && (
+                <div className="text-slate-600 text-xs">{p.position}</div>
+              )}
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              {p.goals > 0 && <span className="text-emerald-400 font-bold">⚽ {p.goals}</span>}
+              {p.assists > 0 && <span className="text-blue-400 font-bold">👟 {p.assists}</span>}
+              {p.yellowCards > 0 && <span>🟨</span>}
+              {p.redCard && <span>🟥</span>}
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );

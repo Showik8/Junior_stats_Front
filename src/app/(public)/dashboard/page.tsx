@@ -5,6 +5,8 @@ import Link from "next/link";
 import { publicService } from "@/services/public.service";
 import { FiChevronLeft, FiChevronRight, FiClock } from "react-icons/fi";
 import { GiSoccerBall, GiTrophy } from "react-icons/gi";
+import TeamLogo from "@/app/components/public/shared/TeamLogo";
+import { formatFullDate, formatTime, isSameDay } from "@/app/utils/format";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -30,21 +32,9 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
-  // ── Date helpers ──
-  const isSameDay = (d1: Date, d2: Date) =>
-    d1.getFullYear() === d2.getFullYear() &&
-    d1.getMonth() === d2.getMonth() &&
-    d1.getDate() === d2.getDate();
-
-  const formatDate = (d: Date) => {
-    if (!mounted) return "";
-    return d.toLocaleDateString("ka-GE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  };
-
-  const formatTime = (dateStr: string) => {
-    if (!mounted) return "";
-    return new Date(dateStr).toLocaleTimeString("ka-GE", { hour: "2-digit", minute: "2-digit" });
-  };
+  // ── Date helpers (using shared utilities, with SSR guard) ──
+  const safeDateLabel = (d: Date) => mounted ? formatFullDate(d.toISOString()) : "";
+  const safeTimeLabel = (dateStr: string) => mounted ? formatTime(dateStr) : "";
 
   // ── Calendar logic ──
   const [calMonth, setCalMonth] = useState(selectedDate.getMonth());
@@ -107,7 +97,7 @@ export default function DashboardPage() {
             დღის მატჩები
           </h1>
           <p className="text-base text-slate-400 mt-3">
-            {formatDate(selectedDate)}
+            {safeDateLabel(selectedDate)}
           </p>
         </div>
 
@@ -148,7 +138,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-600">
                         <FiClock size={11} />
-                        {formatTime(match.date)}
+                        {safeTimeLabel(match.date)}
                       </div>
                     </div>
 
@@ -161,13 +151,7 @@ export default function DashboardPage() {
                             {match.homeTeam?.name || "Home"}
                           </div>
                         </div>
-                        <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/8 flex items-center justify-center shrink-0 overflow-hidden">
-                          {match.homeTeam?.logoUrl ? (
-                            <img src={match.homeTeam.logoUrl} alt="" className="w-7 h-7 object-contain" />
-                          ) : (
-                            <span className="text-lg">⚽</span>
-                          )}
-                        </div>
+                        <TeamLogo src={match.homeTeam?.logoUrl || match.homeTeam?.logo} alt={match.homeTeam?.name} size="md" />
                       </div>
 
                       {/* Score / VS */}
@@ -187,13 +171,7 @@ export default function DashboardPage() {
 
                       {/* Away */}
                       <div className="flex-1 flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/8 flex items-center justify-center shrink-0 overflow-hidden">
-                          {match.awayTeam?.logoUrl ? (
-                            <img src={match.awayTeam.logoUrl} alt="" className="w-7 h-7 object-contain" />
-                          ) : (
-                            <span className="text-lg">⚽</span>
-                          )}
-                        </div>
+                        <TeamLogo src={match.awayTeam?.logoUrl || match.awayTeam?.logo} alt={match.awayTeam?.name} size="md" />
                         <div className="min-w-0">
                           <div className="text-sm font-bold text-white truncate group-hover:text-emerald-400 transition-colors">
                             {match.awayTeam?.name || "Away"}

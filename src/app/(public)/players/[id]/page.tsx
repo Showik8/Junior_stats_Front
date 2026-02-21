@@ -8,6 +8,8 @@ import {
   FiUser, FiArrowLeft, FiAward, FiMapPin
 } from "react-icons/fi";
 import { GiSoccerBall, GiRunningShoe, GiShield } from "react-icons/gi";
+import LoadingSpinner from "@/app/components/public/shared/LoadingSpinner";
+import EmptyState from "@/app/components/public/shared/EmptyState";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -31,27 +33,10 @@ export default function PlayerProfilePage() {
     fetchPlayer();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-[80vh] flex justify-center items-center">
-        <div className="relative">
-          <div className="w-16 h-16 border-[3px] border-white/5 border-t-emerald-500 rounded-full animate-spin" />
-          <GiSoccerBall className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/20" size={20} />
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner icon={GiSoccerBall} />;
 
   if (!data) {
-    return (
-      <div className="text-center py-24 animate-fade-in">
-        <FiUser size={64} className="text-slate-800 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-white mb-3">მოთამაშე არ მოიძებნა</h2>
-        <Link href="/" className="text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors">
-          ← მთავარზე დაბრუნება
-        </Link>
-      </div>
-    );
+    return <EmptyState icon={FiUser} title="მოთამაშე არ მოიძებნა" />;
   }
 
   const overallRating = data.attributes

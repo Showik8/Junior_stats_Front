@@ -29,16 +29,16 @@ export default function Footer() {
               სწრაფი ბმულები
             </h4>
             <div className="flex flex-col gap-3">
-              <Link href="/matches" className="text-sm text-[var(--text-secondary)] hover:text-[var(--emerald-glow)] transition-colors">
+              <Link href="/dashboard" className="text-sm text-[var(--text-secondary)] hover:text-[var(--emerald-glow)] transition-colors">
                 მიმდინარე მატჩები
               </Link>
               <Link href="/players" className="text-sm text-[var(--text-secondary)] hover:text-[var(--emerald-glow)] transition-colors">
                 მოთამაშეების ბაზა
               </Link>
               <Link href="/teams" className="text-sm text-[var(--text-secondary)] hover:text-[var(--emerald-glow)] transition-colors">
-                კლუბები და აკადემიები
+                გუნდების ბაზა
               </Link>
-              <Link href="/tournaments" className="text-sm text-[var(--text-secondary)] hover:text-[var(--emerald-glow)] transition-colors">
+              <Link href="/dashboard" className="text-sm text-[var(--text-secondary)] hover:text-[var(--emerald-glow)] transition-colors">
                 ჩემპიონატები
               </Link>
             </div>

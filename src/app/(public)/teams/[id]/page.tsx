@@ -6,6 +6,8 @@ import Link from "next/link";
 import { publicService } from "@/services/public.service";
 import { FiUser, FiChevronRight, FiGrid, FiUsers, FiClock, FiBarChart2, FiArrowLeft, FiTrendingDown } from "react-icons/fi";
 import { GiSoccerBall, GiWhistle, GiShield, GiRunningShoe, GiTrophy } from "react-icons/gi";
+import LoadingSpinner from "@/app/components/public/shared/LoadingSpinner";
+import EmptyState from "@/app/components/public/shared/EmptyState";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -30,27 +32,10 @@ export default function TeamDetailPage() {
     fetchTeam();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-[80vh] flex justify-center items-center">
-        <div className="relative">
-          <div className="w-16 h-16 border-[3px] border-white/5 border-t-emerald-500 rounded-full animate-spin" />
-          <GiShield className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/20" size={20} />
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner icon={GiShield} />;
 
   if (!data) {
-    return (
-      <div className="text-center py-24 animate-fade-in">
-        <GiShield size={64} className="text-slate-800 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-white mb-3">გუნდი არ მოიძებნა</h2>
-        <Link href="/" className="text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors">
-          ← მთავარზე დაბრუნება
-        </Link>
-      </div>
-    );
+    return <EmptyState icon={GiShield} title="გუნდი არ მოიძებნა" />;
   }
 
   const formatDate = (dateString: string) => {
