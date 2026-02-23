@@ -102,6 +102,7 @@ const tabConfig: { key: DashboardTab; label: string; icon: React.ElementType; re
 
 const TournamentDashboard: React.FC = () => {
   const router = useRouter();
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
@@ -114,17 +115,20 @@ const TournamentDashboard: React.FC = () => {
 
   const fetchTournamentInfo = async () => {
     try {
-      const fetchedTournament = await adminService.getTournamentInfo();
-      setTournament(fetchedTournament);
+      const fetchedTournaments = await adminService.getMyManagedTournaments();
+      setTournaments(fetchedTournaments);
+      
+      const activeTourn = fetchedTournaments.length > 0 ? fetchedTournaments[0] : null;
+      setTournament(activeTourn);
 
-      if (!activeAgeCategory && fetchedTournament) {
-        if (fetchedTournament.ageCategories && fetchedTournament.ageCategories.length > 0) {
-          setActiveAgeCategory(fetchedTournament.ageCategories[0].ageCategory);
-        } else if (fetchedTournament.ageCategory) {
-          setActiveAgeCategory(fetchedTournament.ageCategory as AgeCategory);
+      if (!activeAgeCategory && activeTourn) {
+        if (activeTourn.ageCategories && activeTourn.ageCategories.length > 0) {
+          setActiveAgeCategory(activeTourn.ageCategories[0].ageCategory);
+        } else if (activeTourn.ageCategory) {
+          setActiveAgeCategory(activeTourn.ageCategory as AgeCategory);
         }
       }
-      return fetchedTournament;
+      return fetchedTournaments;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to load tournament info";
       console.error("Tournament info fetch error:", msg);
@@ -173,8 +177,7 @@ const TournamentDashboard: React.FC = () => {
   };
 
   const handleLogout = () => {
-    removeToken();
-    router.push("/sign-in");
+    adminService.logoutAdmin();
   };
 
   const handleExit = () => {
@@ -236,10 +239,36 @@ const TournamentDashboard: React.FC = () => {
                 JS
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900 tracking-tight leading-none">
-                  Junior Stats
-                </h1>
-                <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
+                {tournaments.length > 1 ? (
+                  <select
+                    className="text-lg font-bold text-gray-900 tracking-tight leading-none bg-transparent border-none p-0 pr-6 focus:ring-0 cursor-pointer appearance-none"
+                    value={tournament?.id}
+                    onChange={(e) => {
+                      const selected = tournaments.find((t) => t.id === e.target.value);
+                      if (selected) {
+                        setTournament(selected);
+                        if (selected.ageCategories && selected.ageCategories.length > 0) {
+                          setActiveAgeCategory(selected.ageCategories[0].ageCategory);
+                        } else if (selected.ageCategory) {
+                          setActiveAgeCategory(selected.ageCategory as AgeCategory);
+                        } else {
+                          setActiveAgeCategory(null);
+                        }
+                      }
+                    }}
+                  >
+                    {tournaments.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <h1 className="text-lg font-bold text-gray-900 tracking-tight leading-none">
+                    {tournament?.name || "Junior Stats"}
+                  </h1>
+                )}
+                <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider block mt-0.5">
                   Tournament Admin
                 </span>
               </div>
@@ -323,7 +352,7 @@ const TournamentDashboard: React.FC = () => {
                   >
                     {cat.replace("_", "-")}
                     {activeAgeCategory === cat && (
-                      <span className="absolute -bottom-[1px] left-2 right-2 h-0.5 bg-blue-600 rounded-full" />
+                      <span className="absolute -bottom-px left-2 right-2 h-0.5 bg-blue-600 rounded-full" />
                     )}
                   </button>
                 ))

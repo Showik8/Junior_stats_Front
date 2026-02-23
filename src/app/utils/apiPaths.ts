@@ -2,7 +2,9 @@
  * Base URL for backend API
  * Matches backend server configuration (default port 8888)
  */
+// export const BASE_URL = "https://football-agregator-backend.vercel.app";
 export const BASE_URL = "http://localhost:8888";
+
 
 /**
  * API paths matching backend routes exactly
@@ -11,6 +13,7 @@ export const BASE_URL = "http://localhost:8888";
 export const API_PATHS = {
   ADMIN: {
     LOGIN: "/api/admin/login",
+    REFRESH: "/api/admin/refresh",
     LOG_OUT: "/api/admin/logout",
     GET_ADMIN: "/api/admin",
     DASHBOARD: "/api/admin/dashboard",
@@ -24,6 +27,7 @@ export const API_PATHS = {
   TOURNAMENT: {
     // GET /api/tournaments - Get tournaments (returns active tournament if no query params)
     GET_TOURNAMENTS: "/api/tournaments",
+    GET_MY_MANAGED_TOURNAMENTS: "/api/tournaments/me/managed",
     // POST /api/tournaments - Create tournament
     CREATE_TOURNAMENT: "/api/tournaments",
     // GET /api/tournaments/:id - Get tournament by ID

@@ -39,6 +39,25 @@ export const tournamentService = {
     }
   },
 
+  getMyManagedTournaments: async (): Promise<Tournament[]> => {
+    try {
+      const response = await axiosInstance.get<ApiResponse<Tournament[]>>(
+        API_PATHS.TOURNAMENT.GET_MY_MANAGED_TOURNAMENTS
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to fetch tournaments"
+        );
+      }
+
+      const data = response.data.data;
+      return Array.isArray(data) ? data : [data].filter(Boolean);
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to fetch managed tournaments"));
+    }
+  },
+
   getAllTournaments: async (): Promise<Tournament[]> => {
     try {
       const response = await axiosInstance.get<ApiResponse<Tournament[]>>(

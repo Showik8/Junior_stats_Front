@@ -1,11 +1,10 @@
 "use client";
-import { removeToken } from "@/app/utils/auth";
 import Link from "next/link";
+import { adminService } from "@/services/adminService";
 
 const SuperAdminHeader = () => {
   const logout = () => {
-    removeToken();
-    window.location.href = "/";
+    adminService.logoutAdmin();
   };
 
   return (

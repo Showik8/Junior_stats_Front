@@ -6,6 +6,7 @@ import {
   ApiResponse,
 } from "@/types/admin";
 import { extractErrorMessage } from "./helpers";
+import { getRefreshToken, clearAuth } from "@/app/utils/auth";
 
 export const adminCrudService = {
   getAdmins: async (): Promise<Admin[]> => {
@@ -80,6 +81,22 @@ export const adminCrudService = {
       await axiosInstance.delete(API_PATHS.ADMIN.DELETE(id));
     } catch (error: unknown) {
       throw new Error(extractErrorMessage(error, "Failed to delete admin"));
+    }
+  },
+
+  logoutAdmin: async (): Promise<void> => {
+    try {
+      const refreshToken = getRefreshToken();
+      if (refreshToken) {
+        await axiosInstance.post(API_PATHS.ADMIN.LOG_OUT, { refreshToken });
+      }
+    } catch (error: unknown) {
+      console.error("Logout error:", error);
+    } finally {
+      clearAuth();
+      if (typeof window !== "undefined") {
+        window.location.href = "/sign-in";
+      }
     }
   },
 };

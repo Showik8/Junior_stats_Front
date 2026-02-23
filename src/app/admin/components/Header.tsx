@@ -1,12 +1,11 @@
 "use client";
-import { removeToken } from "@/app/utils/auth";
 import Link from "next/link";
 import { type Tournament } from "@/types/admin";
+import { adminService } from "@/services/adminService";
 
 const Header = ({ tournament }: { tournament: Tournament }) => {
   const logout = () => {
-    removeToken();
-    window.location.href = "/";
+    adminService.logoutAdmin();
   };
 
   return (

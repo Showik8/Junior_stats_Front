@@ -22,3 +22,19 @@ export const extractErrorMessage = (error: any, defaultMessage: string): string 
   
   return defaultMessage;
 };
+
+/**
+ * Normalise a date string to a full ISO format (YYYY-MM-DDTHH:mm:ss).
+ * Ensures the backend receives a consistent date string, regardless of
+ * whether the input came from a `datetime-local` input (no seconds) or a
+ * plain date string (no time component at all).
+ */
+export const formatMatchDate = (dateValue: string): string => {
+  if (dateValue.includes("T")) {
+    const [datePart, timePart] = dateValue.split("T");
+    const timeWithSeconds =
+      timePart.split(":").length === 2 ? `${timePart}:00` : timePart;
+    return `${datePart}T${timeWithSeconds}`;
+  }
+  return `${dateValue}T00:00:00`;
+};

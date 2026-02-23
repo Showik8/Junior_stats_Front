@@ -7,7 +7,7 @@ import {
   ApiResponse,
   SubmitMatchReportPayload,
 } from "@/types/admin";
-import { extractErrorMessage } from "./helpers";
+import { extractErrorMessage, formatMatchDate } from "./helpers";
 
 export const matchService = {
   getMatches: async (
@@ -59,24 +59,11 @@ export const matchService = {
       if (!payload.date) throw new Error("Match date is required");
       if (!payload.tournamentId) throw new Error("Tournament ID is required");
 
-      const dateValue = payload.date;
-      let isoDate: string;
-
-      if (dateValue.includes("T")) {
-        const parts = dateValue.split("T");
-        const timePart = parts[1];
-        const timeWithSeconds =
-          timePart.split(":").length === 2 ? `${timePart}:00` : timePart;
-        isoDate = `${parts[0]}T${timeWithSeconds}`;
-      } else {
-        isoDate = `${dateValue}T00:00:00`;
-      }
-
       const response = await axiosInstance.post<ApiResponse<Match>>(
         API_PATHS.MATCH.CREATE_MATCH,
         {
           ...payload,
-          date: isoDate,
+          date: formatMatchDate(payload.date),
         }
       );
 
@@ -139,19 +126,10 @@ export const matchService = {
     try {
       if (!matchId) throw new Error("Match ID is required");
 
-      const finalPayload: Partial<CreateMatchPayload> & { score?: string } = { ...payload };
-      if (payload.date) {
-        const dateValue = payload.date;
-        if (dateValue.includes("T")) {
-          const parts = dateValue.split("T");
-          const timePart = parts[1];
-          const timeWithSeconds =
-            timePart.split(":").length === 2 ? `${timePart}:00` : timePart;
-          finalPayload.date = `${parts[0]}T${timeWithSeconds}`;
-        } else {
-          finalPayload.date = `${dateValue}T00:00:00`;
-        }
-      }
+      const finalPayload: Partial<CreateMatchPayload> & { score?: string } = {
+        ...payload,
+        ...(payload.date ? { date: formatMatchDate(payload.date) } : {}),
+      };
 
       const response = await axiosInstance.put<ApiResponse<Match>>(
         API_PATHS.MATCH.UPDATE_MATCH(matchId),

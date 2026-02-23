@@ -39,6 +39,7 @@ export { teamAdminService } from "./teamAdmin.service";
 export const adminService = {
   // Tournament
   getTournamentInfo: tournamentService.getTournamentInfo,
+  getMyManagedTournaments: tournamentService.getMyManagedTournaments,
   getAllTournaments: tournamentService.getAllTournaments,
   createTournament: tournamentService.createTournament,
   updateTournament: tournamentService.updateTournament,
@@ -79,6 +80,7 @@ export const adminService = {
   createAdmin: adminCrudService.createAdmin,
   updateAdmin: adminCrudService.updateAdmin,
   deleteAdmin: adminCrudService.deleteAdmin,
+  logoutAdmin: adminCrudService.logoutAdmin,
 
   // Groups
   getGroups: groupService.getGroups,

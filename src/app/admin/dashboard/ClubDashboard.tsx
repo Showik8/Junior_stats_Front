@@ -114,8 +114,7 @@ const ClubDashboard = () => {
   }, []);
 
   const handleLogout = () => {
-    removeToken();
-    router.push("/sign-in");
+    adminService.logoutAdmin();
   };
 
   if (loading) {
