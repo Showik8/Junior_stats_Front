@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { FaChevronRight, FaClock } from "react-icons/fa";
 import { publicService } from "@/services/public.service";
-import moment from "moment";
-import "moment/locale/ka"; // For Georgian dates if needed
+import { formatTime, formatShortDate } from "@/app/utils/format";
+import type { PublicMatch } from "@/types/public";
 
 export default function WeeklyMatchesTeaser() {
-  const [matches, setMatches] = useState<any[]>([]);
+  const [matches, setMatches] = useState<PublicMatch[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,9 +55,9 @@ export default function WeeklyMatchesTeaser() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {matches.map((match) => {
-              const isLive = match.status === "LIVE" || match.status === "IN_PROGRESS";
-              const formattedTime = moment(match.date).format("HH:mm");
-              const formattedDate = moment(match.date).format("DD MMM").replace("Nov", "ნოე").replace("Dec", "დეკ").replace("Jan", "იან").replace("Feb", "თებ").replace("Mar", "მარ").replace("Apr", "აპრ").replace("May", "მაი").replace("Jun", "ივნ").replace("Jul", "ივლ").replace("Aug", "აგვ").replace("Sep", "სექ").replace("Oct", "ოქტ");
+              const isLive = match.status === "LIVE" as string || match.status === "IN_PROGRESS" as string;
+              const formattedTime = formatTime(match.date);
+              const formattedDate = formatShortDate(match.date);
               const score = match.status === "FINISHED" || isLive 
                 ? `${match.homeScore ?? '-'} : ${match.awayScore ?? '-'}`
                 : "- : -";
@@ -88,7 +89,7 @@ export default function WeeklyMatchesTeaser() {
                     <div className="flex flex-col items-center gap-2 flex-1">
                       <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-2xl border border-white/10 group-hover:border-white/20 transition-colors overflow-hidden">
                         {match.homeTeam?.logo?.startsWith("http") || match.homeTeam?.logo?.startsWith("/") ? (
-                          <img src={match.homeTeam.logo} alt={match.homeTeam.name} className="w-full h-full object-cover" />
+                          <Image src={match.homeTeam.logo!} alt={match.homeTeam.name || "Home team"} width={48} height={48} className="w-full h-full object-cover" />
                         ) : (
                           <span>{match.homeTeam?.logo || "🛡️"}</span>
                         )}
@@ -108,7 +109,7 @@ export default function WeeklyMatchesTeaser() {
                     <div className="flex flex-col items-center gap-2 flex-1">
                       <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-2xl border border-white/10 group-hover:border-white/20 transition-colors overflow-hidden">
                         {match.awayTeam?.logo?.startsWith("http") || match.awayTeam?.logo?.startsWith("/") ? (
-                          <img src={match.awayTeam.logo} alt={match.awayTeam.name} className="w-full h-full object-cover" />
+                          <Image src={match.awayTeam.logo!} alt={match.awayTeam.name || "Away team"} width={48} height={48} className="w-full h-full object-cover" />
                         ) : (
                           <span>{match.awayTeam?.logo || "🦅"}</span>
                         )}

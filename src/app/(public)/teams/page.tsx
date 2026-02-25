@@ -57,9 +57,9 @@ export default function TeamsPage() {
       {/* ═══ ALL TEAMS ═══ */}
       <div className="max-w-[1200px] mx-auto px-6 py-10">
         <h2 className="text-2xl font-black text-white mb-2 tracking-tight">
-          ყველა <span className="text-[var(--emerald-glow)]">გუნდი</span>
+          ყველა <span className="text-(--emerald-glow)">გუნდი</span>
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-8">
+        <p className="text-(--text-secondary) text-sm mb-8">
           მოძებნე გუნდი ან მწვრთნელი სახელით
         </p>
 
@@ -71,11 +71,11 @@ export default function TeamsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="მოძებნე გუნდი ან მწვრთნელი..."
-            className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/20 transition-colors"
+            className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/4 border border-white/8 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/20 transition-colors"
           />
         </div>
 
-        <div className="text-xs text-[var(--text-secondary)] mb-6 font-semibold uppercase tracking-wider">
+        <div className="text-xs text-(--text-secondary) mb-6 font-semibold uppercase tracking-wider">
           {sorted.length} გუნდი ნაპოვნია
         </div>
 
@@ -106,7 +106,7 @@ export default function TeamsPage() {
                       <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors truncate">
                         {team.name}
                       </h3>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-[var(--text-secondary)]">
+                      <div className="flex items-center gap-3 mt-1 text-xs text-(--text-secondary)">
                         {team.ageCategory && (
                           <span className="px-2 py-0.5 rounded bg-white/5 border border-white/8 font-bold">
                             {team.ageCategory}
@@ -153,7 +153,7 @@ export default function TeamsPage() {
         {sorted.length === 0 && (
           <div className="text-center py-16">
             <GiShield size={48} className="text-white/10 mx-auto mb-4" />
-            <p className="text-[var(--text-secondary)] text-sm">გუნდი ვერ მოიძებნა</p>
+            <p className="text-(--text-secondary) text-sm">გუნდი ვერ მოიძებნა</p>
           </div>
         )}
       </div>

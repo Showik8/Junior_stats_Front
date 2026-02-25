@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { FaUsers, FaCalendarAlt } from "react-icons/fa";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function HeroSection() {
   const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     setIsVisible(true);
@@ -14,8 +13,7 @@ export default function HeroSection() {
 
   return (
     <section
-      ref={sectionRef}
-      className="relative h-screen w-full overflow-hidden bg-[var(--bg-deep)] flex items-center justify-center -mt-16"
+      className="relative h-screen w-full overflow-hidden bg-(--bg-deep) flex items-center justify-center -mt-16"
     >
       {/* Background Video */}
       <div className="absolute inset-0 z-0">
@@ -24,21 +22,23 @@ export default function HeroSection() {
           loop
           muted
           playsInline
+          preload="none"
+          poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect fill='%23060c1a' width='1' height='1'/%3E%3C/svg%3E"
           className="w-full h-full object-cover opacity-35"
         >
           <source
-            src="https://res.cloudinary.com/dijovppjc/video/upload/v1771603455/main_hero_1_wkdigs.mp4"
+            src="/assets/main_hero.mp4"
             type="video/mp4"
           />
         </video>
         {/* Multi-layer Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#060c1a] via-[#060c1a]/70 to-[#060c1a]/30 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#060c1a]/50 via-transparent to-[#060c1a]/50 z-10" />
+        <div className="absolute inset-0 bg-linear-to-t from-[#060c1a] via-[#060c1a]/70 to-[#060c1a]/30 z-10" />
+        <div className="absolute inset-0 bg-linear-to-r from-[#060c1a]/50 via-transparent to-[#060c1a]/50 z-10" />
       </div>
 
       {/* Scroll-down indicator */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 animate-fade-in delay-800">
-        <span className="text-[10px] uppercase tracking-[0.3em] text-[var(--text-secondary)]">გაიგე მეტი</span>
+        <span className="text-[10px] uppercase tracking-[0.3em] text-(--text-secondary)">გაიგე მეტი</span>
         <div className="w-5 h-8 rounded-full border-2 border-white/20 flex justify-center pt-1.5">
           <div className="w-1 h-2 rounded-full bg-white/60 animate-bounce" />
         </div>
@@ -58,7 +58,7 @@ export default function HeroSection() {
         </h1>
 
         {/* Subtitle */}
-        <p className="text-base sm:text-lg md:text-xl text-[var(--text-secondary)] mb-12 max-w-2xl mx-auto font-light leading-relaxed">
+        <p className="text-base sm:text-lg md:text-xl text-(--text-secondary)2 max-w-2xl mx-auto font-light leading-relaxed">
           აღმოაჩინე ნიჭიერი მოთამაშეები, თვალი ადევნე მიმდინარე ჩემპიონატებს და
           გაეცანი დეტალურ სტატისტიკას ერთ სივრცეში.
         </p>
@@ -68,7 +68,7 @@ export default function HeroSection() {
           {/* Primary CTA */}
           <Link
             href="/players"
-            className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-[var(--emerald-glow)] hover:bg-[#059669] text-white rounded-xl font-bold text-base transition-all duration-300 shadow-[0_0_30px_-5px_rgba(16,185,129,0.4)] hover:shadow-[0_0_40px_-5px_rgba(16,185,129,0.6)] w-full sm:w-auto"
+            className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-(--emerald-glow) hover:bg-[#059669] text-white rounded-xl font-bold text-base transition-all duration-300 shadow-[0_0_30px_-5px_rgba(16,185,129,0.4)] hover:shadow-[0_0_40px_-5px_rgba(16,185,129,0.6)] w-full sm:w-auto"
           >
             <FaUsers className="text-lg text-white/60 group-hover:text-white transition-colors" />
             <span>მოთამაშეების ბაზა</span>

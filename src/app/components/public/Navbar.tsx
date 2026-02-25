@@ -44,9 +44,9 @@ export default function Navbar() {
           <div className="relative">
             <GiSoccerBall
               size={28}
-              className="text-[var(--emerald-glow)] group-hover:text-emerald-300 transition-colors"
+              className="text-(--emerald-glow) group-hover:text-emerald-300 transition-colors"
             />
-            <div className="absolute inset-0 bg-[var(--emerald-glow)]/30 blur-xl rounded-full animate-glow-pulse" />
+            <div className="absolute inset-0 bg-(--emerald-glow)/30 blur-xl rounded-full animate-glow-pulse" />
           </div>
           <span className="text-xl font-black tracking-tight text-white">
             Junior{" "}
@@ -65,7 +65,7 @@ export default function Navbar() {
                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   isActive
                     ? "text-white bg-white/10"
-                    : "text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
+                    : "text-(--text-secondary)r:text-white hover:bg-white/5"
                 }`}
               >
                 {link.label}
@@ -78,8 +78,8 @@ export default function Navbar() {
           <Link
             href="/admin"
             className="group flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-300
-              bg-[var(--emerald-glow)]/10 border border-[var(--emerald-glow)]/25 text-[var(--emerald-glow)]
-              hover:bg-[var(--emerald-glow)]/20 hover:border-[var(--emerald-glow)]/50 hover:text-emerald-300
+              bg-(--emerald-glow)/10 border border-(--emerald-glow)/25 text-(--emerald-glow)
+              hover:bg-(--emerald-glow)/20 hover:border-(--emerald-glow)/50 hover:text-emerald-300
               hover:shadow-lg hover:shadow-emerald-900/20"
           >
             ადმინ პანელი
@@ -93,7 +93,9 @@ export default function Navbar() {
         {/* Mobile Toggle */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden p-2.5 rounded-lg text-[var(--text-secondary)] hover:text-white hover:bg-white/5 transition-all"
+          className="md:hidden p-2.5 rounded-lg text-(--text-secondary) hover:text-white hover:bg-white/5 transition-all"
+          aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={mobileOpen}
         >
           {mobileOpen ? <FiX size={22} /> : <FiMenu size={22} />}
         </button>
@@ -116,7 +118,7 @@ export default function Navbar() {
                 className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all ${
                   isActive
                     ? "text-white bg-white/10"
-                    : "text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
+                    : "text-(--text-secondary) hover:text-white hover:bg-white/5"
                 }`}
               >
                 {link.label}
@@ -126,7 +128,7 @@ export default function Navbar() {
           <div className="h-px bg-white/5 my-2" />
           <Link
             href="/admin"
-            className="text-[var(--emerald-glow)] font-semibold px-4 py-3 rounded-lg hover:bg-[var(--emerald-glow)]/10 transition-all"
+            className="text-(--emerald-glow) font-semibold px-4 py-3 rounded-lg hover:bg-(--emerald-glow)/10 transition-all"
           >
             ადმინ პანელი →
           </Link>

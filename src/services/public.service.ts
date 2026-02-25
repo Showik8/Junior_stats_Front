@@ -1,7 +1,13 @@
 import axios from "axios";
-import { BASE_URL } from "@/app/utils/apiPaths";
-import { API_PATHS } from "@/app/utils/apiPaths";
+import { BASE_URL, API_PATHS } from "@/app/utils/apiPaths";
 import { ApiResponse } from "@/types/admin";
+import type {
+  PublicTournament,
+  PublicTournamentsResponse,
+  PublicTeam,
+  PublicPlayer,
+  PublicMatch,
+} from "@/types/public";
 
 /**
  * Public axios instance — no auth token needed
@@ -15,8 +21,6 @@ const publicAxios = axios.create({
   },
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export const publicService = {
   /**
    * Get public tournaments list with enriched data
@@ -27,7 +31,7 @@ export const publicService = {
     status?: string;
     search?: string;
     ageCategory?: string;
-  }): Promise<{ tournaments: any[]; total: number; page: number; limit: number; totalPages: number }> => {
+  }): Promise<PublicTournamentsResponse> => {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.set("page", String(params.page));
     if (params?.limit) queryParams.set("limit", String(params.limit));
@@ -36,7 +40,7 @@ export const publicService = {
     if (params?.ageCategory) queryParams.set("ageCategory", params.ageCategory);
 
     const url = `${API_PATHS.PUBLIC.TOURNAMENTS}?${queryParams.toString()}`;
-    const response = await publicAxios.get<ApiResponse<any[]>>(url);
+    const response = await publicAxios.get<ApiResponse<PublicTournament[]>>(url);
 
     return {
       tournaments: response.data.data || [],
@@ -50,8 +54,8 @@ export const publicService = {
   /**
    * Get full tournament details for public page
    */
-  getTournamentDetail: async (id: string): Promise<any> => {
-    const response = await publicAxios.get<ApiResponse<any>>(
+  getTournamentDetail: async (id: string): Promise<PublicTournament> => {
+    const response = await publicAxios.get<ApiResponse<PublicTournament>>(
       API_PATHS.PUBLIC.TOURNAMENT_DETAIL(id)
     );
     if (!response.data.success || !response.data.data) {
@@ -63,8 +67,8 @@ export const publicService = {
   /**
    * Get full team details for public page
    */
-  getTeamDetail: async (id: string): Promise<any> => {
-    const response = await publicAxios.get<ApiResponse<any>>(
+  getTeamDetail: async (id: string): Promise<PublicTeam> => {
+    const response = await publicAxios.get<ApiResponse<PublicTeam>>(
       API_PATHS.PUBLIC.TEAM_DETAIL(id)
     );
     if (!response.data.success || !response.data.data) {
@@ -76,8 +80,8 @@ export const publicService = {
   /**
    * Get full player profile for public page
    */
-  getPlayerDetail: async (id: string): Promise<any> => {
-    const response = await publicAxios.get<ApiResponse<any>>(
+  getPlayerDetail: async (id: string): Promise<PublicPlayer> => {
+    const response = await publicAxios.get<ApiResponse<PublicPlayer>>(
       API_PATHS.PUBLIC.PLAYER_DETAIL(id)
     );
     if (!response.data.success || !response.data.data) {
@@ -89,8 +93,8 @@ export const publicService = {
   /**
    * Get full match details for public page
    */
-  getMatchDetail: async (id: string): Promise<any> => {
-    const response = await publicAxios.get<ApiResponse<any>>(
+  getMatchDetail: async (id: string): Promise<PublicMatch> => {
+    const response = await publicAxios.get<ApiResponse<PublicMatch>>(
       API_PATHS.PUBLIC.MATCH_DETAIL(id)
     );
     if (!response.data.success || !response.data.data) {
@@ -102,14 +106,14 @@ export const publicService = {
   /**
    * Get all teams
    */
-  getAllTeams: async (params?: Record<string, string | number>): Promise<any[]> => {
+  getAllTeams: async (params?: Record<string, string | number>): Promise<PublicTeam[]> => {
     const queryParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) queryParams.set(key, String(value));
       });
     }
-    const response = await publicAxios.get<ApiResponse<any[]>>(
+    const response = await publicAxios.get<ApiResponse<PublicTeam[]>>(
       `${API_PATHS.TEAMS.GET_TEAMS}?${queryParams.toString()}`
     );
     return response.data.data || [];
@@ -118,14 +122,14 @@ export const publicService = {
   /**
    * Get all players
    */
-  getAllPlayers: async (params?: Record<string, string | number>): Promise<any[]> => {
+  getAllPlayers: async (params?: Record<string, string | number>): Promise<PublicPlayer[]> => {
     const queryParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) queryParams.set(key, String(value));
       });
     }
-    const response = await publicAxios.get<ApiResponse<any[]>>(
+    const response = await publicAxios.get<ApiResponse<PublicPlayer[]>>(
       `${API_PATHS.PLAYERS.GET_PLAYERS}?${queryParams.toString()}`
     );
     return response.data.data || [];
@@ -134,14 +138,14 @@ export const publicService = {
   /**
    * Get all matches across all tournaments
    */
-  getAllMatches: async (params?: Record<string, string | number>): Promise<any[]> => {
+  getAllMatches: async (params?: Record<string, string | number>): Promise<PublicMatch[]> => {
     const queryParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) queryParams.set(key, String(value));
       });
     }
-    const response = await publicAxios.get<ApiResponse<any[]>>(
+    const response = await publicAxios.get<ApiResponse<PublicMatch[]>>(
       `${API_PATHS.MATCH.GET_MATCHES}?${queryParams.toString()}`
     );
     return response.data.data || [];

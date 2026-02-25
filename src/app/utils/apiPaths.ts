@@ -1,9 +1,9 @@
 /**
- * Base URL for backend API
- * Matches backend server configuration (default port 8888)
+ * Base URL for backend API.
+ * Set NEXT_PUBLIC_API_URL in .env for production/staging.
+ * Falls back to localhost:8888 for local development.
  */
-// export const BASE_URL = "https://football-agregator-backend.vercel.app";
-export const BASE_URL = "http://localhost:8888";
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8888";
 
 
 /**

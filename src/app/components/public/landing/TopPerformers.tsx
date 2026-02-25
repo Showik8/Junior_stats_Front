@@ -1,25 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { FaUserShield, FaTrophy, FaArrowRight } from "react-icons/fa";
 import { publicService } from "@/services/public.service";
+import type { PublicPlayer, PublicTeam } from "@/types/public";
 
 const AGE_GROUPS = ["U10", "U12", "U15", "U17"];
 const CATEGORIES = [
   { id: "players", label: "საუკეთესო მოთამაშეები", icon: FaUserShield },
   { id: "teams", label: "ტოპ გუნდები", icon: FaTrophy },
-];
+] as const;
 
-interface Player {
+interface DisplayPlayer {
   id: string;
   name: string;
   position: string;
   stat: string;
-  photoUrl?: string;
+  photoUrl?: string | null;
 }
 
-interface Team {
+interface DisplayTeam {
   id: string;
   name: string;
   points: string;
@@ -37,8 +39,8 @@ export default function TopPerformers({ mode = "all" }: TopPerformersProps) {
   const [activeCategory, setActiveCategory] = useState(defaultCategory);
   const [animKey, setAnimKey] = useState(0);
 
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [players, setPlayers] = useState<DisplayPlayer[]>([]);
+  const [teams, setTeams] = useState<DisplayTeam[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -47,35 +49,33 @@ export default function TopPerformers({ mode = "all" }: TopPerformersProps) {
       try {
         const ageCategoryFilter = "U_" + activeAge.replace("U", "");
         
-        let fetchedPlayers: any[] = [];
-        let fetchedTeams: any[] = [];
+        let fetchedPlayers: PublicPlayer[] = [];
+        let fetchedTeams: PublicTeam[] = [];
 
         if (activeCategory === "players" || mode === "players") {
-          const playersRes = await publicService.getAllPlayers({ ageCategory: ageCategoryFilter });
-          fetchedPlayers = playersRes;
+          fetchedPlayers = await publicService.getAllPlayers({ ageCategory: ageCategoryFilter });
         }
         
         if (activeCategory === "teams" || mode === "teams") {
-          const teamsRes = await publicService.getAllTeams({ ageCategory: ageCategoryFilter });
-          fetchedTeams = teamsRes;
+          fetchedTeams = await publicService.getAllTeams({ ageCategory: ageCategoryFilter });
         }
 
         setPlayers(
-          fetchedPlayers.slice(0, 3).map((p: any) => ({
+          fetchedPlayers.slice(0, 3).map((p) => ({
              id: p.id,
              name: p.name,
              position: p.position || "მოთამაშე",
-             stat: "სტატისტიკა", // Fallback text as there's no direct aggregate goals in list endpoint yet
+             stat: "სტატისტიკა",
              photoUrl: p.photoUrl,
           }))
         );
 
         setTeams(
-          fetchedTeams.slice(0, 3).map((t: any) => ({
+          fetchedTeams.slice(0, 3).map((t) => ({
              id: t.id,
              name: t.name,
-             points: "0 ქულა", // Fallback
-             form: "N/A",      // Fallback
+             points: "0 ქულა",
+             form: "N/A",
              logo: t.logo || "🛡️",
           }))
         );
@@ -94,15 +94,15 @@ export default function TopPerformers({ mode = "all" }: TopPerformersProps) {
     ? CATEGORIES
     : CATEGORIES.filter((c) => c.id === mode);
 
-  const handleAgeChange = (age: string) => {
+  const handleAgeChange = useCallback((age: string) => {
     setActiveAge(age);
     setAnimKey((k) => k + 1);
-  };
+  }, []);
 
-  const handleCategoryChange = (cat: string) => {
+  const handleCategoryChange = useCallback((cat: string) => {
     setActiveCategory(cat);
     setAnimKey((k) => k + 1);
-  };
+  }, []);
 
   return (
     <section className="py-24 relative overflow-hidden">
@@ -184,9 +184,11 @@ export default function TopPerformers({ mode = "all" }: TopPerformersProps) {
                      {/* Player Photo or Fallback */}
                      <div className="w-24 h-24 rounded-full bg-white/4 mb-4 border border-white/10 flex items-center justify-center overflow-hidden group-hover:scale-105 group-hover:border-white/25 transition-all duration-300">
                        {player.photoUrl ? (
-                         <img
+                         <Image
                            src={player.photoUrl}
                            alt={player.name}
+                           width={96}
+                           height={96}
                            className="w-full h-full object-cover"
                          />
                        ) : (
@@ -221,7 +223,7 @@ export default function TopPerformers({ mode = "all" }: TopPerformersProps) {
 
                      <div className="w-20 h-20 mx-auto rounded-full bg-white/5 mb-4 border border-white/10 flex items-center justify-center text-3xl group-hover:scale-105 group-hover:border-white/25 transition-all duration-300 overflow-hidden">
                        {team.logo?.startsWith("http") || team.logo?.startsWith("/") ? (
-                         <img src={team.logo} alt={team.name} className="w-full h-full object-cover" />
+                         <Image src={team.logo} alt={team.name} width={80} height={80} className="w-full h-full object-cover" />
                        ) : (
                          <span className="text-3xl">{team.logo}</span>
                        )}

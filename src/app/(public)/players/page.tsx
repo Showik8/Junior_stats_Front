@@ -62,9 +62,9 @@ export default function PlayersPage() {
       {/* ═══ ALL PLAYERS ═══ */}
       <div className="max-w-[1200px] mx-auto px-6 py-10">
         <h2 className="text-2xl font-black text-white mb-2 tracking-tight">
-          ყველა <span className="text-[var(--emerald-glow)]">მოთამაშე</span>
+          ყველა <span className="text-(--emerald-glow)">მოთამაშე</span>
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-8">
+        <p className="text-(--text-secondary) text-sm mb-8">
           მოძებნე და გაფილტრე მოთამაშეები პოზიციის მიხედვით
         </p>
 
@@ -77,7 +77,7 @@ export default function PlayersPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="მოძებნე მოთამაშე ან გუნდი..."
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/20 transition-colors"
+              className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/4er border-white/8-white placeholder-white/30 text-sm focus:outline-none focus:border-white/20 transition-colors"
             />
           </div>
           <div className="relative">
@@ -85,7 +85,7 @@ export default function PlayersPage() {
             <select
               value={posFilter}
               onChange={(e) => setPosFilter(e.target.value)}
-              className="pl-10 pr-8 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-white/20 appearance-none cursor-pointer transition-colors"
+              className="pl-10 pr-8 py-3 rounded-xl bg-white/4er border-white/8 text-white text-sm focus:outline-none focus:border-white/20 appearance-none cursor-pointer transition-colors"
             >
               {POSITIONS.map((pos) => (
                 <option key={pos} value={pos} className="bg-[#0a1120] text-white">
@@ -96,7 +96,7 @@ export default function PlayersPage() {
           </div>
         </div>
 
-        <div className="text-xs text-[var(--text-secondary)] mb-6 font-semibold uppercase tracking-wider">
+        <div className="text-xs text-(--text-secondary) mb-6 font-semibold uppercase tracking-wider">
           {sorted.length} მოთამაშე ნაპოვნია
         </div>
 
@@ -116,7 +116,7 @@ export default function PlayersPage() {
                   className="w-14 h-14 rounded-full object-cover border-2 border-white/8 group-hover:border-emerald-500/30 transition-colors shrink-0"
                 />
               ) : (
-                <div className="w-14 h-14 rounded-full bg-white/[0.04] flex items-center justify-center border-2 border-white/5 group-hover:border-emerald-500/20 transition-colors shrink-0">
+                <div className="w-14 h-14 rounded-full bg-white/4 items-center justify-center border-2 border-white/5 group-hover:border-emerald-500/20 transition-colors shrink-0">
                   <FiUser size={20} className="text-white/20" />
                 </div>
               )}
@@ -127,7 +127,7 @@ export default function PlayersPage() {
                     <div className="text-white font-semibold text-sm truncate group-hover:text-emerald-400 transition-colors">
                       {player.name}
                     </div>
-                    <div className="text-[var(--text-secondary)] text-xs mt-0.5">
+                    <div className="text-(--text-secondary) text-xs mt-0.5">
                       {player.position || "—"}
                       {player.teamName && <span className="text-white/20 mx-1">•</span>}
                       {player.teamName && <span className="text-white/30">{player.teamName}</span>}
@@ -160,7 +160,7 @@ export default function PlayersPage() {
         {sorted.length === 0 && (
           <div className="text-center py-16">
             <FiUser size={48} className="text-white/10 mx-auto mb-4" />
-            <p className="text-[var(--text-secondary)] text-sm">მოთამაშე ვერ მოიძებნა</p>
+            <p className="text-(--text-secondary)-sm">მოთამაშე ვერ მოიძებნა</p>
           </div>
         )}
       </div>
