@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { publicService } from "@/services/public.service";
 import { FiUsers, FiSearch, FiChevronRight } from "react-icons/fi";
 import { GiShield, GiWhistle, GiSoccerBall } from "react-icons/gi";
@@ -10,23 +11,12 @@ import TopPerformers from "@/app/components/public/landing/TopPerformers";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export default function TeamsPage() {
-  const [teams, setTeams] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    const fetchTeams = async () => {
-      try {
-        const data = await publicService.getAllTeams();
-        setTeams(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTeams();
-  }, []);
+  const { data: teams = [], isLoading: loading } = useQuery<any[]>({
+    queryKey: ["all-teams"],
+    queryFn: () => publicService.getAllTeams(),
+  });
 
   const filtered = teams.filter(
     (t) =>

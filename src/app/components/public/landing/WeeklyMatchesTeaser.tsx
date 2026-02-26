@@ -1,31 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { FaChevronRight, FaClock } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
 import { publicService } from "@/services/public.service";
 import { formatTime, formatShortDate } from "@/app/utils/format";
 import type { PublicMatch } from "@/types/public";
 
 export default function WeeklyMatchesTeaser() {
-  const [matches, setMatches] = useState<PublicMatch[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchMatches = async () => {
-      try {
-        const data = await publicService.getAllMatches({ limit: 3 });
-        setMatches(data.slice(0, 3));
-      } catch (error) {
-        console.error("Error fetching weekly matches:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMatches();
-  }, []);
+  const { data: matches = [], isLoading: loading } = useQuery({
+    queryKey: ["weekly-matches"],
+    queryFn: () => publicService.getAllMatches({ limit: 3 }).then((data) => data.slice(0, 3)),
+  });
 
   return (
     <section className="py-20 relative">

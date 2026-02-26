@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { publicService } from "@/services/public.service";
 import { FiUser, FiCalendar, FiClock } from "react-icons/fi";
@@ -39,24 +40,13 @@ const eventLabels: Record<string, string> = {
 
 export default function MatchDetailPage() {
   const { id } = useParams();
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("timeline");
 
-  useEffect(() => {
-    if (!id) return;
-    const fetchMatch = async () => {
-      try {
-        const res = await publicService.getMatchDetail(id as string);
-        setData(res);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMatch();
-  }, [id]);
+  const { data, isLoading: loading } = useQuery<any>({
+    queryKey: ["match-detail", id],
+    queryFn: () => publicService.getMatchDetail(id as string),
+    enabled: !!id,
+  });
 
   if (loading) return <LoadingSpinner icon={GiSoccerBall} />;
 

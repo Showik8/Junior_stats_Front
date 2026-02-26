@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { publicService } from "@/services/public.service";
 import { FiUser, FiChevronRight, FiGrid, FiUsers, FiClock, FiBarChart2, FiArrowLeft, FiTrendingDown } from "react-icons/fi";
@@ -13,24 +14,13 @@ import EmptyState from "@/app/components/public/shared/EmptyState";
 
 export default function TeamDetailPage() {
   const { id } = useParams();
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
-  useEffect(() => {
-    if (!id) return;
-    const fetchTeam = async () => {
-      try {
-        const res = await publicService.getTeamDetail(id as string);
-        setData(res);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTeam();
-  }, [id]);
+  const { data, isLoading: loading } = useQuery<any>({
+    queryKey: ["team-detail", id],
+    queryFn: () => publicService.getTeamDetail(id as string),
+    enabled: !!id,
+  });
 
   if (loading) return <LoadingSpinner icon={GiShield} />;
 
@@ -323,7 +313,7 @@ export default function TeamDetailPage() {
                   ].map((stat, idx) => (
                     <div
                       key={stat.label}
-                      className="relative rounded-xl px-4 py-3.5 bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm group hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 animate-reveal-up flex items-center gap-4"
+                      className="relative rounded-xl px-4 py-3.5 bg-white/3 border border-white/6 backdrop-blur-sm group hover:bg-white/5 hover:border-white/10 transition-all duration-300 animate-reveal-up flex items-center gap-4"
                       style={{ animationDelay: `${idx * 80}ms` }}
                     >
                       <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">

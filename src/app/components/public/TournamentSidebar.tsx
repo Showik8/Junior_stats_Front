@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { publicService } from "@/services/public.service";
 import type { PublicTournament, PublicTeam, PublicPlayer } from "@/types/public";
 import { GiTrophy, GiShield } from "react-icons/gi";
@@ -136,33 +137,26 @@ function PlayerItem({ player, idx = 0 }: { player: PublicPlayer; idx?: number })
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function TournamentSidebar() {
-  const [tournaments, setTournaments] = useState<PublicTournament[]>([]);
-  const [teams, setTeams] = useState<PublicTeam[]>([]);
-  const [players, setPlayers] = useState<PublicPlayer[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const pathname = usePathname();
 
-  useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        const [tournRes, allTeams, allPlayers] = await Promise.all([
-          publicService.getTournaments({ limit: 50 }),
-          publicService.getAllTeams(),
-          publicService.getAllPlayers(),
-        ]);
-        setTournaments(tournRes.tournaments);
-        setTeams(allTeams);
-        setPlayers(allPlayers);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAll();
-  }, []);
+  const { data: tournaments = [], isLoading: loadingTournaments } = useQuery({
+    queryKey: ["sidebar-tournaments"],
+    queryFn: () => publicService.getTournaments({ limit: 50 }).then((r) => r.tournaments),
+  });
+
+  const { data: teams = [], isLoading: loadingTeams } = useQuery({
+    queryKey: ["sidebar-teams"],
+    queryFn: () => publicService.getAllTeams(),
+  });
+
+  const { data: players = [], isLoading: loadingPlayers } = useQuery({
+    queryKey: ["sidebar-players"],
+    queryFn: () => publicService.getAllPlayers(),
+  });
+
+  const loading = loadingTournaments || loadingTeams || loadingPlayers;
 
   useEffect(() => {
     setIsOpen(false);

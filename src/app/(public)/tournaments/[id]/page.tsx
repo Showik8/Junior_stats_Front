@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { publicService } from "@/services/public.service";
 import {
@@ -17,24 +18,13 @@ import { formatShortDate } from "@/app/utils/format";
 
 export default function TournamentDetailPage() {
   const { id } = useParams();
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
-  useEffect(() => {
-    if (!id) return;
-    const fetchTournament = async () => {
-      try {
-        const res = await publicService.getTournamentDetail(id as string);
-        setData(res);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTournament();
-  }, [id]);
+  const { data, isLoading: loading } = useQuery<any>({
+    queryKey: ["tournament-detail", id],
+    queryFn: () => publicService.getTournamentDetail(id as string),
+    enabled: !!id,
+  });
 
   if (loading) return <LoadingSpinner icon={GiTrophy} />;
 

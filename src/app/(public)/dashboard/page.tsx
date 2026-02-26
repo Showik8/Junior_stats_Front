@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { publicService } from "@/services/public.service";
 import { FiChevronLeft, FiChevronRight, FiClock } from "react-icons/fi";
 import { GiSoccerBall, GiTrophy } from "react-icons/gi";
@@ -11,26 +12,15 @@ import { formatFullDate, formatTime, isSameDay } from "@/app/utils/format";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export default function DashboardPage() {
-  const [allMatches, setAllMatches] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const matches = await publicService.getAllMatches();
-        setAllMatches(matches);
-      } catch {
-        setAllMatches([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const { data: allMatches = [], isLoading: loading } = useQuery<any[]>({
+    queryKey: ["all-matches"],
+    queryFn: () => publicService.getAllMatches(),
+  });
 
   // ── Date helpers (using shared utilities, with SSR guard) ──
   const safeDateLabel = (d: Date) => mounted ? formatFullDate(d.toISOString()) : "";

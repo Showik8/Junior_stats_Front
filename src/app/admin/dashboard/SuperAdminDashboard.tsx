@@ -6,37 +6,43 @@ import CreateTournamentForm from "../components/CreateTournamentForm";
 import EditTournamentForm from "../components/EditTournamentForm";
 import CreateClubForm from "../components/CreateClubForm";
 import EditClubForm from "../components/EditClubForm";
+import CreateSponsorForm from "../components/CreateSponsorForm";
+import EditSponsorForm from "../components/EditSponsorForm";
 import Table from "../components/Table";
 import { adminService } from "@/services/adminService";
-import { Admin, Tournament, Team } from "@/types/admin";
+import { Admin, Tournament, Team, Sponsor } from "@/types/admin";
 import Button from "../components/Button";
 
 const SuperAdminDashboard = () => {
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [clubs, setClubs] = useState<Team[]>([]);
+  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "admins" | "tournaments" | "clubs">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "admins" | "tournaments" | "clubs" | "sponsors">("overview");
   const [viewMode, setViewMode] = useState<"list" | "create" | "edit">("list");
   const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
   const [editingTournament, setEditingTournament] = useState<Tournament | null>(null);
   const [editingClub, setEditingClub] = useState<Team | null>(null);
+  const [editingSponsor, setEditingSponsor] = useState<Sponsor | null>(null);
   
   const [notification, setNotification] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      const [adminsData, tournamentsData, clubsData] = await Promise.all([
+      const [adminsData, tournamentsData, clubsData, sponsorsData] = await Promise.all([
         adminService.getAdmins(),
         adminService.getAllTournaments(),
-        adminService.getAllClubs()
+        adminService.getAllClubs(),
+        adminService.getSponsors()
       ]);
       
       setAdmins(adminsData);
       setTournaments(tournamentsData);
       setClubs(clubsData);
+      setSponsors(sponsorsData.sponsors || []);
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
     } finally {
@@ -54,6 +60,7 @@ const SuperAdminDashboard = () => {
     setEditingAdmin(null);
     setEditingTournament(null);
     setEditingClub(null);
+    setEditingSponsor(null);
   };
 
   const handleEditAdmin = (admin: Admin) => {
@@ -68,6 +75,11 @@ const SuperAdminDashboard = () => {
 
   const handleEditClub = (club: Team) => {
     setEditingClub(club);
+    setViewMode("edit");
+  };
+
+  const handleEditSponsor = (sponsor: Sponsor) => {
+    setEditingSponsor(sponsor);
     setViewMode("edit");
   };
 
@@ -106,6 +118,19 @@ const SuperAdminDashboard = () => {
     } catch (error) {
            // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const msg = (error as any).message || "Failed to delete club";
+      setNotification({ type: "error", text: msg });
+    }
+  };
+
+  const handleDeleteSponsor = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this sponsor?")) return;
+    try {
+      await adminService.deleteSponsor(id);
+      setNotification({ type: "success", text: "Sponsor deleted successfully" });
+      refreshData();
+    } catch (error) {
+           // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const msg = (error as any).message || "Failed to delete sponsor";
       setNotification({ type: "error", text: msg });
     }
   };
@@ -331,6 +356,83 @@ const SuperAdminDashboard = () => {
     </div>
   );
 
+  const renderSponsorsSection = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-4">
+        <div>
+            <h2 className="text-xl font-bold text-gray-800">Manage Sponsors</h2>
+            <p className="text-sm text-gray-500">Add and manage application sponsors.</p>
+        </div>
+        <Button onClick={() => setViewMode(viewMode === "list" ? "create" : "list")}>
+          {viewMode === "list" ? "Create New Sponsor" : "Back to List"}
+        </Button>
+      </div>
+
+      {viewMode === "create" ? (
+        <CreateSponsorForm onSuccess={refreshData} onCancel={() => setViewMode("list")} />
+      ) : viewMode === "edit" && editingSponsor ? (
+        <EditSponsorForm 
+            sponsor={editingSponsor} 
+            onSuccess={refreshData} 
+            onCancel={() => { setViewMode("list"); setEditingSponsor(null); }} 
+        />
+      ) : (
+        <div className="animate-in fade-in slide-in-from-bottom-2">
+           <Table headers={["Sponsor", "Website", "Created At", "Actions"]}>
+             {sponsors.map((sponsor) => (
+               <tr key={sponsor.id} className="hover:bg-gray-50 transition-colors">
+                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <div className="flex items-center gap-3">
+                        {sponsor.logoUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={sponsor.logoUrl} alt={sponsor.name} className="w-8 h-8 rounded-full object-contain bg-white border border-gray-100 mix-blend-multiply" />
+                        ) : (
+                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">
+                                {sponsor.name.charAt(0)}
+                            </div>
+                        )}
+                        <span>{sponsor.name}</span>
+                    </div>
+                 </td>
+                 <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:underline">
+                    {sponsor.website ? (
+                        <a href={sponsor.website} target="_blank" rel="noopener noreferrer">
+                            Link
+                        </a>
+                    ) : (
+                        <span className="text-gray-400 no-underline">—</span>
+                    )}
+                 </td>
+                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sponsor.createdAt ? new Date(sponsor.createdAt).toLocaleDateString() : 'N/A'}</td>
+                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                   <div className="flex space-x-2">
+                       <button 
+                         onClick={() => handleEditSponsor(sponsor)}
+                         className="text-gray-400 hover:text-blue-600 transition-colors"
+                         title="Edit"
+                       >
+                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                       </button>
+                       <button 
+                         onClick={() => handleDeleteSponsor(sponsor.id)}
+                         className="text-gray-400 hover:text-red-600 transition-colors"
+                         title="Delete"
+                       >
+                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                       </button>
+                   </div>
+                 </td>
+               </tr>
+             ))}
+             {sponsors.length === 0 && (
+               <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500 italic">No sponsors found</td></tr>
+             )}
+           </Table>
+        </div>
+      )}
+    </div>
+  );
+
   const renderOverviewSection = () => (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
         {/* Stats Cards */}
@@ -419,7 +521,7 @@ const SuperAdminDashboard = () => {
 
         {/* Navigation Tabs */}
         <div className="flex border-b border-gray-200 mb-8 overflow-x-auto">
-          {(["overview", "admins", "tournaments", "clubs"] as const).map((tab) => (
+          {(["overview", "admins", "tournaments", "clubs", "sponsors"] as const).map((tab) => (
              <button
                 key={tab}
                 onClick={() => { setActiveTab(tab); setViewMode("list"); }}
@@ -446,6 +548,7 @@ const SuperAdminDashboard = () => {
                     {activeTab === "admins" && renderAdminsSection()}
                     {activeTab === "tournaments" && renderTournamentsSection()}
                     {activeTab === "clubs" && renderClubsSection()}
+                    {activeTab === "sponsors" && renderSponsorsSection()}
                 </>
              )}
         </div>

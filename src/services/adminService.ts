@@ -19,6 +19,8 @@ import { adminCrudService } from "./admin.service";
 import { groupService } from "./group.service";
 import { standingService } from "./standing.service";
 import { statsService } from "./stats.service";
+import { sponsorService } from "./sponsor.service";
+import { auditService } from "./audit.service";
 
 // Re-export individual services for direct imports
 export { tournamentService } from "./tournament.service";
@@ -31,6 +33,8 @@ export { standingService } from "./standing.service";
 export { statsService } from "./stats.service";
 export { tournamentAdminService } from "./tournamentAdmin.service";
 export { teamAdminService } from "./teamAdmin.service";
+export { sponsorService } from "./sponsor.service";
+export { auditService } from "./audit.service";
 
 /**
  * Unified adminService object — backwards compatible
@@ -44,6 +48,8 @@ export const adminService = {
   createTournament: tournamentService.createTournament,
   updateTournament: tournamentService.updateTournament,
   deleteTournament: tournamentService.deleteTournament,
+  finalizeTournament: tournamentService.finalizeTournament,
+  getTournamentHistory: tournamentService.getTournamentHistory,
 
   // Teams
   searchTeams: teamService.searchTeams,
@@ -74,6 +80,8 @@ export const adminService = {
   updateMatch: matchService.updateMatch,
   deleteMatch: matchService.deleteMatch,
   submitMatchReport: matchService.submitMatchReport,
+  getMatchStats: matchService.getMatchStats,
+  getKnockoutBracket: matchService.getKnockoutBracket,
 
   // Admins
   getAdmins: adminCrudService.getAdmins,
@@ -94,4 +102,20 @@ export const adminService = {
 
   // Tournament Statistics
   getTournamentStatsSummary: statsService.getTournamentStatsSummary,
+  getTopScorers: statsService.getTopScorers,
+  getTopAssists: statsService.getTopAssists,
+  getMostMatchesPlayed: statsService.getMostMatchesPlayed,
+
+  // Sponsors
+  getSponsors: sponsorService.getAll,
+  getSponsor: sponsorService.getById,
+  createSponsor: sponsorService.create,
+  updateSponsor: sponsorService.update,
+  deleteSponsor: sponsorService.delete,
+  assignSponsorToTournament: sponsorService.assignToTournament,
+  removeSponsorFromTournament: sponsorService.removeFromTournament,
+
+  // Audit Logs
+  getAuditLogs: auditService.getAuditLogs,
+  getEntityAuditLogs: auditService.getEntityAuditLogs,
 };

@@ -176,4 +176,50 @@ export const matchService = {
       throw new Error(extractErrorMessage(error, "Failed to submit match report"));
     }
   },
+
+  /**
+   * Get match statistics for a tournament
+   */
+  getMatchStats: async (tournamentId: string): Promise<unknown> => {
+    try {
+      if (!tournamentId) throw new Error("Tournament ID is required");
+
+      const response = await axiosInstance.get<ApiResponse<unknown>>(
+        API_PATHS.MATCH.GET_MATCH_STATS(tournamentId)
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to fetch match stats"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to fetch match stats"));
+    }
+  },
+
+  /**
+   * Get knockout bracket for a tournament
+   */
+  getKnockoutBracket: async (tournamentId: string): Promise<unknown> => {
+    try {
+      if (!tournamentId) throw new Error("Tournament ID is required");
+
+      const response = await axiosInstance.get<ApiResponse<unknown>>(
+        API_PATHS.MATCH.GET_KNOCKOUT_BRACKET(tournamentId)
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.error?.message || "Failed to fetch knockout bracket"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to fetch knockout bracket"));
+    }
+  },
 };

@@ -4,7 +4,7 @@ export default function SponsorsMarquee() {
   return (
     <section className="py-16 border-y border-white/5 bg-[#030812] overflow-hidden relative">
       <div className="max-w-7xl mx-auto px-6 mb-10 text-center">
-        <h3 className="text-xs font-bold uppercase tracking-[0.25em] text-[var(--text-secondary)]">
+        <h3 className="text-xs font-bold uppercase tracking-[0.25em] text-(--text-secondary)">
           სპონსორები და პარტნიორები
         </h3>
       </div>
@@ -12,8 +12,8 @@ export default function SponsorsMarquee() {
       {/* Marquee Container */}
       <div className="relative w-full overflow-hidden">
         {/* Gradient edge masks */}
-        <div className="absolute left-0 inset-y-0 w-24 md:w-40 bg-gradient-to-r from-[#030812] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 inset-y-0 w-24 md:w-40 bg-gradient-to-l from-[#030812] to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 inset-y-0 w-24 md:w-40 bg-linear-to-r from-[#030812] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 inset-y-0 w-24 md:w-40 bg-linear-to-l from-[#030812] to-transparent z-10 pointer-events-none" />
 
         {/* Scrolling Track */}
         <div className="flex w-max animate-marquee">

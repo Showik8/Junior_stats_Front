@@ -1,7 +1,8 @@
 import { useState } from "react";
 import Button from "./Button";
 import { adminService } from "@/services/adminService";
-import { Admin, AgeCategory, AGE_CATEGORIES, TournamentFormat, TOURNAMENT_FORMATS } from "@/types/admin";
+import { Admin, AgeCategory, AGE_CATEGORIES, TournamentFormat, TOURNAMENT_FORMATS, Sponsor, SponsorTier } from "@/types/admin";
+import { useEffect } from "react";
 
 interface CreateTournamentFormProps {
   admins: Admin[];
@@ -25,6 +26,10 @@ const CreateTournamentForm = ({ admins, onSuccess }: CreateTournamentFormProps) 
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  // Sponsors State
+  const [availableSponsors, setAvailableSponsors] = useState<Sponsor[]>([]);
+  const [selectedSponsors, setSelectedSponsors] = useState<{ sponsorId: string; tier: SponsorTier }[]>([]);
+
   // Filter for Tournament Admins only
   const tournamentAdmins = admins.filter(a => a.role === "TOURNAMENT_ADMIN" || a.role === "SUPER_ADMIN");
 
@@ -33,6 +38,35 @@ const CreateTournamentForm = ({ admins, onSuccess }: CreateTournamentFormProps) 
       prev.includes(cat) 
         ? prev.filter(c => c !== cat) 
         : [...prev, cat]
+    );
+  };
+
+  useEffect(() => {
+    const fetchSponsors = async () => {
+      try {
+        const data = await adminService.getSponsors();
+        setAvailableSponsors(data.sponsors);
+      } catch (error) {
+        console.error("Failed to load sponsors", error);
+      }
+    };
+    fetchSponsors();
+  }, []);
+
+  const handleSponsorToggle = (sponsorId: string) => {
+    setSelectedSponsors((prev) => {
+      const exists = prev.find((s) => s.sponsorId === sponsorId);
+      if (exists) {
+        return prev.filter((s) => s.sponsorId !== sponsorId);
+      } else {
+        return [...prev, { sponsorId, tier: "BRONZE" }];
+      }
+    });
+  };
+
+  const handleSponsorTierChange = (sponsorId: string, tier: SponsorTier) => {
+    setSelectedSponsors((prev) =>
+      prev.map((s) => (s.sponsorId === sponsorId ? { ...s, tier } : s))
     );
   };
 
@@ -61,7 +95,8 @@ const CreateTournamentForm = ({ admins, onSuccess }: CreateTournamentFormProps) 
         logoUrl: logoUrl || undefined,
         bannerUrl: bannerUrl || undefined,
         adminEmail: selectedAdmin?.email,
-        ageCategories: selectedAgeCategories
+        ageCategories: selectedAgeCategories,
+        sponsors: selectedSponsors.length > 0 ? selectedSponsors : undefined,
       });
 
       setMessage({ type: "success", text: "Tournament created successfully!" });
@@ -77,6 +112,7 @@ const CreateTournamentForm = ({ admins, onSuccess }: CreateTournamentFormProps) 
       setBannerUrl("");
       setSelectedAgeCategories([]);
       setSelectedAdminId("");
+      setSelectedSponsors([]);
       setShowAdvanced(false);
       onSuccess();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -253,6 +289,66 @@ const CreateTournamentForm = ({ admins, onSuccess }: CreateTournamentFormProps) 
                 <input type="url" className={inputClass} placeholder="https://example.com/banner.png" value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)} />
               </div>
             </div>
+
+            {/* Sponsor Selection */}
+            {availableSponsors.length > 0 && (
+              <div className="pt-4 border-t border-gray-100 mt-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Attach Sponsors</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {availableSponsors.map((sponsor) => {
+                    const isSelected = selectedSponsors.some((s) => s.sponsorId === sponsor.id);
+                    const selectedData = selectedSponsors.find((s) => s.sponsorId === sponsor.id);
+                    
+                    return (
+                      <div 
+                        key={sponsor.id} 
+                        className={`flex flex-col p-4 rounded-lg border transition-all ${isSelected ? 'border-blue-500 bg-blue-50/30' : 'border-gray-200 bg-white hover:border-blue-300'}`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <label className="flex items-center gap-3 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleSponsorToggle(sponsor.id)}
+                              className="w-5 h-5 text-blue-600 rounded-sm border-gray-300 focus:ring-blue-500"
+                            />
+                            <div className="flex items-center gap-2">
+                              {sponsor.logoUrl && (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={sponsor.logoUrl} alt={sponsor.name} className="w-6 h-6 object-contain rounded-full bg-white" />
+                              )}
+                              <span className={`font-medium ${isSelected ? 'text-blue-700' : 'text-gray-700'}`}>{sponsor.name}</span>
+                            </div>
+                          </label>
+                        </div>
+                        
+                        {isSelected && (
+                          <div className="ml-8 mt-1 animate-in fade-in">
+                            <label className="text-xs text-gray-500 mb-1 block">Sponsorship Tier</label>
+                            <div className="relative">
+                              <select 
+                                className="w-full text-sm rounded-md border border-gray-300 p-2 text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none appearance-none bg-white"
+                                value={selectedData?.tier || "BRONZE"}
+                                onChange={(e) => handleSponsorTierChange(sponsor.id, e.target.value as SponsorTier)}
+                              >
+                                <option value="BRONZE">Bronze</option>
+                                <option value="SILVER">Silver</option>
+                                <option value="GOLD">Gold</option>
+                                <option value="MAIN">Main</option>
+                              </select>
+                              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            
           </div>
         )}
       </div>

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { FaUserShield, FaTrophy, FaArrowRight } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
 import { publicService } from "@/services/public.service";
-import type { PublicPlayer, PublicTeam } from "@/types/public";
 
 const AGE_GROUPS = ["U10", "U12", "U15", "U17"];
 const CATEGORIES = [
@@ -39,56 +39,37 @@ export default function TopPerformers({ mode = "all" }: TopPerformersProps) {
   const [activeCategory, setActiveCategory] = useState(defaultCategory);
   const [animKey, setAnimKey] = useState(0);
 
-  const [players, setPlayers] = useState<DisplayPlayer[]>([]);
-  const [teams, setTeams] = useState<DisplayTeam[]>([]);
-  const [loading, setLoading] = useState(false);
+  const ageCategoryFilter = "U_" + activeAge.replace("U", "");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const ageCategoryFilter = "U_" + activeAge.replace("U", "");
-        
-        let fetchedPlayers: PublicPlayer[] = [];
-        let fetchedTeams: PublicTeam[] = [];
+  const { data: fetchedPlayers = [], isLoading: loadingPlayers } = useQuery({
+    queryKey: ["top-players", ageCategoryFilter],
+    queryFn: () => publicService.getAllPlayers({ ageCategory: ageCategoryFilter }),
+    enabled: activeCategory === "players" || mode === "players",
+  });
 
-        if (activeCategory === "players" || mode === "players") {
-          fetchedPlayers = await publicService.getAllPlayers({ ageCategory: ageCategoryFilter });
-        }
-        
-        if (activeCategory === "teams" || mode === "teams") {
-          fetchedTeams = await publicService.getAllTeams({ ageCategory: ageCategoryFilter });
-        }
+  const { data: fetchedTeams = [], isLoading: loadingTeams } = useQuery({
+    queryKey: ["top-teams", ageCategoryFilter],
+    queryFn: () => publicService.getAllTeams({ ageCategory: ageCategoryFilter }),
+    enabled: activeCategory === "teams" || mode === "teams",
+  });
 
-        setPlayers(
-          fetchedPlayers.slice(0, 3).map((p) => ({
-             id: p.id,
-             name: p.name,
-             position: p.position || "მოთამაშე",
-             stat: "სტატისტიკა",
-             photoUrl: p.photoUrl,
-          }))
-        );
+  const loading = (activeCategory === "players" && loadingPlayers) || (activeCategory === "teams" && loadingTeams);
 
-        setTeams(
-          fetchedTeams.slice(0, 3).map((t) => ({
-             id: t.id,
-             name: t.name,
-             points: "0 ქულა",
-             form: "N/A",
-             logo: t.logo || "🛡️",
-          }))
-        );
+  const players: DisplayPlayer[] = fetchedPlayers.slice(0, 3).map((p) => ({
+    id: p.id,
+    name: p.name,
+    position: p.position || "მოთამაშე",
+    stat: "სტატისტიკა",
+    photoUrl: p.photoUrl,
+  }));
 
-      } catch (error) {
-        console.error("Error fetching top performers data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, [activeAge, activeCategory, mode]);
+  const teams: DisplayTeam[] = fetchedTeams.slice(0, 3).map((t) => ({
+    id: t.id,
+    name: t.name,
+    points: "0 ქულა",
+    form: "N/A",
+    logo: t.logo || "🛡️",
+  }));
 
   const visibleCategories = mode === "all"
     ? CATEGORIES

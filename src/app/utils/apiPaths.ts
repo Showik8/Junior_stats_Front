@@ -38,6 +38,10 @@ export const API_PATHS = {
     DELETE_TOURNAMENT: (id: string) => `/api/tournaments/${id}`,
     // GET /api/tournaments/:id/stats - Get tournament stats
     GET_TOURNAMENT_STATS: (id: string) => `/api/tournaments/${id}/stats`,
+    // POST /api/tournaments/:id/finish - Finalize tournament (determine winners)
+    FINALIZE_TOURNAMENT: (id: string) => `/api/tournaments/${id}/finish`,
+    // GET /api/tournaments/:id/history - Get tournament history (winners)
+    GET_HISTORY: (id: string) => `/api/tournaments/${id}/history`,
   },
 
   TOURNAMENT_STATS: {
@@ -107,6 +111,9 @@ export const API_PATHS = {
     // GET /api/matches/tournament/:tournamentId/stats - Get match stats for tournament
     GET_MATCH_STATS: (tournamentId: string) =>
       `/api/matches/tournament/${tournamentId}/stats`,
+    // GET /api/matches/tournament/:tournamentId/knockout - Get knockout bracket
+    GET_KNOCKOUT_BRACKET: (tournamentId: string) =>
+      `/api/matches/tournament/${tournamentId}/knockout`,
   },
 
   GROUPS: {
@@ -172,5 +179,13 @@ export const API_PATHS = {
     ASSIGN_TOURNAMENT: (id: string) => `/api/sponsors/${id}/tournaments`,
     REMOVE_TOURNAMENT: (id: string, tournamentId: string) =>
       `/api/sponsors/${id}/tournaments/${tournamentId}`,
+  },
+
+  AUDIT_LOGS: {
+    // GET /api/audit-logs - Get audit logs with pagination/filtering
+    LIST: "/api/audit-logs",
+    // GET /api/audit-logs/entity/:entity/:entityId - Get logs for specific entity
+    ENTITY: (entity: string, entityId: string) =>
+      `/api/audit-logs/entity/${entity}/${entityId}`,
   },
 };

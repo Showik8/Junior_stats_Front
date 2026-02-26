@@ -5,6 +5,7 @@ import {
   ApiResponse,
   CreateTournamentPayload,
   UpdateTournamentPayload,
+  TournamentHistory,
 } from "@/types/admin";
 import { extractErrorMessage } from "./helpers";
 
@@ -103,6 +104,7 @@ export const tournamentService = {
       if (payload.rules?.trim()) cleanPayload.rules = payload.rules.trim();
       if (payload.logoUrl?.trim()) cleanPayload.logoUrl = payload.logoUrl.trim();
       if (payload.bannerUrl?.trim()) cleanPayload.bannerUrl = payload.bannerUrl.trim();
+      if (payload.sponsors && payload.sponsors.length > 0) cleanPayload.sponsors = payload.sponsors;
 
       const response = await axiosInstance.post<ApiResponse<Tournament>>(
         API_PATHS.TOURNAMENT.CREATE_TOURNAMENT,
@@ -152,6 +154,50 @@ export const tournamentService = {
       await axiosInstance.delete(API_PATHS.TOURNAMENT.DELETE_TOURNAMENT(id));
     } catch (error: unknown) {
       throw new Error(extractErrorMessage(error, "Failed to delete tournament"));
+    }
+  },
+
+  /**
+   * Finalize a tournament — determine winners for each age category
+   */
+  finalizeTournament: async (id: string): Promise<unknown> => {
+    try {
+      if (!id) throw new Error("Tournament ID is required");
+
+      const response = await axiosInstance.post<ApiResponse<unknown>>(
+        API_PATHS.TOURNAMENT.FINALIZE_TOURNAMENT(id)
+      );
+
+      if (!response.data.success) {
+        throw new Error(
+          response.data.error?.message || "Failed to finalize tournament"
+        );
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to finalize tournament"));
+    }
+  },
+
+  /**
+   * Get tournament history (winners by age category)
+   */
+  getTournamentHistory: async (id: string): Promise<TournamentHistory[]> => {
+    try {
+      if (!id) throw new Error("Tournament ID is required");
+
+      const response = await axiosInstance.get<ApiResponse<TournamentHistory[]>>(
+        API_PATHS.TOURNAMENT.GET_HISTORY(id)
+      );
+
+      if (!response.data.success || !response.data.data) {
+        return [];
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to fetch tournament history"));
     }
   },
 };

@@ -55,6 +55,32 @@ export const TOURNAMENT_FORMATS: { value: TournamentFormat; label: string }[] = 
  */
 export type SponsorTier = "MAIN" | "GOLD" | "SILVER" | "BRONZE";
 
+/**
+ * Player position values from backend Prisma schema
+ */
+export type PlayerPosition =
+  | "GK" | "CB" | "LB" | "RB" | "LWB" | "RWB"
+  | "CDM" | "CM" | "CAM" | "RM" | "LM"
+  | "RW" | "LW" | "ST" | "CF";
+
+export const PLAYER_POSITIONS: { value: PlayerPosition; label: string }[] = [
+  { value: "GK", label: "Goalkeeper" },
+  { value: "CB", label: "Center Back" },
+  { value: "LB", label: "Left Back" },
+  { value: "RB", label: "Right Back" },
+  { value: "LWB", label: "Left Wing Back" },
+  { value: "RWB", label: "Right Wing Back" },
+  { value: "CDM", label: "Defensive Midfielder" },
+  { value: "CM", label: "Central Midfielder" },
+  { value: "CAM", label: "Attacking Midfielder" },
+  { value: "RM", label: "Right Midfielder" },
+  { value: "LM", label: "Left Midfielder" },
+  { value: "RW", label: "Right Winger" },
+  { value: "LW", label: "Left Winger" },
+  { value: "ST", label: "Striker" },
+  { value: "CF", label: "Center Forward" },
+];
+
 // --- Match Report Types ---
 
 export enum EventType {
@@ -139,6 +165,7 @@ export interface Standing {
   losses: number;
   goalsFor: number;
   goalsAgainst: number;
+  goalDifference: number;
   points: number;
   
   // Relations
@@ -357,6 +384,7 @@ export interface CreateTournamentPayload {
   rules?: string;
   logoUrl?: string;
   bannerUrl?: string;
+  sponsors?: { sponsorId: string; tier?: SponsorTier }[];
 }
 
 /**
@@ -375,6 +403,7 @@ export interface UpdateTournamentPayload {
   logoUrl?: string;
   bannerUrl?: string;
   adminEmail?: string;
+  sponsors?: { sponsorId: string; tier?: SponsorTier }[];
 }
 
 /**
@@ -524,3 +553,68 @@ export interface TeamAdminAssignment {
   createdAt?: string;
 }
 
+/**
+ * Tournament History (winner records)
+ */
+export interface TournamentHistory {
+  id: string;
+  tournamentId: string;
+  ageCategory: AgeCategory;
+  season?: string | null;
+  winnerId: string;
+  runnerUpId?: string | null;
+  totalMatches: number;
+  totalGoals: number;
+  finishedAt: string;
+  tournament?: Tournament;
+  winner?: Team;
+  runnerUp?: Team | null;
+}
+
+/**
+ * Audit Log interface matching backend Prisma AuditLog model
+ */
+export interface AuditLog {
+  id: string;
+  entity: string;
+  entityId: string;
+  action: string;
+  adminId?: number | null;
+  changes?: Record<string, unknown> | null;
+  admin?: Admin | null;
+  createdAt: string;
+}
+
+/**
+ * Create Sponsor payload
+ */
+export interface CreateSponsorPayload {
+  name: string;
+  logoUrl: string;
+  website?: string;
+}
+
+/**
+ * Update Sponsor payload
+ */
+export interface UpdateSponsorPayload {
+  name?: string;
+  logoUrl?: string;
+  website?: string;
+}
+
+/**
+ * Knockout bracket match representation
+ */
+export interface KnockoutMatch {
+  id: string;
+  round?: string | null;
+  bracket?: string | null;
+  homeTeam?: Team;
+  awayTeam?: Team;
+  homeScore?: number | null;
+  awayScore?: number | null;
+  status: MatchStatus;
+  date: string;
+  nextMatchId?: string | null;
+}
