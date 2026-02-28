@@ -21,6 +21,12 @@ const CATEGORIES = [
   { id: "matches", label: "ყველაზე მეტი მატჩი", icon: FaRunning },
 ] as const;
 
+interface PerformerStat {
+  player: { id: string; name: string; photoUrl?: string };
+  team?: { name: string; logo?: string };
+  statistics?: { goals?: number; assists?: number; matchesPlayed?: number; minutesPlayed?: number };
+}
+
 export default function TopPerformers() {
   const [activeAge, setActiveAge] = useState("U16");
   const [activeCategory, setActiveCategory] = useState<"scorers" | "assists" | "matches">("scorers");
@@ -36,11 +42,12 @@ export default function TopPerformers() {
   });
 
   // Get active items based on selected category
-  let activeItems: any[] = [];
+  let activeItems: PerformerStat[] = [];
   if (globalStats) {
-    if (activeCategory === "scorers") activeItems = globalStats.topScorers || [];
-    else if (activeCategory === "assists") activeItems = globalStats.topAssists || [];
-    else if (activeCategory === "matches") activeItems = globalStats.mostMatchesPlayed || [];
+    const statsItem = globalStats as Record<string, PerformerStat[]>;
+    if (activeCategory === "scorers") activeItems = statsItem.topScorers || [];
+    else if (activeCategory === "assists") activeItems = statsItem.topAssists || [];
+    else if (activeCategory === "matches") activeItems = statsItem.mostMatchesPlayed || [];
   }
 
   // GSAP Animation handling: Section entry

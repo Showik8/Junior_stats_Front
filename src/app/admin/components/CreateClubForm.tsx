@@ -41,10 +41,10 @@ const CreateClubForm = ({ admins, onSuccess }: CreateClubFormProps) => {
       setAgeCategory(AGE_CATEGORIES[0]);
       setSelectedAdminId("");
       onSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setMessage({ type: "error", text: err.response?.data?.message || err.message || "Failed to create club" });
+      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || (err as Error)?.message || "Failed to create club";
+      setMessage({ type: "error", text: errorMessage });
     } finally {
       setLoading(false);
     }

@@ -47,7 +47,7 @@ const AddTeamToTournamentModal = ({
       // Pass ageCategory to filter teams by category suitable for this tournament section
       const results = await adminService.searchTeams(searchTerm, ageCategory);
       setSearchResults(results);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Search failed:", err);
       setError("Failed to search teams");
     } finally {
@@ -65,8 +65,8 @@ const AddTeamToTournamentModal = ({
       // Reset state
       setSearchTerm("");
       setSearchResults([]);
-    } catch (err: any) {
-      setError(err.message || "Failed to add team to tournament");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Failed to add team to tournament");
     } finally {
       setAssigningId(null);
     }

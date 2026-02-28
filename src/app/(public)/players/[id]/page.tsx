@@ -13,6 +13,7 @@ import {
 import { TbRulerMeasure, TbWeight } from "react-icons/tb";
 import { BASE_URL, API_PATHS } from "@/app/utils/apiPaths";
 import { PublicPlayer } from "@/types/public";
+import PlayerViewTracker from "@/app/components/public/PlayerViewTracker";
 
 interface PlayerDetail extends PublicPlayer {
   stats?: {
@@ -67,6 +68,7 @@ export default async function PlayerProfilePage({
 
   return (
     <div className="relative min-h-screen bg-[#050505] text-white font-sans selection:bg-emerald-500/30 overflow-x-hidden">
+      <PlayerViewTracker playerId={data.id} />
       
       {/* ── BACK BUTTON ── */}
       <Link
@@ -129,7 +131,7 @@ export default async function PlayerProfilePage({
           </div>
 
           <div className="text-xs font-medium text-white/40 tracking-widest uppercase">
-            {data.views || 850} ნახვა
+            {data.views || 0} ნახვა
           </div>
         </div>
       </div>
@@ -274,7 +276,7 @@ export default async function PlayerProfilePage({
               </div>
               <div className="flex justify-between items-center pb-3 border-b border-white/5">
                 <span className="text-xs text-white/40 tracking-wide">პროფილის ნახვები:</span>
-                <span className="text-sm font-bold text-blue-400">{data.views || 850}</span>
+                <span className="text-sm font-bold text-blue-400">{data.views || 0}</span>
               </div>
             </div>
           </div>

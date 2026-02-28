@@ -35,9 +35,9 @@ export default function SignInPage() {
         const errorMessage = response.data.error?.message || "Login failed";
         alert(errorMessage);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login failed:", error);
-      const errorMessage = error.response?.data?.error?.message || error.message || "Login failed. Please try again.";
+      const errorMessage = (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || (error as Error)?.message || "Login failed. Please try again.";
       alert(errorMessage);
     } finally {
       setIsLoading(false);

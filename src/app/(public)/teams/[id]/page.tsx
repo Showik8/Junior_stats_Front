@@ -1,28 +1,85 @@
-"use client";
-
-import { useState } from "react";
-import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { notFound } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
+import {
+  FiUser,
+  FiChevronRight,
+  FiGrid,
+  FiUsers,
+  FiClock,
+  FiBarChart2,
+  FiArrowLeft,
+  FiTrendingDown,
+} from "react-icons/fi";
+import { GiSoccerBall, GiWhistle, GiShield, GiTrophy } from "react-icons/gi";
 import { publicService } from "@/services/public.service";
-import { FiUser, FiChevronRight, FiGrid, FiUsers, FiClock, FiBarChart2, FiArrowLeft, FiTrendingDown } from "react-icons/fi";
-import { GiSoccerBall, GiWhistle, GiShield, GiRunningShoe, GiTrophy } from "react-icons/gi";
-import LoadingSpinner from "@/app/components/public/shared/LoadingSpinner";
 import EmptyState from "@/app/components/public/shared/EmptyState";
+import { PublicTeam } from "@/types/public";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+interface TeamMatch {
+  id: string;
+  date: string;
+  status: string;
+  homeScore: number;
+  awayScore: number;
+  homeTeam: { id: string; name: string; logo?: string };
+  awayTeam: { id: string; name: string; logo?: string };
+  tournament?: { name: string };
+}
 
-export default function TeamDetailPage() {
-  const { id } = useParams();
-  const [activeTab, setActiveTab] = useState("overview");
+interface TeamPlayer {
+  id: string;
+  name: string;
+  photoUrl?: string;
+  shirtNumber?: number;
+  position?: string;
+  age?: number;
+  stats?: {
+    goals?: number;
+    assists?: number;
+  };
+}
 
-  const { data, isLoading: loading } = useQuery<any>({
-    queryKey: ["team-detail", id],
-    queryFn: () => publicService.getTeamDetail(id as string),
-    enabled: !!id,
-  });
+// Extended interface because some fields might be injected dynamically by API
+interface TeamDetail extends PublicTeam {
+  stats?: {
+    wins?: number;
+    draws?: number;
+    losses?: number;
+    winRate?: number;
+    totalPlayers?: number;
+    matchesPlayed?: number;
+    goalsFor?: number;
+    goalsAgainst?: number;
+    points?: number;
+    goalDifference?: number;
+  };
+  finishedMatches?: TeamMatch[];
+  scheduledMatches?: TeamMatch[];
+  players?: TeamPlayer[];
+  coach?: string;
+  logo?: string;
+}
 
-  if (loading) return <LoadingSpinner icon={GiShield} />;
+export default async function TeamDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const { id } = await params;
+  const { tab } = await searchParams;
+  const activeTab = tab || "overview";
+
+  let data: TeamDetail | null = null;
+  try {
+    // The publicService uses axios internally. For SSR caching benefits, 
+    // it's usually better to use raw fetch. Let's stick to the existing axios service since it returns the full team detail.
+    data = (await publicService.getTeamDetail(id)) as TeamDetail;
+  } catch (error) {
+    console.error("Failed to fetch team details");
+  }
 
   if (!data) {
     return <EmptyState icon={GiShield} title="გუნდი არ მოიძებნა" />;
@@ -42,11 +99,11 @@ export default function TeamDetailPage() {
     { id: "stats", label: "სტატისტიკა", icon: FiBarChart2 },
   ];
 
-  const MatchItem = ({ match, delay = 0 }: { match: any; delay?: number }) => {
+  const MatchItem = ({ match, delay = 0 }: { match: TeamMatch; delay?: number }) => {
     const isHome = match.homeTeam.id === data.id;
     const opponent = isHome ? match.awayTeam : match.homeTeam;
 
-    let resultColor = "bg-slate-700/50 text-slate-400";
+    let resultColor = "bg-[#050505] text-white/40 border border-white/10";
     let resultText = "VS";
 
     if (match.status === "FINISHED") {
@@ -54,13 +111,13 @@ export default function TeamDetailPage() {
       const oppScore = isHome ? match.awayScore : match.homeScore;
 
       if (teamScore > oppScore) {
-        resultColor = "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        resultColor = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
         resultText = "W";
       } else if (teamScore < oppScore) {
-        resultColor = "bg-red-500/20 text-red-400 border border-red-500/30";
+        resultColor = "bg-red-500/10 text-red-400 border border-red-500/20";
         resultText = "L";
       } else {
-        resultColor = "bg-amber-500/20 text-amber-400 border border-amber-500/30";
+        resultColor = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
         resultText = "D";
       }
     }
@@ -68,27 +125,29 @@ export default function TeamDetailPage() {
     return (
       <Link
         href={`/matches/${match.id}`}
-        className="group flex items-center p-4 glass-card rounded-xl hover:transform-none! mb-3 transition-all animate-reveal-up"
+        className="group flex items-center p-4 bg-[#030303] border border-white/5 rounded-xl hover:bg-white/5 transition-all mb-3 animate-fade-in-up"
         style={{ animationDelay: `${delay}ms` }}
       >
-        <div className="w-[60px] text-center text-xs text-slate-500">
-          <div className="font-semibold">{formatDate(match.date)}</div>
-          <div className="text-[11px] opacity-70">
+        <div className="w-[60px] text-center text-xs text-white/50">
+          <div className="font-semibold text-white/80">{formatDate(match.date)}</div>
+          <div className="text-[11px]">
             {new Date(match.date).toLocaleTimeString("ka-GE", { hour: "2-digit", minute: "2-digit" })}
           </div>
         </div>
 
-        <div className="flex-1 flex items-center gap-4 pl-4 border-l border-white/5">
+        <div className="flex-1 flex items-center gap-4 pl-4 border-l border-white/10">
           {opponent.logo ? (
-            <img src={opponent.logo} alt="" className="w-8 h-8 object-contain" />
+            <div className="relative w-8 h-8">
+              <Image src={opponent.logo} alt="" fill unoptimized priority className="object-contain" />
+            </div>
           ) : (
-            <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
-              <GiShield size={14} className="text-slate-600" />
+            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+              <GiShield size={14} className="text-white/40" />
             </div>
           )}
           <div>
             <div className="text-white text-sm font-semibold group-hover:text-emerald-400 transition-colors">{opponent.name}</div>
-            <div className="text-slate-600 text-xs">
+            <div className="text-white/40 text-[11px] uppercase tracking-widest mt-0.5">
               {isHome ? "(შინ)" : "(გასვლა)"} • {match.tournament?.name}
             </div>
           </div>
@@ -97,7 +156,7 @@ export default function TeamDetailPage() {
         <div className="flex items-center gap-3">
           {match.status === "FINISHED" ? (
             <div className="flex items-center gap-2">
-              <div className={`w-7 h-7 rounded-lg ${resultColor} flex items-center justify-center text-[11px] font-black`}>
+              <div className={`w-7 h-7 rounded-lg ${resultColor} flex items-center justify-center text-[10px] font-black`}>
                 {resultText}
               </div>
               <div className="text-white font-extrabold text-base min-w-[45px] text-right tabular-nums">
@@ -105,126 +164,168 @@ export default function TeamDetailPage() {
               </div>
             </div>
           ) : (
-            <span className="px-2.5 py-1 rounded-lg bg-white/5 text-slate-500 text-xs font-semibold border border-white/5">
+            <span className="px-2.5 py-1 rounded-lg bg-white/5 text-white/50 text-[10px] uppercase tracking-widest font-semibold border border-white/5">
               {match.status}
             </span>
           )}
-          <FiChevronRight className="text-slate-700 group-hover:text-emerald-400 transition-colors" size={16} />
+          <FiChevronRight className="text-white/20 group-hover:text-emerald-400 transition-colors" size={16} />
         </div>
       </Link>
     );
   };
 
-  return (
-    <div>
-      {/* ──────────── HEADER ──────────── */}
-      <div className="relative py-16 px-6 border-b border-white/5 overflow-hidden">
-        <div className="absolute inset-0 bg-linear-to-br from-blue-950/40 via-transparent to-transparent pointer-events-none" />
-        <div className="absolute top-0 right-[20%] w-[400px] h-[300px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 left-[10%] w-[300px] h-[200px] bg-emerald-500/5 blur-[100px] rounded-full pointer-events-none" />
+  const winRate = data.stats?.winRate || 0;
 
-        <div className="relative max-w-[1200px] mx-auto flex items-center gap-8 flex-wrap animate-fade-in-up">
-          {/* Logo */}
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-blue-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="relative w-[120px] h-[120px] rounded-full bg-[#0a1228] border-4 border-white/8 flex items-center justify-center overflow-hidden shadow-2xl shadow-black/30">
+  return (
+    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-blue-500/30">
+      
+      {/* ── BACK BUTTON ── */}
+      <Link
+        href="/teams"
+        className="fixed top-24 left-6 md:left-10 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all shadow-lg"
+      >
+        <FiArrowLeft size={20} />
+      </Link>
+
+      {/* ── CINEMATIC HERO SECTION ── */}
+      <div className="relative w-full h-[55vh] md:h-[65vh] flex flex-col items-center justify-center overflow-hidden border-b border-white/5">
+        
+        {/* Abstract Glowing Background from Logo */}
+        {data.logo ? (
+          <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none blur-[100px]">
+             <Image src={data.logo} alt="" fill unoptimized priority className="object-cover scale-150" />
+          </div>
+        ) : (
+          <div className="absolute inset-0 bg-linear-to-b from-blue-900/10 to-[#050505] opacity-50" />
+        )}
+
+        {/* Gradient Fades */}
+        <div className="absolute inset-0 bg-linear-to-b from-[#050505]/40 via-[#050505]/60 to-[#050505]" />
+        
+        {/* Giant Watermark Letter / Name */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] md:text-[250px] font-black leading-none select-none z-0 tracking-tighter pointer-events-none drop-shadow-2xl text-transparent bg-clip-text bg-linear-to-b from-blue-500/10 via-emerald-500/5 to-transparent whitespace-nowrap overflow-hidden max-w-[100vw] text-center opacity-50">
+          {data.name.substring(0, 4).toUpperCase()}
+        </div>
+
+        {/* Foreground Content */}
+        <div className="relative z-10 flex flex-col items-center justify-center w-full px-4 animate-fade-in-up mt-10">
+          
+          <div className="relative group mb-6">
+            <div className="absolute -inset-2 bg-blue-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+            <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full bg-[#0a0a0a] border border-white/10 p-4 flex items-center justify-center overflow-hidden shadow-2xl glass-card">
               {data.logo ? (
-                <img src={data.logo} alt="" className="w-[80%] h-[80%] object-contain" />
+                <div className="relative w-full h-full">
+                   <Image src={data.logo} alt={data.name} fill unoptimized priority className="object-contain drop-shadow-lg" />
+                </div>
               ) : (
-                <GiShield size={48} className="text-blue-500/50" />
+                <GiShield size={64} className="text-white/20" />
               )}
             </div>
           </div>
 
-          <div className="flex-1">
-            <div className="flex gap-3 mb-2 items-center flex-wrap">
-              <span className="text-slate-500 text-sm font-semibold">{data.ageCategory}</span>
-              {data.stats.winRate > 0 && (
-                <span className="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
-                  {data.stats.winRate}% მოგება
-                </span>
-              )}
-            </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-3 tracking-tight">
-              {data.name}
-            </h1>
+          <div className="flex gap-2 items-center justify-center mb-3">
+            <span className="px-3 py-1 rounded-full border border-white/10 bg-black/50 backdrop-blur-md text-[10px] font-bold text-white/50 uppercase tracking-widest">
+              {data.ageCategory}
+            </span>
+            {winRate > 0 && (
+              <span className="px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md text-[10px] font-bold text-emerald-400 tracking-widest uppercase">
+                {winRate}% მოგება
+              </span>
+            )}
+          </div>
 
-            <div className="flex gap-6 flex-wrap items-center text-sm">
-              {data.coach && (
-                <div className="flex items-center gap-2 text-slate-300">
-                  <GiWhistle size={16} className="text-emerald-500" />
-                  <span>მწვრთნელი: <b>{data.coach}</b></span>
-                </div>
-              )}
-              <div className="flex items-center gap-2 text-slate-400">
-                <FiUser size={14} />
-                {data.stats.totalPlayers} მოთამაშე
-              </div>
-            </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-center tracking-tight mb-4 drop-shadow-lg text-white">
+            {data.name}
+          </h1>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold uppercase tracking-widest text-white/40">
+            {data.coach && (
+              <span className="flex items-center gap-1.5 border border-white/5 px-4 py-1.5 rounded-full bg-black/40">
+                <GiWhistle size={14} className="text-white/30" />
+                {data.coach}
+              </span>
+            )}
+            <span className="flex items-center gap-1.5 border border-white/5 px-4 py-1.5 rounded-full bg-black/40">
+              <FiUsers size={14} className="text-white/30" />
+              {data.stats?.totalPlayers || 0} მოთამაშე
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ── TABS NAV ── */}
+      <div className="sticky top-[80px] z-40 bg-[#050505]/90 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="flex gap-1 overflow-x-auto no-scrollbar">
+            {tabs.map((t) => {
+              const isActive = activeTab === t.id;
+              return (
+                <Link
+                  key={t.id}
+                  href={`/teams/${data.id}?tab=${t.id}`}
+                  replace
+                  scroll={false}
+                  className={`
+                    flex items-center gap-2 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all duration-300 whitespace-nowrap border-b-2
+                    ${isActive
+                      ? "border-emerald-500 text-emerald-400 bg-emerald-500/5"
+                      : "border-transparent text-white/40 hover:text-white/80 hover:bg-white/5"
+                    }
+                  `}
+                >
+                  <t.icon size={15} />
+                  {t.label}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* ──────────── CONTENT ──────────── */}
-      <div className="max-w-[1200px] mx-auto px-6 py-10">
-
-        {/* Tabs */}
-        <div className="flex gap-1 mb-10 overflow-x-auto pb-1 border-b border-white/5">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`
-                flex items-center gap-2 px-5 py-3.5 text-sm font-semibold rounded-t-lg transition-all duration-300 whitespace-nowrap border-b-2
-                ${activeTab === tab.id
-                  ? "border-emerald-500 text-emerald-400 bg-emerald-500/5"
-                  : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-white/3"
-                }
-              `}
-            >
-              <tab.icon size={15} />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
-
-          {/* LEFT (Dynamic based on Tab) */}
+      {/* ── CONTENT AREA ── */}
+      <div className="max-w-5xl mx-auto px-6 py-12 relative z-20 min-h-[50vh]">
+        <div className="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-8">
+          
+          {/* LEFT (Dynamic Based on Tab) */}
           <div className="flex flex-col gap-10">
-
+            
             {/* OVERVIEW TAB */}
             {activeTab === "overview" && (
               <>
-                {/* Stats Overview */}
                 <div className="grid grid-cols-3 gap-4">
                   {[
-                    { label: "მოგება", value: data.stats.wins, color: "emerald" },
-                    { label: "ფრე", value: data.stats.draws, color: "white" },
-                    { label: "წაგება", value: data.stats.losses, color: "red" },
+                    { label: "მოგება", value: data.stats?.wins || 0, color: "emerald", icon: GiTrophy },
+                    { label: "ფრე", value: data.stats?.draws || 0, color: "slate", icon: FiGrid },
+                    { label: "წაგება", value: data.stats?.losses || 0, color: "red", icon: FiTrendingDown },
                   ].map((s, i) => (
                     <div
                       key={s.label}
-                      className={`rounded-2xl p-5 text-center bg-${s.color}-500/8 border border-${s.color}-500/15 animate-reveal-up`}
+                      className="rounded-2xl p-5 md:p-6 text-center bg-[#030303] border border-white/5 flex flex-col items-center justify-center animate-reveal-up hover:border-white/15 transition-all"
                       style={{ animationDelay: `${i * 100}ms` }}
                     >
-                      <div className={`text-${s.color}-400 text-3xl font-extrabold tabular-nums`}>{s.value}</div>
-                      <div className={`text-${s.color}-300/70 text-xs font-bold uppercase tracking-wider mt-1`}>{s.label}</div>
+                      <s.icon size={20} className={`text-${s.color}-500/50 mb-3`} />
+                      <div className="text-white text-3xl font-bold tabular-nums leading-none mb-1.5">{s.value}</div>
+                      <div className="text-white/40 text-[9px] font-bold uppercase tracking-widest">{s.label}</div>
                     </div>
                   ))}
                 </div>
 
-                {/* Latest Matches */}
                 <div className="animate-fade-in-up delay-200">
-                  <h3 className="text-lg font-bold text-white mb-4">ბოლო მატჩები</h3>
-                  {data.finishedMatches?.length > 0 ? (
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-serif font-bold text-white tracking-wide">ბოლო მატჩები</h3>
+                    <Link href={`/teams/${data.id}?tab=matches`} className="text-xs font-bold uppercase tracking-widest text-[#6ee7b7] hover:text-white transition-colors">
+                      ყველას ნახვა
+                    </Link>
+                  </div>
+                  {data.finishedMatches?.length ? (
                     <div>
-                      {data.finishedMatches.slice(0, 3).map((m: any, i: number) => (
-                        <MatchItem key={m.id} match={m} delay={300 + i * 80} />
+                      {data.finishedMatches.slice(0, 3).map((m: TeamMatch, i: number) => (
+                        <MatchItem key={m.id} match={m} delay={100 + i * 80} />
                       ))}
                     </div>
                   ) : (
-                    <p className="text-slate-600 text-sm">მატჩები არ არის</p>
+                    <div className="bg-[#030303] border border-white/5 rounded-xl p-8 text-center text-sm text-white/40">ატვირთული მატჩები არ არის.</div>
                   )}
                 </div>
               </>
@@ -232,47 +333,44 @@ export default function TeamDetailPage() {
 
             {/* SQUAD TAB */}
             {(activeTab === "squad" || activeTab === "overview") && (
-              <section className={`${activeTab === 'overview' ? 'animate-fade-in-up delay-400' : 'animate-fade-in'}`}>
+              <section className={activeTab === 'overview' ? 'animate-fade-in-up delay-300' : 'animate-fade-in'}>
                 {activeTab === 'overview' && (
-                  <div className="flex justify-between items-center mb-5">
-                    <h3 className="text-xl font-bold text-white">შემადგენლობა</h3>
-                    <button onClick={() => setActiveTab('squad')} className="text-emerald-400 text-sm font-semibold hover:text-emerald-300 transition-colors">
-                      სრული სია →
-                    </button>
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-serif font-bold text-white tracking-wide">შემადგენლობა</h3>
+                    <Link href={`/teams/${data.id}?tab=squad`} className="text-xs font-bold uppercase tracking-widest text-[#6ee7b7] hover:text-white transition-colors">
+                      სრული სია
+                    </Link>
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {(activeTab === 'overview' ? data.players.slice(0, 6) : data.players).map((p: any, idx: number) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {(activeTab === 'overview' ? (data.players || []).slice(0, 6) : (data.players || [])).map((p: TeamPlayer, idx: number) => (
                     <Link href={`/players/${p.id}`} key={p.id} className="group block">
                       <div
-                        className="glass-card rounded-xl p-4 flex items-center gap-4 hover:transform-none! animate-reveal-up"
-                        style={activeTab === 'squad' ? { animationDelay: `${idx * 60}ms` } : undefined}
+                        className="bg-[#030303] border border-white/5 rounded-xl p-4 flex items-center gap-4 hover:border-white/15 hover:bg-white/5 transition-all animate-reveal-up"
+                        style={activeTab === 'squad' ? { animationDelay: `${idx * 50}ms` } : undefined}
                       >
                         {p.photoUrl ? (
-                          <img
-                            src={p.photoUrl}
-                            alt=""
-                            className="w-12 h-12 rounded-full object-cover border-2 border-white/8 group-hover:border-emerald-500/30 transition-colors"
-                          />
+                          <div className="relative w-12 h-12 rounded-full overflow-hidden border border-white/10 group-hover:border-emerald-500/50 transition-colors">
+                            <Image src={p.photoUrl} alt="" fill unoptimized className="object-cover" />
+                          </div>
                         ) : (
-                          <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-base font-bold text-slate-500 border-2 border-white/5 group-hover:border-emerald-500/20 transition-colors">
+                          <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-sm font-bold text-white/30 border border-white/10 group-hover:border-emerald-500/30 transition-colors">
                             {p.shirtNumber || <FiUser size={16} />}
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-start">
-                            <div className="text-white text-sm font-semibold truncate group-hover:text-emerald-400 transition-colors">
+                            <div className="text-white text-sm font-semibold truncate group-hover:text-[#6ee7b7] transition-colors tracking-wide">
                               {p.name}
                             </div>
-                            {p.shirtNumber && <span className="text-xs font-bold text-slate-600">#{p.shirtNumber}</span>}
+                            {p.shirtNumber && <span className="text-xs text-white/30 font-bold ml-2">#{p.shirtNumber}</span>}
                           </div>
-                          <div className="text-slate-600 text-xs">
+                          <div className="text-white/40 text-[10px] uppercase tracking-widest mt-1">
                             {p.position || "—"}
-                            {p.age && <span className="opacity-70"> • {p.age} წლის</span>}
+                            {p.age && <span className="opacity-50"> • {p.age} წლის</span>}
                           </div>
                         </div>
-                        <FiChevronRight className="text-slate-700 group-hover:text-emerald-400 transition-colors opacity-0 group-hover:opacity-100" size={14} />
                       </div>
                     </Link>
                   ))}
@@ -282,85 +380,94 @@ export default function TeamDetailPage() {
 
             {/* MATCHES TAB */}
             {activeTab === "matches" && (
-              <div className="flex flex-col gap-8 animate-fade-in">
+              <div className="flex flex-col gap-10 animate-fade-in">
+                {data.scheduledMatches?.length ? (
+                  <section>
+                    <h3 className="text-sm font-bold uppercase tracking-widest text-white/70 mb-5 flex items-center gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      დაგეგმილი
+                    </h3>
+                    <div className="flex flex-col gap-2">
+                      {data.scheduledMatches.map((m: TeamMatch, i: number) => <MatchItem key={m.id} match={m} delay={i * 60} />)}
+                    </div>
+                  </section>
+                ) : null}
+
                 <section>
-                  <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    დაგეგმილი
-                  </h3>
-                  {data.scheduledMatches?.length > 0 ? (
-                    data.scheduledMatches.map((m: any, i: number) => <MatchItem key={m.id} match={m} delay={i * 80} />)
-                  ) : <p className="text-slate-600">მატჩები არ არის</p>}
-                </section>
-                <section>
-                  <h3 className="text-lg font-bold text-white mb-4">დასრულებული</h3>
-                  {data.finishedMatches?.length > 0 ? (
-                    data.finishedMatches.map((m: any, i: number) => <MatchItem key={m.id} match={m} delay={i * 80} />)
-                  ) : <p className="text-slate-600">მატჩები არ არის</p>}
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-white/70 mb-5">დასრულებული</h3>
+                   {data.finishedMatches?.length ? (
+                      <div className="flex flex-col gap-2">
+                        {data.finishedMatches.map((m: TeamMatch, i: number) => <MatchItem key={m.id} match={m} delay={i * 60} />)}
+                      </div>
+                   ) : <div className="text-sm text-white/40">მატჩები არ მოიძებნა.</div>}
                 </section>
               </div>
             )}
 
             {/* STATS TAB */}
             {activeTab === "stats" && (
-              <div className="animate-fade-in flex flex-col gap-8">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="animate-fade-in flex flex-col gap-10">
+                
+                {/* 8-Card Pure Black Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {[
-                    { label: "მოგება", value: data.stats.wins, icon: GiTrophy, color: "emerald" },
-                    { label: "წაგება", value: data.stats.losses, icon: FiTrendingDown, color: "red" },
-                    { label: "გატ. გოლი", value: data.stats.goalsFor, icon: GiSoccerBall, color: "blue" },
-                    { label: "გაშ. გოლი", value: data.stats.goalsAgainst, icon: GiShield, color: "amber" },
+                    { label: "მოგება", value: data.stats?.wins || 0, icon: GiTrophy },
+                    { label: "ფრე", value: data.stats?.draws || 0, icon: FiGrid },
+                    { label: "წაგება", value: data.stats?.losses || 0, icon: FiTrendingDown },
+                    { label: "ჯამში", value: data.stats?.matchesPlayed || 0, icon: GiWhistle },
+                    { label: "გატანილი", value: data.stats?.goalsFor || 0, icon: GiSoccerBall },
+                    { label: "გაშვებული", value: data.stats?.goalsAgainst || 0, icon: GiShield },
+                    { label: "ქულა", value: data.stats?.points || 0, icon: FiBarChart2 },
+                    { label: "მოთამაშე", value: data.stats?.totalPlayers || 0, icon: FiUsers },
                   ].map((stat, idx) => (
                     <div
                       key={stat.label}
-                      className="relative rounded-xl px-4 py-3.5 bg-white/3 border border-white/6 backdrop-blur-sm group hover:bg-white/5 hover:border-white/10 transition-all duration-300 animate-reveal-up flex items-center gap-4"
-                      style={{ animationDelay: `${idx * 80}ms` }}
+                      className="rounded-xl p-5 bg-[#030303] border border-white/5 flex flex-col items-center justify-center animate-reveal-up hover:border-white/15 transition-all duration-300 gap-3 text-center"
+                      style={{ animationDelay: `${idx * 60}ms` }}
                     >
-                      <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-                        <stat.icon className={`text-${stat.color}-400/80`} size={16} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{stat.label}</div>
-                        <div className="text-2xl font-black text-white tabular-nums leading-tight">{stat.value}</div>
-                      </div>
+                      <stat.icon className="text-white/30" size={20} />
+                      <div className="text-2xl font-bold text-white tabular-nums leading-none">{stat.value}</div>
+                      <div className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{stat.label}</div>
                     </div>
                   ))}
                 </div>
 
-                {/* Top scorers from team */}
-                <div className="glass-card rounded-2xl p-6 hover:transform-none!">
-                  <h3 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
-                    <GiSoccerBall className="text-amber-400" />
+                {/* Top Scorers Board */}
+                <div className="bg-[#080808] border border-white/5 rounded-2xl p-6 md:p-8">
+                  <h3 className="text-lg font-serif font-bold text-white tracking-wide mb-6 flex items-center gap-3">
+                    <GiSoccerBall className="text-amber-500/80" />
                     ბომბარდირები
                   </h3>
-                  <div className="space-y-3">
-                    {data.players
-                      .filter((p: any) => p.stats?.goals > 0)
-                      .sort((a: any, b: any) => (b.stats?.goals || 0) - (a.stats?.goals || 0))
-                      .map((p: any, idx: number) => (
-                        <Link key={p.id} href={`/players/${p.id}`} className="group flex items-center gap-4 p-3 rounded-xl hover:bg-white/3 transition-colors">
-                          <span className={`text-sm font-black w-6 text-center ${idx === 0 ? "text-amber-400" : idx === 1 ? "text-slate-300" : "text-slate-600"}`}>
+                  <div className="flex flex-col gap-2">
+                    {(data.players || [])
+                      .filter((p: TeamPlayer) => (p.stats?.goals || 0) > 0)
+                      .sort((a: TeamPlayer, b: TeamPlayer) => (b.stats?.goals || 0) - (a.stats?.goals || 0))
+                      .map((p: TeamPlayer, idx: number) => (
+                        <Link key={p.id} href={`/players/${p.id}`} className="group flex items-center gap-4 py-3 px-4 rounded-xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
+                          <span className={`text-sm font-black w-5 text-center ${idx === 0 ? "text-amber-500" : idx === 1 ? "text-slate-300" : idx === 2 ? "text-orange-700/80" : "text-white/20"}`}>
                             {idx + 1}
                           </span>
                           {p.photoUrl ? (
-                            <img src={p.photoUrl} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-white/10" />
+                            <div className="relative w-10 h-10 rounded-full border border-white/10 overflow-hidden">
+                              <Image src={p.photoUrl} alt="" fill unoptimized className="object-cover" />
+                            </div>
                           ) : (
-                            <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-500 border-2 border-white/5">
-                              {p.shirtNumber}
+                            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-bold text-white/30 border border-white/5">
+                              {p.shirtNumber || <FiUser />}
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
-                            <div className="text-white text-sm font-semibold group-hover:text-emerald-400 transition-colors truncate">{p.name}</div>
-                            <div className="text-slate-600 text-xs">{p.position}</div>
+                            <div className="text-white text-sm font-semibold group-hover:text-emerald-400 transition-colors truncate tracking-wide">{p.name}</div>
+                            <div className="text-white/40 text-[10px] uppercase tracking-widest mt-0.5">{p.position || "—"}</div>
                           </div>
-                          <div className="flex items-center gap-4 text-sm">
+                          <div className="flex items-center gap-5 md:gap-8 pr-2">
                             <div className="text-center">
-                              <div className="text-emerald-400 font-extrabold">{p.stats?.goals || 0}</div>
-                              <div className="text-[9px] text-slate-600 uppercase">გოლი</div>
+                              <div className="text-emerald-400 font-extrabold text-lg tabular-nums leading-none mb-1">{p.stats?.goals || 0}</div>
+                              <div className="text-[8px] text-white/40 uppercase font-black tracking-widest">გოლი</div>
                             </div>
                             <div className="text-center">
-                              <div className="text-blue-400 font-extrabold">{p.stats?.assists || 0}</div>
-                              <div className="text-[9px] text-slate-600 uppercase">ასისტი</div>
+                              <div className="text-blue-400/80 font-extrabold text-lg tabular-nums leading-none mb-1">{p.stats?.assists || 0}</div>
+                              <div className="text-[8px] text-white/40 uppercase font-black tracking-widest">ასისტი</div>
                             </div>
                           </div>
                         </Link>
@@ -371,40 +478,78 @@ export default function TeamDetailPage() {
             )}
           </div>
 
-          {/* RIGHT SIDEBAR (Always visible) */}
+          {/* RIGHT SIDEBAR */}
           <div className="flex flex-col gap-6">
-            {/* Next Match */}
+            
+            {/* Goal Difference & Ratios */}
+            <div className="bg-[#080808] border border-white/5 rounded-2xl p-6 flex justify-between items-center animate-slide-in-right">
+              <div>
+                <div className="text-white/30 text-[9px] font-black uppercase tracking-widest mb-1.5">გატანილი / გაშვებული</div>
+                <div className="text-white text-2xl font-extrabold tabular-nums flex items-center gap-3">
+                  <span className="text-[#6ee7b7]">{data.stats?.goalsFor || 0}</span>
+                  <span className="text-white/10 text-xl font-light">|</span>
+                  <span className="text-red-400/80">{data.stats?.goalsAgainst || 0}</span>
+                </div>
+              </div>
+              <div className="text-right border-l border-white/5 pl-5">
+                <div className="text-white/30 text-[9px] font-black uppercase tracking-widest mb-1.5">სხვაობა</div>
+                <div className={`text-xl md:text-2xl font-black tabular-nums ${
+                  (data.stats?.goalDifference || 0) > 0 ? "text-[#6ee7b7]" :
+                  (data.stats?.goalDifference || 0) < 0 ? "text-red-400/80" : "text-white/50"
+                }`}>
+                  {(data.stats?.goalDifference || 0) > 0 ? "+" : ""}{data.stats?.goalDifference || 0}
+                </div>
+              </div>
+            </div>
+
+            {/* Win Rate Circle */}
+            <div className="bg-[#080808] border border-white/5 rounded-2xl p-8 text-center animate-slide-in-right flex flex-col items-center">
+              <div className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-6">მოგების პროცენტი</div>
+              <div className="relative w-32 h-32 mx-auto">
+                <svg className="w-full h-full -rotate-90 drop-shadow-[0_0_15px_rgba(16,185,129,0.15)]" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="6" />
+                  <circle
+                    cx="50" cy="50" r="42" fill="none"
+                    stroke="rgb(52, 211, 153)"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    strokeDasharray={`${winRate * 2.64} ${264 - winRate * 2.64}`}
+                    className="transition-all duration-1000 ease-out"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-3xl font-black text-white tabular-nums tracking-tighter">{winRate}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Next Match Mini Widget */}
             {data.scheduledMatches && data.scheduledMatches.length > 0 && (
-              <div className="rounded-2xl p-6 bg-linear-to-br from-blue-950/60 to-blue-900/20 border border-blue-500/20 animate-slide-in-right">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-blue-400 mb-5">შემდეგი მატჩი</h3>
+              <div className="rounded-2xl p-6 bg-[#030303] border border-white/5 animate-slide-in-right relative overflow-hidden group">
+                <div className="absolute inset-0 bg-linear-to-b from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <h3 className="text-[9px] font-black uppercase tracking-widest text-[#93c5fd] mb-6 flex items-center gap-2 relative z-10">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                  მომავალი შეხვედრა
+                </h3>
                 {(() => {
                   const match = data.scheduledMatches[0];
                   const opponent = match.homeTeam.id === data.id ? match.awayTeam : match.homeTeam;
 
                   return (
-                    <div className="text-center">
+                    <div className="text-center relative z-10">
                       <div className="flex justify-center items-center gap-6 mb-5">
-                        <div className="flex flex-col items-center gap-2">
-                          {data.logo ? (
-                            <img src={data.logo} alt="" className="w-12 h-12 object-contain" />
-                          ) : (
-                            <GiShield size={32} className="text-blue-400/50" />
-                          )}
-                          <span className="text-xs font-bold text-white">{data.name}</span>
-                        </div>
-                        <span className="text-2xl font-extrabold text-slate-600">VS</span>
-                        <div className="flex flex-col items-center gap-2">
-                          {opponent.logo ? (
-                            <img src={opponent.logo} alt="" className="w-12 h-12 object-contain" />
-                          ) : (
-                            <GiShield size={32} className="text-blue-400/50" />
-                          )}
-                          <span className="text-xs font-bold text-white">{opponent.name}</span>
+                         <div className="relative w-10 h-10 drop-shadow-lg">
+                           {data.logo ? <Image src={data.logo} alt="" fill unoptimized className="object-contain" /> : <GiShield size={40} className="text-white/20"/>}
+                         </div>
+                        <span className="text-[10px] font-black text-white/20">VS</span>
+                        <div className="relative w-10 h-10 drop-shadow-lg">
+                           {opponent.logo ? <Image src={opponent.logo} alt="" fill unoptimized className="object-contain" /> : <GiShield size={40} className="text-white/20"/>}
                         </div>
                       </div>
-                      <div className="bg-black/20 rounded-lg px-4 py-2.5 inline-flex flex-col gap-1">
-                        <span className="text-white font-semibold text-sm">{formatDate(match.date)}</span>
-                        <span className="text-slate-500 text-xs">
+                      <div className="inline-flex items-center gap-3 border border-white/5 rounded-full px-4 py-2 bg-white/5 backdrop-blur-sm group-hover:border-white/10 transition-colors">
+                        <span className="text-white font-bold text-xs tracking-wide">{formatDate(match.date)}</span>
+                        <span className="text-white/10 text-[10px]">|</span>
+                        <span className="text-[#6ee7b7] text-xs font-bold tabular-nums">
                           {new Date(match.date).toLocaleTimeString("ka-GE", { hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
@@ -414,47 +559,6 @@ export default function TeamDetailPage() {
               </div>
             )}
 
-            {/* Goal Diff */}
-            <div className="glass-card transform-none! rounded-2xl p-5 flex justify-between items-center animate-slide-in-right delay-200">
-              <div>
-                <div className="text-slate-600 text-xs font-bold uppercase tracking-wider">გატანილი / გაშვებული</div>
-                <div className="text-white text-2xl font-extrabold mt-1 tabular-nums">
-                  <span className="text-emerald-400">{data.stats.goalsFor}</span>
-                  <span className="text-slate-700 mx-2">/</span>
-                  <span className="text-red-400">{data.stats.goalsAgainst}</span>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-slate-600 text-xs font-bold uppercase tracking-wider">სხვაობა</div>
-                <div className={`text-2xl font-extrabold mt-1 tabular-nums ${
-                  data.stats.goalDifference > 0 ? "text-emerald-400" :
-                  data.stats.goalDifference < 0 ? "text-red-400" : "text-slate-500"
-                }`}>
-                  {data.stats.goalDifference > 0 ? "+" : ""}{data.stats.goalDifference}
-                </div>
-              </div>
-            </div>
-
-            {/* Win Rate Circle */}
-            <div className="glass-card transform-none! rounded-2xl p-6 text-center animate-slide-in-right delay-300">
-              <div className="text-slate-600 text-xs font-bold uppercase tracking-wider mb-4">მოგების პროცენტი</div>
-              <div className="relative w-28 h-28 mx-auto mb-3">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
-                  <circle
-                    cx="50" cy="50" r="42" fill="none"
-                    stroke="rgb(16, 185, 129)"
-                    strokeWidth="8"
-                    strokeLinecap="round"
-                    strokeDasharray={`${data.stats.winRate * 2.64} ${264 - data.stats.winRate * 2.64}`}
-                    className="animate-bar-fill"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-2xl font-black text-white tabular-nums">{data.stats.winRate}%</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

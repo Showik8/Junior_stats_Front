@@ -162,7 +162,8 @@ export default function TournamentSidebar() {
   const loading = loadingTournaments || loadingTeams || loadingPlayers;
 
   useEffect(() => {
-    setIsOpen(false);
+    const timer = setTimeout(() => setIsOpen(false), 0);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   const q = search.toLowerCase().trim();

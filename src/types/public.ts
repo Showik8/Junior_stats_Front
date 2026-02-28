@@ -52,6 +52,11 @@ export interface PublicPlayer {
   shirtNumber?: number | null;
   photoUrl?: string | null;
   birthDate?: string | null;
+  nationality?: string | null;
+  height?: number | null;
+  weight?: number | null;
+  preferredFoot?: string | null;
+  views?: number;
   teamId?: string;
   teamName?: string;
 }

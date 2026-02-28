@@ -57,6 +57,10 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
     position: "",
     photoUrl: "",
     birthDate: "",
+    nationality: "",
+    height: "",
+    weight: "",
+    preferredFoot: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -69,6 +73,10 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
     position: "",
     photoUrl: "",
     birthDate: "",
+    nationality: "",
+    height: "",
+    weight: "",
+    preferredFoot: "",
   });
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
@@ -109,6 +117,10 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
         position: newPlayer.position || null,
         photoUrl: newPlayer.photoUrl || null,
         birthDate: newPlayer.birthDate || null,
+        nationality: newPlayer.nationality || null,
+        height: newPlayer.height ? parseInt(newPlayer.height) : null,
+        weight: newPlayer.weight ? parseInt(newPlayer.weight) : null,
+        preferredFoot: newPlayer.preferredFoot || null,
       });
       setIsAddModalOpen(false);
       setNewPlayer({
@@ -117,6 +129,10 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
         position: "",
         photoUrl: "",
         birthDate: "",
+        nationality: "",
+        height: "",
+        weight: "",
+        preferredFoot: "",
       });
       fetchPlayers();
     } catch (err: unknown) {
@@ -138,6 +154,10 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
       birthDate: player.birthDate
         ? new Date(player.birthDate).toISOString().split("T")[0]
         : "",
+      nationality: player.nationality || "",
+      height: player.height?.toString() || "",
+      weight: player.weight?.toString() || "",
+      preferredFoot: player.preferredFoot || "",
     });
     setEditError(null);
   };
@@ -156,6 +176,10 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
         position: editData.position || null,
         photoUrl: editData.photoUrl || null,
         birthDate: editData.birthDate || null,
+        nationality: editData.nationality || null,
+        height: editData.height ? parseInt(editData.height) : null,
+        weight: editData.weight ? parseInt(editData.weight) : null,
+        preferredFoot: editData.preferredFoot || null,
       });
       setEditTarget(null);
       fetchPlayers();
@@ -292,6 +316,61 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
           value={data.birthDate}
           onChange={(e) => setData({ ...data, birthDate: e.target.value })}
         />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Nationality
+          </label>
+          <input
+            type="text"
+            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            value={data.nationality}
+            onChange={(e) => setData({ ...data, nationality: e.target.value })}
+            placeholder="Georgia"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Preferred Foot
+          </label>
+          <select
+            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white transition"
+            value={data.preferredFoot}
+            onChange={(e) => setData({ ...data, preferredFoot: e.target.value })}
+          >
+            <option value="">Select...</option>
+            <option value="Right">Right</option>
+            <option value="Left">Left</option>
+            <option value="Both">Both</option>
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Height (cm)
+          </label>
+          <input
+            type="number"
+            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            value={data.height}
+            onChange={(e) => setData({ ...data, height: e.target.value })}
+            placeholder="180"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Weight (kg)
+          </label>
+          <input
+            type="number"
+            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            value={data.weight}
+            onChange={(e) => setData({ ...data, weight: e.target.value })}
+            placeholder="75"
+          />
+        </div>
       </div>
     </>
   );

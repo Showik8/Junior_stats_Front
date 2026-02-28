@@ -125,6 +125,11 @@ export interface Player {
   shirtNumber?: number | null;
   photoUrl?: string | null;
   birthDate?: string | null;
+  nationality?: string | null;
+  height?: number | null;
+  weight?: number | null;
+  preferredFoot?: string | null;
+  views?: number;
   teamId: string;
   createdAt?: string;
   updatedAt?: string;
@@ -292,6 +297,10 @@ export interface CreatePlayerPayload {
   shirtNumber?: number | null;
   photoUrl?: string | null;
   birthDate?: string | null;
+  nationality?: string | null;
+  height?: number | null;
+  weight?: number | null;
+  preferredFoot?: string | null;
 }
 
 /**
@@ -524,6 +533,10 @@ export interface UpdatePlayerPayload {
   shirtNumber?: number | null;
   photoUrl?: string | null;
   birthDate?: string | null;
+  nationality?: string | null;
+  height?: number | null;
+  weight?: number | null;
+  preferredFoot?: string | null;
   teamId?: string;
 }
 

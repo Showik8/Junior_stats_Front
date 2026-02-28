@@ -159,9 +159,20 @@ export const publicService = {
     if (params?.ageCategory) queryParams.set("ageCategory", params.ageCategory);
     if (params?.limit) queryParams.set("limit", String(params.limit));
 
-    const response = await publicAxios.get<ApiResponse<any>>(
+    const response = await publicAxios.get<ApiResponse<Record<string, unknown>>>(
       `/api/public/statistics/summary?${queryParams.toString()}`
     );
     return response.data.data;
+  },
+
+  /**
+   * Increment player views securely
+   */
+  incrementPlayerView: async (id: string): Promise<void> => {
+    try {
+      await publicAxios.post(API_PATHS.PUBLIC.PLAYER_DETAIL(id) + "/view");
+    } catch (error) {
+      console.error("Failed to increment player view silently", error);
+    }
   },
 };

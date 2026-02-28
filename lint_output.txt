@@ -1,10 +1,6 @@
 
-> junior-stats@0.1.0 lint
-> eslint
-
-
-/Users/macbook/Desktop/Football-Agregator/Junior_Stats_Front/src/app/admin/AdminLayout.tsx
-  19:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/dashboard/DashboardClient.tsx
+  16:21  error  Error: Calling setState synchronously within an effect can trigger cascading renders
 
 Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
 * Update external systems with the latest state from React.
@@ -12,63 +8,381 @@ Effects are intended to synchronize state between React and external systems suc
 
 Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
 
-/Users/macbook/Desktop/Football-Agregator/Junior_Stats_Front/src/app/admin/AdminLayout.tsx:19:7
-  17 |       router.push("/sign-in");
-  18 |     } else {
-> 19 |       setRole(userRole);
-     |       ^^^^^^^ Avoid calling setState() directly within an effect
-  20 |     }
-  21 |     setIsChecking(false);
-  22 |   }, [router]);  react-hooks/set-state-in-effect
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/dashboard/DashboardClient.tsx:16:21
+  14 |   const [mounted, setMounted] = useState(false);
+  15 |
+> 16 |   useEffect(() => { setMounted(true); }, []);
+     |                     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  17 |
+  18 |   // ── Date helpers (using shared utilities, with SSR guard) ──
+  19 |   const safeDateLabel = (d: Date) => mounted ? formatFullDate(d.toISOString()) : "";  react-hooks/set-state-in-effect
 
-/Users/macbook/Desktop/Football-Agregator/Junior_Stats_Front/src/app/admin/components/AddTeamToTournamentModal.tsx
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/matches/[id]/page.tsx
+  1:10  warning  'notFound' is defined but never used  @typescript-eslint/no-unused-vars
+  5:24  warning  'GiShield' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/players/page.tsx
+  70:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/teams/[id]/page.tsx
+    1:10   warning  'notFound' is defined but never used      @typescript-eslint/no-unused-vars
+   21:11   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   22:21   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   23:22   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   24:13   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   45:12   warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+   67:53   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  288:65   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  312:113  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  356:54   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  365:55   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  408:35   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  409:33   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  409:41   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  410:32   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/teams/page.tsx
+  8:10  warning  'FiUsers' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/tournaments/[id]/page.tsx
+    1:10  warning  'notFound' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   34:12  warning  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   82:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @next/next/no-img-element
+  104:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @next/next/no-img-element
+  156:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @next/next/no-img-element
+  193:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @next/next/no-img-element
+  251:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @next/next/no-img-element
+  302:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/tournaments/[id]/page.tsx:302:20
+  300 |                      განრიგი
+  301 |                   </h3>
+> 302 |                   <MatchesList matches={data.scheduledMatches.slice(0, 3)} />
+      |                    ^^^^^^^^^^^ This component is created during render
+  303 |                 </section>
+  304 |                )}
+  305 |
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/tournaments/[id]/page.tsx:51:23
+   49 |
+   50 |   /* ── SUB-COMPONENT EXTRACTS ── */
+>  51 |   const MatchesList = ({ matches }: { matches: any[] }) => (
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  52 |     <div className="flex flex-col gap-3">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  53 |       {matches.length === 0 ? (
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 120 |     </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 121 |   );
+      | ^^^^ The component is created during render here
+  122 |
+  123 |   const StandingsTable = ({ standings }: { standings: any[] }) => (
+  124 |     <div className="overflow-x-auto rounded-3xl border border-white/5 bg-[#030303]">                                                                                                                                                                                                                                  react-hooks/static-components
+  318:18  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/tournaments/[id]/page.tsx:318:18
+  316 |                   </Link>
+  317 |                 </div>
+> 318 |                 <MatchesList matches={data.finishedMatches.slice(0, 5)} />
+      |                  ^^^^^^^^^^^ This component is created during render
+  319 |               </section>
+  320 |             </div>
+  321 |
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/tournaments/[id]/page.tsx:51:23
+   49 |
+   50 |   /* ── SUB-COMPONENT EXTRACTS ── */
+>  51 |   const MatchesList = ({ matches }: { matches: any[] }) => (
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  52 |     <div className="flex flex-col gap-3">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  53 |       {matches.length === 0 ? (
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 120 |     </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 121 |   );
+      | ^^^^ The component is created during render here
+  122 |
+  123 |   const StandingsTable = ({ standings }: { standings: any[] }) => (
+  124 |     <div className="overflow-x-auto rounded-3xl border border-white/5 bg-[#030303]">                                                                                                                                                                                                                                            react-hooks/static-components
+  340:27  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @next/next/no-img-element
+  374:16  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/tournaments/[id]/page.tsx:374:16
+  372 |                  მიმდინარე / დაგეგმილი
+  373 |               </h3>
+> 374 |               <MatchesList matches={data.scheduledMatches} />
+      |                ^^^^^^^^^^^ This component is created during render
+  375 |             </section>
+  376 |             <section>
+  377 |               <h3 className="text-[11px] font-black uppercase tracking-widest text-white/30 mb-6 flex items-center gap-2">
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/tournaments/[id]/page.tsx:51:23
+   49 |
+   50 |   /* ── SUB-COMPONENT EXTRACTS ── */
+>  51 |   const MatchesList = ({ matches }: { matches: any[] }) => (
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  52 |     <div className="flex flex-col gap-3">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  53 |       {matches.length === 0 ? (
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 120 |     </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 121 |   );
+      | ^^^^ The component is created during render here
+  122 |
+  123 |   const StandingsTable = ({ standings }: { standings: any[] }) => (
+  124 |     <div className="overflow-x-auto rounded-3xl border border-white/5 bg-[#030303]">                                                                                                                     react-hooks/static-components
+  380:16  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/tournaments/[id]/page.tsx:380:16
+  378 |                  დასრულებული
+  379 |               </h3>
+> 380 |               <MatchesList matches={data.finishedMatches} />
+      |                ^^^^^^^^^^^ This component is created during render
+  381 |             </section>
+  382 |           </div>
+  383 |         )}
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/tournaments/[id]/page.tsx:51:23
+   49 |
+   50 |   /* ── SUB-COMPONENT EXTRACTS ── */
+>  51 |   const MatchesList = ({ matches }: { matches: any[] }) => (
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  52 |     <div className="flex flex-col gap-3">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  53 |       {matches.length === 0 ? (
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 120 |     </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 121 |   );
+      | ^^^^ The component is created during render here
+  122 |
+  123 |   const StandingsTable = ({ standings }: { standings: any[] }) => (
+  124 |     <div className="overflow-x-auto rounded-3xl border border-white/5 bg-[#030303]">                                                                                                                                                                                                                                                     react-hooks/static-components
+  389:16  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/tournaments/[id]/page.tsx:389:16
+  387 |           <div className="animate-fade-in min-h-[40vh]">
+  388 |             {data.format === "LEAGUE" && data.standings && (
+> 389 |               <StandingsTable standings={data.standings} />
+      |                ^^^^^^^^^^^^^^ This component is created during render
+  390 |             )}
+  391 |
+  392 |             {(data.format === "GROUP_KNOCKOUT" || data.format === "KNOCKOUT") && data.groups && data.groups.map((group: any) => (
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/(public)/tournaments/[id]/page.tsx:123:26
+  121 |   );
+  122 |
+> 123 |   const StandingsTable = ({ standings }: { standings: any[] }) => (
+      |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 124 |     <div className="overflow-x-auto rounded-3xl border border-white/5 bg-[#030303]">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 125 |       <table className="w-full border-collapse">
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 176 |     </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 177 |   );
+      | ^^^^ The component is created during render here
+  178 |
+  179 |   return (
+  180 |     <div className="bg-[#050505] min-h-screen">  react-hooks/static-components
+  412:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @next/next/no-img-element
+  459:26  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @next/next/no-img-element
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/components/AddTeamToTournamentModal.tsx
   41:6   warning  React Hook useEffect has a missing dependency: 'handleSearch'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
   50:19  error    Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
   68:19  error    Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
 
-/Users/macbook/Desktop/Football-Agregator/Junior_Stats_Front/src/app/admin/components/CreateClubForm.tsx
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/components/CreateClubForm.tsx
   44:19  error    Unexpected any. Specify a different type                                                               @typescript-eslint/no-explicit-any
   46:7   warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
 
-/Users/macbook/Desktop/Football-Agregator/Junior_Stats_Front/src/app/admin/components/CreateTournamentForm.tsx
-  56:19  error    Unexpected any. Specify a different type                                                               @typescript-eslint/no-explicit-any
-  58:7   warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/components/MatchReportForm.tsx
+    5:21  warning  'FaSave' is defined but never used                               @typescript-eslint/no-unused-vars
+    5:55  warning  'FaUser' is defined but never used                               @typescript-eslint/no-unused-vars
+  146:90  error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  163:31  warning  'asDraft' is assigned a value but never used                     @typescript-eslint/no-unused-vars
+  224:9   warning  'isMatchFinished' is assigned a value but never used             @typescript-eslint/no-unused-vars
+  227:9   warning  'isFormDisabled' is assigned a value but never used              @typescript-eslint/no-unused-vars
+  510:43  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
 
-/Users/macbook/Desktop/Football-Agregator/Junior_Stats_Front/src/app/admin/components/MatchManagement.tsx
-    4:48  warning  'FaTimes' is defined but never used                                                                    @typescript-eslint/no-unused-vars
-   66:7   warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
-   93:7   warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
-  109:9   warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/components/MembersManagement.tsx
+  4:10  warning  'FaTimes' is defined but never used  @typescript-eslint/no-unused-vars
 
-/Users/macbook/Desktop/Football-Agregator/Junior_Stats_Front/src/app/admin/components/MembersManagement.tsx
-   63:7   warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
-   81:7   warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
-  141:38  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
-  141:38  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
-  159:43  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
-  159:57  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
-  180:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/components/TournamentInfo.tsx
+  130:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
 
-/Users/macbook/Desktop/Football-Agregator/Junior_Stats_Front/src/app/admin/components/club/ClubOverview.tsx
-  61:77  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/components/club/ClubOverview.tsx
+   9:3  warning  'FaArrowRight' is defined but never used  @typescript-eslint/no-unused-vars
+  12:3  warning  'FaUserPlus' is defined but never used    @typescript-eslint/no-unused-vars
 
-/Users/macbook/Desktop/Football-Agregator/Junior_Stats_Front/src/app/admin/components/club/PlayersModule.tsx
-  13:10  warning  'error' is assigned a value but never used                                                                       @typescript-eslint/no-unused-vars
-  40:6   warning  React Hook useEffect has a missing dependency: 'fetchPlayers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
-  57:19  error    Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
-  69:21  error    Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/components/club/ClubSidebar.tsx
+  122:10  error  Error: Cannot create components during render
 
-/Users/macbook/Desktop/Football-Agregator/Junior_Stats_Front/src/app/admin/dashboard/ClubDashboard.tsx
-  27:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+Components created during render will reset their state each time they are created. Declare components outside of render.
 
-/Users/macbook/Desktop/Football-Agregator/Junior_Stats_Front/src/app/admin/dashboard/TournamentDashboard.tsx
-  66:15  warning  'tourn' is assigned a value but never used                                                                              @typescript-eslint/no-unused-vars
-  73:6   warning  React Hook useEffect has a missing dependency: 'fetchTournamentInfo'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/components/club/ClubSidebar.tsx:122:10
+  120 |       {/* Desktop sidebar */}
+  121 |       <aside className="hidden h-full w-[260px] flex-col bg-white border-r border-gray-100 shadow-sm md:flex">
+> 122 |         <NavContent />
+      |          ^^^^^^^^^^ This component is created during render
+  123 |       </aside>
+  124 |
+  125 |       {/* Mobile overlay */}
 
-/Users/macbook/Desktop/Football-Agregator/Junior_Stats_Front/src/app/sign-in/[[...sign-in]]/page.tsx
-   3:8   warning  'Link' is defined but never used          @typescript-eslint/no-unused-vars
-  40:21  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/components/club/ClubSidebar.tsx:39:22
+   37 |   };
+   38 |
+>  39 |   const NavContent = () => (
+      |                      ^^^^^^^
+>  40 |     <>
+      | ^^^^^^
+>  41 |       {/* Logo */}
+      …
+      | ^^^^^^
+> 107 |     </>
+      | ^^^^^^
+> 108 |   );
+      | ^^^^ The component is created during render here
+  109 |
+  110 |   return (
+  111 |     <>             react-hooks/static-components
+  133:14  error  Error: Cannot create components during render
 
-✖ 29 problems (12 errors, 17 warnings)
-  0 errors and 7 warnings potentially fixable with the `--fix` option.
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/components/club/ClubSidebar.tsx:133:14
+  131 |           />
+  132 |           <aside className="fixed inset-y-0 left-0 w-[280px] bg-white z-50 flex flex-col shadow-2xl md:hidden animate-slide-in-right">
+> 133 |             <NavContent />
+      |              ^^^^^^^^^^ This component is created during render
+  134 |           </aside>
+  135 |         </>
+  136 |       )}
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/components/club/ClubSidebar.tsx:39:22
+   37 |   };
+   38 |
+>  39 |   const NavContent = () => (
+      |                      ^^^^^^^
+>  40 |     <>
+      | ^^^^^^
+>  41 |       {/* Logo */}
+      …
+      | ^^^^^^
+> 107 |     </>
+      | ^^^^^^
+> 108 |   );
+      | ^^^^ The component is created during render here
+  109 |
+  110 |   return (
+  111 |     <>  react-hooks/static-components
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/components/club/MatchesModule.tsx
+   2:23  warning  'MatchEvent' is defined but never used                                                                           @typescript-eslint/no-unused-vars
+   2:35  warning  'MatchPlayerStatistic' is defined but never used                                                                 @typescript-eslint/no-unused-vars
+  14:3   warning  'FaExchangeAlt' is defined but never used                                                                        @typescript-eslint/no-unused-vars
+  39:6   warning  React Hook useEffect has a missing dependency: 'fetchMatches'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/components/club/TournamentsModule.tsx
+  1:36  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/dashboard/ClubDashboard.tsx
+   4:10  warning  'removeToken' is defined but never used      @typescript-eslint/no-unused-vars
+  92:9   warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/admin/dashboard/TournamentDashboard.tsx
+    5:10  warning  'removeToken' is defined but never used                                                         @typescript-eslint/no-unused-vars
+  170:5   warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/components/public/Navbar.tsx
+  28:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/components/public/Navbar.tsx:28:5
+  26 |   // Close mobile menu on route change
+  27 |   useEffect(() => {
+> 28 |     setMobileOpen(false);
+     |     ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  29 |   }, [pathname]);
+  30 |
+  31 |   return (  react-hooks/set-state-in-effect
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/components/public/TournamentSidebar.tsx
+  165:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/components/public/TournamentSidebar.tsx:165:5
+  163 |
+  164 |   useEffect(() => {
+> 165 |     setIsOpen(false);
+      |     ^^^^^^^^^ Avoid calling setState() directly within an effect
+  166 |   }, [pathname]);
+  167 |
+  168 |   const q = search.toLowerCase().trim();  react-hooks/set-state-in-effect
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/components/public/landing/HeroSection.tsx
+  11:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/components/public/landing/HeroSection.tsx:11:5
+   9 |
+  10 |   useEffect(() => {
+> 11 |     setIsVisible(true);
+     |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  12 |   }, []);
+  13 |
+  14 |   return (  react-hooks/set-state-in-effect
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/components/public/landing/TopPerformers.tsx
+   6:61  warning  'FaArrowRight' is defined but never used  @typescript-eslint/no-unused-vars
+  39:20  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/components/public/shared/TeamLogo.tsx
+  27:9  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/app/sign-in/[[...sign-in]]/page.tsx
+  38:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/services/match.service.ts
+  161:3  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/macbook/Desktop/Football-Agregator/Junior_stats_Front/src/services/public.service.ts
+  162:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 71 problems (32 errors, 39 warnings)
+  0 errors and 3 warnings potentially fixable with the `--fix` option.
 

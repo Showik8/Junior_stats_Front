@@ -143,10 +143,10 @@ const MatchReportForm: React.FC<MatchReportFormProps> = ({ match, onClose, onSuc
     setEvents(newEvents);
   };
 
-  const updatePlayerStat = (playerId: string, field: keyof MatchReportPlayerStat, value: any) => {
+  const updatePlayerStat = (playerId: string, field: keyof MatchReportPlayerStat, value: number | boolean) => {
     // Strict Input: Minutes between 0-120
     if (field === 'minutesPlayed') {
-       const v = parseInt(value) || 0;
+       const v = typeof value === 'string' ? parseInt(value as string) || 0 : (value as number || 0);
        if (v < 0) value = 0;
        if (v > 120) value = 120;
     }
@@ -507,7 +507,7 @@ const MatchReportForm: React.FC<MatchReportFormProps> = ({ match, onClose, onSuc
                    return (
                       <div key={idx} className="ml-6 relative">
                          <div className={`absolute -left-[31px] w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs shadow-sm bg-white ${event.eventType === EventType.GOAL ? 'border-green-500 text-green-600' : 'border-gray-200 text-gray-500'}`}>
-                            {event.minute}'
+                            {event.minute}&apos;
                          </div>
                          
                          <div className={`p-4 rounded-xl border flex items-center justify-between group bg-white shadow-sm hover:shadow-md transition-all ${getEventColor(event.eventType)}`}>
@@ -606,7 +606,7 @@ const MatchReportForm: React.FC<MatchReportFormProps> = ({ match, onClose, onSuc
                                         className={`w-full text-center p-1 rounded border ${isPlayed ? 'border-gray-200' : 'bg-gray-50 border-transparent text-gray-400'}`}
                                         disabled={!isPlayed || isFinished}
                                         value={stats.minutesPlayed}
-                                        onChange={e => updatePlayerStat(player.id, "minutesPlayed", e.target.value)}
+                                        onChange={e => updatePlayerStat(player.id, "minutesPlayed", parseInt(e.target.value) || 0)}
                                       />
                                    </td>
                                    {/* Goals */}

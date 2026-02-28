@@ -36,7 +36,7 @@ const ClubSidebar: React.FC<ClubSidebarProps> = ({
     setMobileOpen(false);
   };
 
-  const NavContent = () => (
+  const renderNavContent = () => (
     <>
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-5 border-b border-gray-100/50">
@@ -119,7 +119,7 @@ const ClubSidebar: React.FC<ClubSidebarProps> = ({
 
       {/* Desktop sidebar */}
       <aside className="hidden h-full w-[260px] flex-col bg-white border-r border-gray-100 shadow-sm md:flex">
-        <NavContent />
+        {renderNavContent()}
       </aside>
 
       {/* Mobile overlay */}
@@ -130,7 +130,7 @@ const ClubSidebar: React.FC<ClubSidebarProps> = ({
             onClick={() => setMobileOpen(false)}
           />
           <aside className="fixed inset-y-0 left-0 w-[280px] bg-white z-50 flex flex-col shadow-2xl md:hidden animate-slide-in-right">
-            <NavContent />
+            {renderNavContent()}
           </aside>
         </>
       )}

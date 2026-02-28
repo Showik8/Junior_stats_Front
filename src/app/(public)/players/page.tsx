@@ -1,37 +1,32 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import { publicService } from "@/services/public.service";
-import { FiUser, FiSearch, FiFilter } from "react-icons/fi";
+import { FiUser } from "react-icons/fi";
 import { GiSoccerBall, GiRunningShoe, GiShield } from "react-icons/gi";
 import TopPerformers from "@/app/components/public/landing/TopPerformers";
+import PlayerFilters from "./PlayerFilters";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const POSITIONS = [
-  "ყველა",
-  "Forward",
-  "Midfielder",
-  "Defender",
-  "Goalkeeper",
-  "Winger",
-];
+export default async function PlayersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string; position?: string }>;
+}) {
+  const { search, position } = await searchParams;
+  const searchLower = search?.toLowerCase() || "";
+  const posFilter = position || "ყველა";
 
-export default function PlayersPage() {
-  const [search, setSearch] = useState("");
-  const [posFilter, setPosFilter] = useState("ყველა");
-
-  const { data: players = [], isLoading: loading } = useQuery<any[]>({
-    queryKey: ["all-players"],
-    queryFn: () => publicService.getAllPlayers(),
-  });
+  let players: any[] = [];
+  try {
+    players = await publicService.getAllPlayers();
+  } catch (error) {
+    console.error("Failed to fetch players:", error);
+  }
 
   const filtered = players.filter((p) => {
     const matchSearch =
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.teamName?.toLowerCase().includes(search.toLowerCase());
+      p.name.toLowerCase().includes(searchLower) ||
+      p.teamName?.toLowerCase().includes(searchLower);
     const matchPos = posFilter === "ყველა" || p.position === posFilter;
     return matchSearch && matchPos;
   });
@@ -40,27 +35,13 @@ export default function PlayersPage() {
     (a, b) => (b.stats?.goals || 0) - (a.stats?.goals || 0)
   );
 
-  if (loading) {
-    return (
-      <div className="min-h-[60vh] flex justify-center items-center">
-        <div className="relative">
-          <div className="w-16 h-16 border-[3px] border-white/5 border-t-emerald-500 rounded-full animate-spin" />
-          <FiUser
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/20"
-            size={20}
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div>
       {/* ═══ TOP PLAYERS (reused from landing) ═══ */}
       <TopPerformers />
 
       {/* ═══ ALL PLAYERS ═══ */}
-      <div className="max-w-[1200px] mx-auto px-6 py-10">
+      <div className="max-w-[1200px] mx-auto px-6 py-10 min-h-[50vh]">
         <h2 className="text-2xl font-black text-white mb-2 tracking-tight">
           ყველა <span className="text-(--emerald-glow)">მოთამაშე</span>
         </h2>
@@ -68,43 +49,8 @@ export default function PlayersPage() {
           მოძებნე და გაფილტრე მოთამაშეები პოზიციის მიხედვით
         </p>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-8">
-          <div className="relative flex-1">
-            <FiSearch
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30"
-              size={16}
-            />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="მოძებნე მოთამაშე ან გუნდი..."
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 placeholder-white/40 text-sm focus:outline-none focus:border-emerald-400/60 focus:bg-white/10 transition-colors"
-            />
-          </div>
-          <div className="relative">
-            <FiFilter
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30"
-              size={14}
-            />
-            <select
-              value={posFilter}
-              onChange={(e) => setPosFilter(e.target.value)}
-              className="pl-10 pr-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-emerald-400/60 focus:bg-white/10 appearance-none cursor-pointer transition-colors"
-            >
-              {POSITIONS.map((pos) => (
-                <option
-                  key={pos}
-                  value={pos}
-                  className="bg-[#0a1120] text-white"
-                >
-                  {pos}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        {/* Client Component for filtering via URL */}
+        <PlayerFilters />
 
         <div className="text-xs text-(--text-secondary) mb-6 font-semibold uppercase tracking-wider">
           {sorted.length} მოთამაშე ნაპოვნია
@@ -116,7 +62,7 @@ export default function PlayersPage() {
             <Link
               key={player.id}
               href={`/players/${player.id}`}
-              className="group glass-card rounded-2xl p-5 flex items-stretch gap-4 animate-reveal-up hover:border-emerald-400/40 hover:-translate-y-1 transition-all duration-300"
+              className="group glass-card rounded-2xl p-5 flex items-stretch gap-4 animate-reveal-up hover:border-emerald-400/40 hover:-translate-y-1 transition-all duration-300 bg-[#030303]"
               style={{ animationDelay: `${idx * 40}ms` }}
             >
               <div className="relative shrink-0">
@@ -149,7 +95,7 @@ export default function PlayersPage() {
                         {player.position || "პოზიცია მითითებული არ არის"}
                       </span>
                       {player.teamName && (
-                        <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/5 text-white/70">
+                        <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/5 text-white/70 truncate max-w-[120px]">
                           {player.teamName}
                         </span>
                       )}
@@ -192,10 +138,10 @@ export default function PlayersPage() {
         </div>
 
         {sorted.length === 0 && (
-          <div className="text-center py-16">
+          <div className="text-center py-16 bg-[#030303] rounded-3xl border border-white/5">
             <FiUser size={48} className="text-white/10 mx-auto mb-4" />
             <p className="text-(--text-secondary) text-sm">
-              მოთამაშე ვერ მოიძებნა
+              მოთამაშე ვერ მოიძებნა ამ კრიტერიუმებით
             </p>
           </div>
         )}
