@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const { data: allMatches = [], isLoading: loading } = useQuery<any[]>({
     queryKey: ["all-matches"],
     queryFn: () => publicService.getAllMatches(),
+    staleTime: 1000 * 60 * 2, // 2 minutes caching for matches
   });
 
   // ── Date helpers (using shared utilities, with SSR guard) ──
@@ -121,49 +122,53 @@ export default function DashboardPage() {
                     style={{ animationDelay: `${idx * 80}ms` }}
                   >
                     {/* Tournament badge */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                        <GiTrophy size={12} className="text-amber-400/60" />
-                        {match.tournament?.name || "ტურნირი"}
+                    <div className="flex justify-between items-center border-b border-white/5 pb-3 mb-3 md:pb-0 md:mb-4 md:border-0">
+                      <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-wider min-w-0 pr-2">
+                        <GiTrophy size={14} className="text-amber-400/60 shrink-0" />
+                        <span className="truncate">{match.tournament?.name || "ტურნირი"}</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-600">
-                        <FiClock size={11} />
+                      <div className="flex items-center gap-1.5 text-[10px] md:text-[11px] font-bold text-slate-600 shrink-0">
+                        <FiClock size={12} />
                         {safeTimeLabel(match.date)}
                       </div>
                     </div>
 
                     {/* Teams */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 md:gap-4 w-full">
                       {/* Home */}
-                      <div className="flex-1 flex items-center gap-3 justify-end text-right">
-                        <div className="min-w-0">
-                          <div className="text-sm font-bold text-white truncate group-hover:text-emerald-400 transition-colors">
+                      <div className="flex-1 min-w-0 flex items-center gap-2 md:gap-3 justify-end text-right">
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[11px] md:text-sm font-bold text-white truncate whitespace-nowrap block group-hover:text-emerald-400 transition-colors">
                             {match.homeTeam?.name || "Home"}
                           </div>
                         </div>
-                        <TeamLogo src={match.homeTeam?.logoUrl || match.homeTeam?.logo} alt={match.homeTeam?.name} size="md" />
+                        <div className="shrink-0 md:w-auto flex justify-center">
+                          <TeamLogo src={match.homeTeam?.logoUrl || match.homeTeam?.logo} alt={match.homeTeam?.name} size="md" />
+                        </div>
                       </div>
 
                       {/* Score / VS */}
-                      <div className="shrink-0 px-4">
+                      <div className="shrink-0 px-2 md:px-4">
                         {match.status === "FINISHED" ? (
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl font-black text-white tabular-nums">{match.homeScore}</span>
-                            <span className="text-sm font-bold text-slate-600">-</span>
-                            <span className="text-2xl font-black text-white tabular-nums">{match.awayScore}</span>
+                           <div className="px-2 md:px-4 py-1 bg-black/30 rounded-lg min-w-[65px] md:min-w-[80px] text-center border shadow-inner border-white/10">
+                            <span className="font-black text-sm md:text-lg tracking-wider text-white">
+                               {match.homeScore}-{match.awayScore}
+                            </span>
                           </div>
                         ) : (
-                          <div className="px-4 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                            <span className="text-xs font-bold text-emerald-400">VS</span>
+                          <div className="px-3 md:px-4 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                            <span className="text-[10px] md:text-xs font-bold text-emerald-400">VS</span>
                           </div>
                         )}
                       </div>
 
                       {/* Away */}
-                      <div className="flex-1 flex items-center gap-3">
-                        <TeamLogo src={match.awayTeam?.logoUrl || match.awayTeam?.logo} alt={match.awayTeam?.name} size="md" />
-                        <div className="min-w-0">
-                          <div className="text-sm font-bold text-white truncate group-hover:text-emerald-400 transition-colors">
+                      <div className="flex-1 min-w-0 flex items-center gap-2 md:gap-3">
+                        <div className="shrink-0 md:w-auto flex justify-center">
+                          <TeamLogo src={match.awayTeam?.logoUrl || match.awayTeam?.logo} alt={match.awayTeam?.name} size="md" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[11px] md:text-sm font-bold text-white truncate whitespace-nowrap block group-hover:text-emerald-400 transition-colors text-left">
                             {match.awayTeam?.name || "Away"}
                           </div>
                         </div>
@@ -190,7 +195,7 @@ export default function DashboardPage() {
           </div>
 
           {/* ── RIGHT: Calendar ── */}
-          <div className="lg:w-[340px] shrink-0 animate-fade-in-up delay-300">
+          <div className="w-full sm:max-w-[340px] lg:w-[340px] mx-auto lg:mx-0 shrink-0 animate-fade-in-up delay-300">
             <div className="glass-card rounded-2xl p-5 sticky top-28">
               {/* Calendar header */}
               <div className="flex items-center justify-between mb-5">

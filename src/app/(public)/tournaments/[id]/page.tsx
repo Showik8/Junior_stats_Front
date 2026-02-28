@@ -53,22 +53,25 @@ export default function TournamentDetailPage() {
           <Link
             href={`/matches/${m.id}`}
             key={m.id}
-            className="group flex items-center justify-between p-4 glass-card rounded-xl hover:transform-none! animate-reveal-up"
+            className="group flex flex-col md:flex-row md:items-center justify-between p-4 glass-card rounded-xl hover:transform-none! animate-reveal-up gap-4 md:gap-0"
             style={{ animationDelay: `${idx * 80}ms` }}
           >
-            {/* Date */}
-            <div className="w-[90px] text-sm text-slate-500 flex flex-col gap-1">
-              <span className="font-semibold">{formatShortDate(m.date)}</span>
-              <span className="text-xs opacity-70">
-                {new Date(m.date).toLocaleTimeString("ka-GE", { hour: "2-digit", minute: "2-digit" })}
-              </span>
+            {/* Date Mobile Header */}
+            <div className="flex justify-between items-center md:w-[90px] border-b border-white/5 pb-3 md:pb-0 md:border-0 md:block">
+              <div className="text-sm text-slate-500 flex md:flex-col gap-2 md:gap-1 items-center md:items-start">
+                <span className="font-semibold">{formatShortDate(m.date)}</span>
+                <span className="text-xs opacity-70">
+                  {new Date(m.date).toLocaleTimeString("ka-GE", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              </div>
+              <FiChevronRight size={16} className="md:hidden text-slate-600" />
             </div>
 
             {/* Teams */}
-            <div className="flex-1 flex items-center justify-center gap-5">
+            <div className="flex-1 flex items-center justify-between md:justify-center gap-2 md:gap-5 w-full">
               {/* Home */}
-              <div className="flex items-center gap-3 flex-1 justify-end">
-                <span className="text-white font-semibold text-sm text-right truncate">{m.homeTeam.name}</span>
+              <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 justify-end">
+                <span className="text-white font-semibold text-xs md:text-sm text-right truncate whitespace-nowrap overflow-hidden block min-w-0 w-full">{m.homeTeam.name}</span>
                 {m.homeTeam.logo ? (
                   <img src={m.homeTeam.logo} alt="" className="w-8 h-8 rounded-lg object-contain shrink-0" />
                 ) : (
@@ -79,18 +82,18 @@ export default function TournamentDetailPage() {
               </div>
 
               {/* Score */}
-              <div className={`px-4 py-1.5 rounded-lg min-w-[80px] text-center border ${
-                m.status === 'FINISHED' ? 'bg-black/30 border-white/5' : 'bg-emerald-500/5 border-emerald-500/15'
+              <div className={`px-2 md:px-4 py-1 bg-black/30 rounded-lg min-w-[65px] md:min-w-[80px] text-center border shadow-inner ${
+                m.status === 'FINISHED' ? 'border-white/10' : 'border-emerald-500/15'
               }`}>
-                <span className={`font-extrabold text-lg ${
+                <span className={`font-black text-base md:text-lg tracking-wider ${
                   m.status === 'FINISHED' ? 'text-white' : 'text-emerald-400'
                 }`}>
-                  {m.status === "FINISHED" ? `${m.homeScore} - ${m.awayScore}` : "VS"}
+                  {m.status === "FINISHED" ? `${m.homeScore}-${m.awayScore}` : "VS"}
                 </span>
               </div>
 
               {/* Away */}
-              <div className="flex items-center gap-3 flex-1">
+              <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
                 {m.awayTeam.logo ? (
                   <img src={m.awayTeam.logo} alt="" className="w-8 h-8 rounded-lg object-contain shrink-0" />
                 ) : (
@@ -98,11 +101,11 @@ export default function TournamentDetailPage() {
                     <GiShield size={14} className="text-slate-600" />
                   </div>
                 )}
-                <span className="text-white font-semibold text-sm truncate">{m.awayTeam.name}</span>
+                <span className="text-white font-semibold text-xs md:text-sm text-left truncate whitespace-nowrap overflow-hidden block min-w-0 w-full">{m.awayTeam.name}</span>
               </div>
             </div>
 
-            <div className="w-8 flex justify-end">
+            <div className="hidden md:flex w-8 justify-end">
               <FiChevronRight size={16} className="text-slate-700 group-hover:text-emerald-400 transition-colors" />
             </div>
           </Link>

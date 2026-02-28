@@ -1,265 +1,286 @@
-"use client";
-
-import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { notFound } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
-import { publicService } from "@/services/public.service";
 import {
-  FiUser, FiArrowLeft, FiAward, FiMapPin
+  FiArrowLeft,
+  FiAward,
+  FiTarget,
+  FiUsers,
+  FiCalendar,
+  FiAlertTriangle,
+  FiBookmark,
 } from "react-icons/fi";
-import { GiSoccerBall, GiRunningShoe, GiShield } from "react-icons/gi";
-import LoadingSpinner from "@/app/components/public/shared/LoadingSpinner";
-import EmptyState from "@/app/components/public/shared/EmptyState";
+import { TbRulerMeasure, TbWeight } from "react-icons/tb";
+import { BASE_URL, API_PATHS } from "@/app/utils/apiPaths";
+import { PublicPlayer } from "@/types/public";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+interface PlayerDetail extends PublicPlayer {
+  stats?: {
+    goals?: number;
+    assists?: number;
+    matches?: number;
+    yellowCards?: number;
+    redCards?: number;
+  };
+  nationality?: string;
+  age?: number;
+  height?: number;
+  weight?: number;
+  views?: number;
+  preferredFoot?: string;
+}
 
-export default function PlayerProfilePage() {
-  const { id } = useParams();
+async function getPlayer(id: string): Promise<PlayerDetail | null> {
+  try {
+    const res = await fetch(`${BASE_URL}${API_PATHS.PUBLIC.PLAYER_DETAIL(id)}`, {
+      next: { revalidate: 60 } // cache for 60 seconds
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (!json.success || !json.data) return null;
+    return json.data;
+  } catch (error) {
+    console.error("Failed to fetch player:", error);
+    return null;
+  }
+}
 
-  const { data, isLoading: loading } = useQuery<any>({
-    queryKey: ["player-detail", id],
-    queryFn: () => publicService.getPlayerDetail(id as string),
-    enabled: !!id,
-  });
-
-  if (loading) return <LoadingSpinner icon={GiSoccerBall} />;
+export default async function PlayerProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const data = await getPlayer(id);
 
   if (!data) {
-    return <EmptyState icon={FiUser} title="მოთამაშე არ მოიძებნა" />;
+    notFound();
   }
 
-  const overallRating = data.attributes
-    ? Math.round(
-        (data.attributes.pace +
-          data.attributes.shooting +
-          data.attributes.passing +
-          data.attributes.dribbling +
-          data.attributes.defense +
-          data.attributes.physical) / 6
-      )
-    : null;
-
-  const attributes = data.attributes
-    ? [
-        { label: "სისწრაფე", key: "pace", value: data.attributes.pace },
-        { label: "დარტყმა", key: "shooting", value: data.attributes.shooting },
-        { label: "პასი", key: "passing", value: data.attributes.passing },
-        { label: "დრიბლინგი", key: "dribbling", value: data.attributes.dribbling },
-        { label: "დაცვა", key: "defense", value: data.attributes.defense },
-        { label: "ფიზიკური", key: "physical", value: data.attributes.physical },
-      ]
-    : [];
+  // Fallbacks
+  const stats = data.stats || {};
+  const goals = stats.goals || 0;
+  const assists = stats.assists || 0;
+  const matches = stats.matches || 0;
+  const yellowCards = stats.yellowCards || 0;
+  const redCards = stats.redCards || 0;
 
   return (
-    <div className="relative overflow-hidden">
-      {/* ── Background ── */}
-      <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
-        style={{ backgroundImage: "url('/images/player_bg.jpeg')" }}
-      />
-      <div className="fixed inset-0 bg-linear-to-b from-[#060c1a]/80 via-[#060c1a]/90 to-[#060c1a]/98 z-0" />
+    <div className="relative min-h-screen bg-[#050505] text-white font-sans selection:bg-emerald-500/30 overflow-x-hidden">
+      
+      {/* ── BACK BUTTON ── */}
+      <Link
+        href={data.teamId ? `/teams/${data.teamId}` : "/"}
+        className="fixed top-24 left-6 md:left-10 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all shadow-lg"
+      >
+        <FiArrowLeft size={20} />
+      </Link>
 
-      {/* ── Content ── */}
-      <div className="relative z-10">
+      {/* ── HERO SECTION ── */}
+      <div className="relative w-full h-[65vh] md:h-[80vh] flex flex-col items-center justify-center overflow-hidden">
+        
+        {/* Background Image Setup using Next/Image for LCP Optimization */}
+        {data.photoUrl ? (
+          <Image 
+            src={data.photoUrl}
+            alt={data.name}
+            fill
+            priority
+            unoptimized
+            className="object-cover object-center opacity-40 mix-blend-luminosity"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-linear-to-b from-slate-800 to-[#050505] opacity-50" />
+        )}
 
-        {/* ── Back Button ── */}
-        <Link
-          href={data.teamId ? `/teams/${data.teamId}` : "/"}
-          className="fixed top-24 left-6 z-30 w-10 h-10 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all"
-        >
-          <FiArrowLeft size={18} />
-        </Link>
+        {/* Gradient Fades to mesh into black background */}
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-[#050505]/60 to-[#050505]" />
+        
+        {/* Giant Watermark Number */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[40%] text-[200px] md:text-[350px] lg:text-[450px] font-black leading-none select-none z-0 tracking-tighter pointer-events-none drop-shadow-2xl text-transparent bg-clip-text bg-linear-to-b from-blue-500/40 via-purple-500/20 to-transparent">
+          {data.shirtNumber}
+        </div>
 
-        {/* ── HERO SECTION ── */}
-        <div className="flex flex-col lg:flex-row items-center lg:items-end gap-10 lg:gap-16 max-w-6xl mx-auto px-6 pt-16 pb-12 lg:pt-24 lg:pb-0">
+        {/* Foreground Content */}
+        <div className="relative z-10 flex flex-col items-center mt-auto pb-12 w-full px-4 animate-fade-in-up">
+          
+          {/* Player Name */}
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-center tracking-tight mb-6 drop-shadow-lg [text-shadow:0_4px_24px_rgb(0_0_0/50%)]">
+            {data.name}
+          </h1>
 
-          {/* Player Image - Redesigned to be properly contained and stylish */}
-          <div className="relative w-72 lg:w-[420px] shrink-0 animate-slide-in-left group">
-            {/* Giant Background Number */}
-            <div className="absolute -top-10 -left-10 text-[240px] lg:text-[450px] font-black text-white/20 leading-none select-none z-20 tracking-tighter pointer-events-none transition-transform duration-700 group-hover:scale-105 group-hover:text-white/30 drop-shadow-2xl">
-              {data.shirtNumber}
-            </div>
-            
-            {/* Vibrant Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-emerald-500/20 blur-[120px] rounded-full pointer-events-none transition-opacity duration-700 group-hover:opacity-100 opacity-70" />
-
-            {/* Profile Image Container */}
-            <div className="relative z-10 w-full aspect-4/5 lg:aspect-3/4 rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#0a1122] transition-colors duration-500 group-hover:border-emerald-500/30">
-              {data.photoUrl ? (
-                <img
-                  src={data.photoUrl}
-                  alt={data.name}
-                  className="w-full h-full object-cover object-top opacity-90 transition-transform duration-700 group-hover:scale-105"
-                />
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center bg-linear-to-br from-slate-800 to-slate-900">
-                  <FiUser size={80} className="text-white/10 mb-6" />
-                  <span className="text-8xl font-black text-white/5">#{data.shirtNumber}</span>
-                </div>
-              )}
-              {/* Image bottom gradient fade */}
-              <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-linear-to-t from-[#0a1122] to-transparent pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Player Info - Enhanced Typography and Spacing */}
-          <div className="flex-1 pb-4 lg:pb-12 text-center lg:text-left animate-fade-in-up w-full">
-            {/* Badges */}
-            <div className="flex items-center gap-2 mb-6 justify-center lg:justify-start flex-wrap">
-              <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+          {/* Badges / Information Pills */}
+          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mb-5">
+            {data.position && (
+              <span className="px-5 py-1.5 rounded-full border border-white/20 bg-transparent backdrop-blur-md text-[10px] md:text-xs font-semibold uppercase tracking-widest text-[#9ca3af]">
                 {data.position}
               </span>
-              {data.nationality && (
-                <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
-                  <FiMapPin size={11} className="text-emerald-400" />
-                  {data.nationality}
-                </span>
-              )}
-              {data.stats?.mom > 0 && (
-                <span className="px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
-                  <FiAward size={13} /> MOM ×{data.stats.mom}
-                </span>
-              )}
-            </div>
-
-            {/* Name */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-linear-to-br from-white via-white to-white/40 uppercase tracking-tight leading-none mb-6 drop-shadow-sm">
-              {data.name}
-            </h1>
-
-            {/* Team & Bio info */}
-            <div className="flex items-center gap-5 justify-center lg:justify-start flex-wrap text-base mb-8">
-              <Link
-                href={`/teams/${data.teamId}`}
-                className="flex items-center gap-2.5 bg-white/5 px-5 py-3 rounded-2xl border border-white/10 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300 group shadow-lg shadow-black/20"
-              >
-                <GiShield className="text-emerald-500 group-hover:scale-110 transition-transform duration-300" size={20} />
-                <span className="font-bold text-white group-hover:text-emerald-400 transition-colors uppercase tracking-wide text-sm">{data.teamName}</span>
-                {data.age && (
-                  <span className="text-[11px] bg-emerald-500/20 px-2 py-0.5 rounded uppercase text-emerald-300 font-extrabold ml-1">
-                    U-{data.age}
-                  </span>
-                )}
-              </Link>
-              {data.height && (
-                <span className="text-slate-500 text-sm">
-                  {data.height} სმ {data.weight ? `/ ${data.weight} კგ` : ""}
-                </span>
-              )}
-              {data.preferredFoot && (
-                <span className="text-slate-500 text-sm">
-                  {data.preferredFoot} ფეხი
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ── STATS SECTION ── */}
-        <div className="max-w-6xl mx-auto px-6 pb-16">
-
-          {/* Key Stats Row - Enhanced Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-            {[
-              { label: "გოლი", value: data.stats?.goals || 0, icon: GiSoccerBall, color: "text-emerald-400" },
-              { label: "ასისტი", value: data.stats?.assists || 0, icon: GiRunningShoe, color: "text-blue-400" },
-              { label: "მატჩი", value: data.stats?.matches || 0, icon: GiShield, color: "text-violet-400" },
-              { label: "წუთი", value: `${data.stats?.minutes || 0}'`, icon: FiAward, color: "text-amber-400" },
-            ].map((stat, idx) => (
-              <div
-                key={stat.label}
-                className="relative rounded-2xl p-5 bg-white/5 border border-white/10 backdrop-blur-md group hover:bg-white/10 hover:border-white/20 hover:-translate-y-1 transition-all duration-300 animate-reveal-up flex flex-col items-center sm:items-start lg:flex-row lg:items-center gap-5 overflow-hidden shadow-xl shadow-black/20"
-                style={{ animationDelay: `${idx * 80}ms` }}
-              >
-                {/* Glow behind icon */}
-                <div className="absolute top-1/2 -left-4 -translate-y-1/2 w-16 h-16 bg-white/5 blur-xl group-hover:bg-white/10 transition-colors rounded-full pointer-events-none" />
-                
-                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:scale-110 transition-transform duration-300 shadow-inner">
-                  <stat.icon className={stat.color} size={22} />
-                </div>
-                
-                <div className="flex-1 text-center sm:text-left lg:text-left w-full sm:w-auto">
-                  <div className="text-[11px] font-black text-white/50 uppercase tracking-widest mb-1">{stat.label}</div>
-                  <div className={`text-3xl font-black tabular-nums leading-none drop-shadow-md text-transparent bg-clip-text bg-linear-to-br from-white to-white/60`}>
-                    {stat.value}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-            {/* ── Attributes ── */}
-            {data.attributes && (
-              <div className="lg:col-span-2 rounded-3xl p-8.5 bg-[#0a1122]/80 border border-white/10 backdrop-blur-xl animate-reveal-up delay-300 shadow-2xl shadow-black/50 group hover:border-white/20 transition-colors duration-500">
-                <div className="flex items-center justify-between mb-8 pb-5 border-b border-white/10 group-hover:border-white/20 transition-colors duration-500">
-                  <h3 className="text-lg font-black text-white flex items-center gap-3 uppercase tracking-wide">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                      <GiSoccerBall className="text-emerald-400" size={20} />
-                    </div>
-                    მონაცემები
-                  </h3>
-                  {overallRating && (
-                    <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-xl border border-white/10">
-                      <span className="text-xs font-black text-emerald-400 uppercase tracking-widest">OVR</span>
-                      <span className="text-3xl font-black text-white tabular-nums leading-none">{overallRating}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  {attributes.map((attr, idx) => (
-                    <div key={attr.key} className="animate-slide-in-right" style={{ animationDelay: `${500 + idx * 60}ms` }}>
-                      <div className="flex justify-between items-center mb-1.5">
-                        <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">{attr.label}</span>
-                        <span className="text-white font-bold text-sm tabular-nums">{attr.value}</span>
-                      </div>
-                      <div className="h-1.5 bg-white/4 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full animate-bar-fill bg-linear-to-r from-white/20 to-white/40"
-                          style={{
-                            width: `${attr.value}%`,
-                            animationDelay: `${600 + idx * 60}ms`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             )}
+            {data.teamName && (
+              <span className="px-5 py-1.5 rounded-full border border-blue-500/50 bg-transparent backdrop-blur-md text-[10px] md:text-xs font-semibold tracking-widest text-[#93c5fd]">
+                {data.teamName}
+              </span>
+            )}
+            {data.nationality && (
+              <span className="px-5 py-1.5 rounded-full border border-emerald-500/50 bg-transparent backdrop-blur-md text-[10px] md:text-xs font-semibold tracking-widest text-[#6ee7b7]">
+                {data.nationality}
+              </span>
+            )}
+          </div>
 
-            {/* ── Bio ── */}
-            <div className="lg:col-span-3 rounded-3xl p-8.5 bg-linear-to-b from-[#0a1122]/90 to-[#070c17]/90 border border-white/10 backdrop-blur-xl animate-reveal-up delay-500 flex flex-col shadow-2xl shadow-black/50 group hover:border-white/20 transition-colors duration-500">
-              <h3 className="text-lg font-black text-white mb-6 pb-5 border-b border-white/10 group-hover:border-white/20 transition-colors duration-500 flex items-center gap-3 uppercase tracking-wide">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-                  <FiUser className="text-blue-400" size={20} />
-                </div>
-                ბიოგრაფია
-              </h3>
+          <div className="text-xs font-medium text-white/40 tracking-widest uppercase">
+            {data.views || 850} ნახვა
+          </div>
+        </div>
+      </div>
 
-              <p className="text-slate-300 leading-[1.8] text-[15px] flex-1 font-medium bg-white/5 p-6 rounded-2xl border border-white/5">
-                {data.bio || "ინფორმაცია მოთამაშის შესახებ არ არის ხელმისაწვდომი."}
-              </p>
+      {/* ── STATISTICS & INFO SECTION ── */}
+      <div className="max-w-4xl lg:max-w-5xl mx-auto px-6 pb-24 relative z-20 mt-10">
+        
+        <h2 className="text-2xl md:text-[28px] font-serif font-bold text-center mb-10 text-white tracking-wide">კარიერული სტატისტიკა</h2>
 
-              {/* Quick Facts */}
-              <div className="mt-8 pt-6 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  { label: "პოზიცია", value: data.position },
-                  { label: "ნომერი", value: `#${data.shirtNumber}` },
-                  { label: "ასაკი", value: data.age ? `${data.age} წელი` : "—" },
-                  { label: "ფეხი", value: data.preferredFoot || "—" },
-                ].map((fact) => (
-                  <div key={fact.label} className="bg-[#050912]/50 p-4 rounded-xl border border-white/5 text-center">
-                    <div className="text-[11px] font-black text-emerald-400 uppercase tracking-widest mb-1.5">{fact.label}</div>
-                    <div className="text-sm font-bold text-white uppercase">{fact.value}</div>
-                  </div>
-                ))}
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-16">
+          
+          {/* Goal */}
+          <div className="flex flex-col md:flex-row items-center justify-center md:items-center md:justify-center gap-3 md:gap-6 border border-white/5 bg-[#030303] rounded-xl p-6 md:px-8 hover:border-white/15 transition-all duration-300">
+            <FiAward className="text-white shrink-0" size={20} />
+            <div className="text-center md:text-left">
+              <div className="text-2xl font-bold leading-none mb-1.5 text-white tabular-nums">{goals}</div>
+              <div className="text-[9px] uppercase tracking-widest text-white/50 font-medium">გოლი</div>
+            </div>
+          </div>
+
+          {/* Assists */}
+          <div className="flex flex-col md:flex-row items-center justify-center md:items-center md:justify-center gap-3 md:gap-6 border border-white/5 bg-[#030303] rounded-xl p-6 md:px-8 hover:border-white/15 transition-all duration-300">
+             <FiTarget className="text-white shrink-0" size={20} />
+            <div className="text-center md:text-left">
+              <div className="text-2xl font-bold leading-none mb-1.5 text-white tabular-nums">{assists}</div>
+              <div className="text-[9px] uppercase tracking-widest text-white/50 font-medium">ასისტი</div>
+            </div>
+          </div>
+
+          {/* Matches */}
+          <div className="flex flex-col md:flex-row items-center justify-center md:items-center md:justify-center gap-3 md:gap-6 border border-white/5 bg-[#030303] rounded-xl p-6 md:px-8 hover:border-white/15 transition-all duration-300">
+            <FiUsers className="text-white shrink-0" size={20} />
+            <div className="text-center md:text-left">
+              <div className="text-2xl font-bold leading-none mb-1.5 text-white tabular-nums">{matches}</div>
+              <div className="text-[9px] uppercase tracking-widest text-white/50 font-medium">მატჩი</div>
+            </div>
+          </div>
+
+          {/* Age */}
+          <div className="flex flex-col md:flex-row items-center justify-center md:items-center md:justify-center gap-3 md:gap-6 border border-white/5 bg-[#030303] rounded-xl p-6 md:px-8 hover:border-white/15 transition-all duration-300">
+            <FiCalendar className="text-white shrink-0" size={20} />
+            <div className="text-center md:text-left">
+              <div className="text-2xl font-bold leading-none mb-1.5 text-white tabular-nums">{data.age || "—"}</div>
+              <div className="text-[9px] uppercase tracking-widest text-white/50 font-medium">ასაკი</div>
+            </div>
+          </div>
+
+          {/* Yellow Cards */}
+           <div className="flex flex-col md:flex-row items-center justify-center md:items-center md:justify-center gap-3 md:gap-6 border border-white/5 bg-[#030303] rounded-xl p-6 md:px-8 hover:border-white/15 transition-all duration-300">
+            <FiAlertTriangle className="text-white shrink-0" size={20} />
+            <div className="text-center md:text-left">
+              <div className="text-2xl font-bold leading-none mb-1.5 text-white tabular-nums">{yellowCards}</div>
+              <div className="text-[9px] uppercase tracking-widest text-white/50 font-medium">ყვითელი<br/>ბარათი</div>
+            </div>
+          </div>
+
+          {/* Red Cards */}
+          <div className="flex flex-col md:flex-row items-center justify-center md:items-center md:justify-center gap-3 md:gap-6 border border-white/5 bg-[#030303] rounded-xl p-6 md:px-8 hover:border-white/15 transition-all duration-300">
+            <FiBookmark className="text-white shrink-0" size={20} />
+            <div className="text-center md:text-left">
+              <div className="text-2xl font-bold leading-none mb-1.5 text-white tabular-nums">{redCards}</div>
+              <div className="text-[9px] uppercase tracking-widest text-white/50 font-medium">წითელი<br/>ბარათი</div>
+            </div>
+          </div>
+
+          {/* Height */}
+          <div className="flex flex-col md:flex-row items-center justify-center md:items-center md:justify-center gap-3 md:gap-6 border border-white/5 bg-[#030303] rounded-xl p-6 md:px-8 hover:border-white/15 transition-all duration-300">
+            <TbRulerMeasure className="text-white shrink-0" size={20} />
+            <div className="text-center md:text-left flex flex-col items-center md:items-start">
+              <div className="text-2xl font-bold leading-none mb-1.5 text-white tabular-nums inline-flex items-baseline gap-1">
+                {data.height ? data.height : "—"}
+                {data.height && <span className="text-sm font-semibold">სმ</span>}
+              </div>
+              <div className="text-[9px] uppercase tracking-widest text-white/50 font-medium">სიმაღლე</div>
+            </div>
+          </div>
+
+          {/* Weight */}
+          <div className="flex flex-col md:flex-row items-center justify-center md:items-center md:justify-center gap-3 md:gap-6 border border-white/5 bg-[#030303] rounded-xl p-6 md:px-8 hover:border-white/15 transition-all duration-300">
+            <TbWeight className="text-white shrink-0" size={20} />
+            <div className="text-center md:text-left flex flex-col items-center md:items-start">
+              <div className="text-2xl font-bold leading-none mb-1.5 text-white tabular-nums inline-flex items-baseline gap-1">
+                 {data.weight ? data.weight : "—"}
+                 {data.weight && <span className="text-sm font-semibold">კგ</span>}
+              </div>
+              <div className="text-[9px] uppercase tracking-widest text-white/50 font-medium">წონა</div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Lower Info Panels */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          {/* Player Information */}
+          <div className="border border-white/5 bg-[#080808] rounded-2xl p-6 md:p-8 hover:border-white/10 transition-colors">
+            <h3 className="text-lg font-serif font-bold mb-6 text-white tracking-wide">პირადი ინფორმაცია</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                <span className="text-xs text-white/40 tracking-wide">სრული სახელი:</span>
+                <span className="text-sm font-bold text-white tracking-wide">{data.name}</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                <span className="text-xs text-white/40 tracking-wide">მაისურის ნომერი:</span>
+                <span className="text-sm font-bold text-blue-400">#{data.shirtNumber}</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                <span className="text-xs text-white/40 tracking-wide">პოზიცია:</span>
+                <span className="text-sm font-bold text-white tracking-wide uppercase">{data.position}</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                <span className="text-xs text-white/40 tracking-wide">მიმდინარე გუნდი:</span>
+                <span className="text-sm font-bold text-white tracking-wide">{data.teamName}</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                <span className="text-xs text-white/40 tracking-wide">ქვეყანა:</span>
+                <span className="text-sm font-bold text-white tracking-wide">{data.nationality || "—"}</span>
               </div>
             </div>
           </div>
+
+          {/* Physical Stats */}
+          <div className="border border-white/5 bg-[#080808] rounded-2xl p-6 md:p-8 hover:border-white/10 transition-colors">
+            <h3 className="text-lg font-serif font-bold mb-6 text-white tracking-wide">ფიზიკური მონაცემები</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                <span className="text-xs text-white/40 tracking-wide">ასაკი:</span>
+                <span className="text-sm font-bold text-white tracking-wide">{data.age ? `${data.age} წელი` : "—"}</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                <span className="text-xs text-white/40 tracking-wide">სიმაღლე:</span>
+                <span className="text-sm font-bold text-white tracking-wide">{data.height ? `${data.height} სმ` : "—"}</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                <span className="text-xs text-white/40 tracking-wide">წონა:</span>
+                <span className="text-sm font-bold text-white tracking-wide">{data.weight ? `${data.weight} კგ` : "—"}</span>
+              </div>
+               <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                <span className="text-xs text-white/40 tracking-wide">საუკეთესო ფეხი:</span>
+                <span className="text-sm font-bold text-white tracking-wide">{data.preferredFoot || "—"}</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                <span className="text-xs text-white/40 tracking-wide">პროფილის ნახვები:</span>
+                <span className="text-sm font-bold text-blue-400">{data.views || 850}</span>
+              </div>
+            </div>
+          </div>
+
         </div>
+
       </div>
     </div>
   );

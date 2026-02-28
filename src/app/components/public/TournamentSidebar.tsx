@@ -144,16 +144,19 @@ export default function TournamentSidebar() {
   const { data: tournaments = [], isLoading: loadingTournaments } = useQuery({
     queryKey: ["sidebar-tournaments"],
     queryFn: () => publicService.getTournaments({ limit: 50 }).then((r) => r.tournaments),
+    staleTime: 1000 * 60 * 5, // 5 minutes caching
   });
 
   const { data: teams = [], isLoading: loadingTeams } = useQuery({
     queryKey: ["sidebar-teams"],
     queryFn: () => publicService.getAllTeams(),
+    staleTime: 1000 * 60 * 5,
   });
 
   const { data: players = [], isLoading: loadingPlayers } = useQuery({
     queryKey: ["sidebar-players"],
     queryFn: () => publicService.getAllPlayers(),
+    staleTime: 1000 * 60 * 5,
   });
 
   const loading = loadingTournaments || loadingTeams || loadingPlayers;
@@ -194,30 +197,45 @@ export default function TournamentSidebar() {
 
   return (
     <>
-      {/* Mobile Toggle */}
-      <button
-        onClick={handleToggle}
-        className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30 text-white hover:bg-emerald-400 transition-colors active:scale-95"
-        aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
-        aria-expanded={isOpen}
-      >
-        {isOpen ? <FiX size={22} /> : <FiMenu size={22} />}
-      </button>
+      {/* Mobile Sticky Top Bar (Replaces floating button) */}
+      <div className="lg:hidden relative z-30 bg-[#0a1228]/95 backdrop-blur-xl border-b border-white/5 p-4 animate-fade-in-up">
+        <button
+          onClick={handleToggle}
+          className="w-full bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between transition-colors shadow-lg shadow-black/20"
+        >
+          <div className="flex items-center gap-3 text-slate-300">
+            <FiSearch size={16} />
+            <span className="text-sm font-semibold">ტურნირის / გუნდის ძიება...</span>
+          </div>
+          <FiMenu size={18} className="text-emerald-500" />
+        </button>
+      </div>
 
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
+          className="fixed inset-0 top-16 bg-black/60 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
           onClick={handleClose}
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-40 w-72 bg-[#0a1228]/98 backdrop-blur-xl border-r border-white/5 transform transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:translate-x-0 lg:static lg:h-[calc(100vh-80px)]
-        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        fixed top-16 bottom-0 left-0 z-50 w-full sm:w-80 bg-[#0a1228]/98 backdrop-blur-xl border-r border-white/5 transform transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:translate-x-0 lg:static lg:h-[calc(100vh-80px)] lg:w-72 lg:z-40
+        ${isOpen ? "translate-x-0 shadow-2xl shadow-black/50" : "-translate-x-full"}
       `}>
-        <div className="h-full overflow-y-auto p-4 flex flex-col">
+        <div className="h-full overflow-y-auto p-4 flex flex-col pt-6 lg:pt-4">
+          {/* Mobile Closer Header */}
+          <div className="lg:hidden flex items-center justify-between mb-6 px-1">
+            <h2 className="text-lg font-black text-white">ნავიგაცია</h2>
+            <button
+              onClick={handleClose}
+              className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <FiX size={18} />
+            </button>
+          </div>
+
           {/* Search */}
           <div className="relative mb-4 px-1">
             <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={14} />

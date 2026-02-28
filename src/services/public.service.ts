@@ -150,4 +150,18 @@ export const publicService = {
     );
     return response.data.data || [];
   },
+
+  /**
+   * Get global statistics summary across all tournaments
+   */
+  getGlobalStatistics: async (params?: { ageCategory?: string; limit?: number }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.ageCategory) queryParams.set("ageCategory", params.ageCategory);
+    if (params?.limit) queryParams.set("limit", String(params.limit));
+
+    const response = await publicAxios.get<ApiResponse<any>>(
+      `/api/public/statistics/summary?${queryParams.toString()}`
+    );
+    return response.data.data;
+  },
 };

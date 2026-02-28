@@ -12,22 +12,22 @@ export const metadata = {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[var(--bg-deep)] text-white">
+    <main className="min-h-screen bg-(--bg-deep) text-white">
       
       {/* 1. Hero / Video Background */}
       <HeroSection />
 
-      {/* 2. Top Performers (Players / Teams by Age) */}
-      <TopPerformers />
+      {/* 2. Animated Platform Statistics */}
+      <PlatformStats />
 
       {/* 3. Weekly Live/Upcoming Matches */}
       <WeeklyMatchesTeaser />
 
-      {/* 4. Scout / Agent Information Split */}
-      <ScoutInfoSection />
+      {/* 4. Top Performers (Players / Teams by Age) */}
+      <TopPerformers />
 
-      {/* 5. Animated Platform Statistics */}
-      <PlatformStats />
+      {/* 5. Scout / Agent Information Split */}
+      <ScoutInfoSection />
 
       {/* 6. Sponsors Scrolling Marquee */}
       <SponsorsMarquee />

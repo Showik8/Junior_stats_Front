@@ -42,7 +42,7 @@ export default function TeamsPage() {
   return (
     <div>
       {/* ═══ TOP TEAMS (reused from landing) ═══ */}
-      <TopPerformers mode="teams" />
+      <TopPerformers />
 
       {/* ═══ ALL TEAMS ═══ */}
       <div className="max-w-[1200px] mx-auto px-6 py-10">
