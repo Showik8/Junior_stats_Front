@@ -110,6 +110,7 @@ export interface Team {
   // M:N relation structure from Prisma
   tournaments?: { tournament: Tournament; status: string; joinedAt: string }[];
   standings?: Standing[];
+  sponsors?: TeamSponsor[];
   
   scheduledMatches?: Match[];
   finishedMatches?: Match[];
@@ -203,6 +204,18 @@ export interface TournamentSponsor {
   sponsorId: string;
   tier: SponsorTier;
   tournament?: Tournament;
+  sponsor?: Sponsor;
+  assignedAt?: string;
+}
+
+/**
+ * TeamSponsor join interface
+ */
+export interface TeamSponsor {
+  teamId: string;
+  sponsorId: string;
+  tier: SponsorTier;
+  team?: Team;
   sponsor?: Sponsor;
   assignedAt?: string;
 }

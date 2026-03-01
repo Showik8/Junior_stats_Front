@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Button from "./Button";
 import { adminService } from "@/services/adminService";
 import { Admin, Team, AgeCategory, AGE_CATEGORIES, CreateTeamPayload } from "@/types/admin";
+import TeamSponsorsModule from "./club/TeamSponsorsModule";
 
 interface EditClubFormProps {
   club: Team;
@@ -148,12 +149,16 @@ const EditClubForm = ({ club, admins, onSuccess, onCancel }: EditClubFormProps) 
                     </option>
                   ))}
                 </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                </div>
-            </div>
-            <p className="text-xs text-gray-400 mt-1">Select an admin to re-assign/update the club admin.</p>
+          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
         </div>
+        <p className="text-xs text-gray-400 mt-1">Select an admin to re-assign/update the club admin.</p>
+      </div>
+      </div>
+
+      <div className="col-span-1 md:col-span-2 mt-8">
+        <TeamSponsorsModule team={club} onRefresh={() => {}} />
       </div>
 
       <div className="pt-4 flex gap-4">

@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { Team } from "@/types/admin";
 import { adminService } from "@/services/adminService";
-import { removeToken } from "@/app/utils/auth";
-import { useRouter } from "next/navigation";
 import ClubSidebar from "../components/club/ClubSidebar";
 import ClubHeader from "../components/club/ClubHeader";
 import ClubOverview from "../components/club/ClubOverview";
@@ -10,6 +8,7 @@ import ClubInfo from "../components/club/ClubInfo";
 import PlayersModule from "../components/club/PlayersModule";
 import MatchesModule from "../components/club/MatchesModule";
 import TournamentsModule from "../components/club/TournamentsModule";
+import TeamSponsorsModule from "../components/club/TeamSponsorsModule";
 
 /* ── Skeleton loader ── */
 const DashboardSkeleton = () => (
@@ -89,7 +88,6 @@ const DashboardSkeleton = () => (
 );
 
 const ClubDashboard = () => {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
@@ -172,7 +170,8 @@ const ClubDashboard = () => {
             )}
             {activeTab === "players" && <PlayersModule team={team} />}
             {activeTab === "matches" && <MatchesModule team={team} />}
-            {activeTab === "tournaments" && <TournamentsModule team={team} />}
+            {activeTab === "tournaments" && team && <TournamentsModule team={team} />}
+            {activeTab === "sponsors" && team && <TeamSponsorsModule team={team} onRefresh={fetchTeamInfo} />}
             {activeTab === "settings" && (
               <div className="space-y-6">
                 <div>

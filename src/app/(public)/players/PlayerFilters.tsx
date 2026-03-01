@@ -39,7 +39,10 @@ export default function PlayerFilters() {
         params.delete("position");
       }
       
-      router.replace(`?${params.toString()}`, { scroll: false });
+      const newQueryString = params.toString();
+      if (newQueryString !== searchParams.toString()) {
+        router.replace(`?${newQueryString}`, { scroll: false });
+      }
     }, 300);
 
     return () => clearTimeout(handler);

@@ -173,4 +173,52 @@ export const sponsorService = {
       throw new Error(extractErrorMessage(error, "Failed to remove sponsor from tournament"));
     }
   },
+
+  /**
+   * Assign sponsor to a team with optional tier
+   */
+  assignToTeam: async (
+    sponsorId: string,
+    teamId: string,
+    tier?: SponsorTier
+  ): Promise<void> => {
+    try {
+      if (!sponsorId || !teamId) {
+        throw new Error("Sponsor ID and Team ID are required");
+      }
+
+      const response = await axiosInstance.post<ApiResponse<unknown>>(
+        API_PATHS.SPONSORS.ASSIGN_TEAM(sponsorId),
+        { teamId, tier }
+      );
+
+      if (!response.data.success) {
+        throw new Error(
+          response.data.error?.message || "Failed to assign sponsor to team"
+        );
+      }
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to assign sponsor to team"));
+    }
+  },
+
+  /**
+   * Remove sponsor from a team
+   */
+  removeFromTeam: async (
+    sponsorId: string,
+    teamId: string
+  ): Promise<void> => {
+    try {
+      if (!sponsorId || !teamId) {
+        throw new Error("Sponsor ID and Team ID are required");
+      }
+
+      await axiosInstance.delete(
+        API_PATHS.SPONSORS.REMOVE_TEAM(sponsorId, teamId)
+      );
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to remove sponsor from team"));
+    }
+  },
 };

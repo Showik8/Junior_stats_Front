@@ -14,7 +14,7 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
 }
 
-const AGE_GROUPS = ["U12", "U14", "U16", "U17"];
+const AGE_GROUPS = ["U12", "U14", "U15","U16", "U17"];
 const CATEGORIES = [
   { id: "scorers", label: "ბომბარდირები", icon: FaFutbol },
   { id: "assists", label: "ასისტენტები", icon: FaHandsHelping },

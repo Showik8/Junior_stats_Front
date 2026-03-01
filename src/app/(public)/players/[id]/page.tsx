@@ -16,12 +16,12 @@ import { PublicPlayer } from "@/types/public";
 import PlayerViewTracker from "@/app/components/public/PlayerViewTracker";
 
 interface PlayerDetail extends PublicPlayer {
-  stats?: {
-    goals?: number;
-    assists?: number;
-    matches?: number;
-    yellowCards?: number;
-    redCards?: number;
+  careerStats?: {
+    totalGoals?: number;
+    totalAssists?: number;
+    totalMatches?: number;
+    totalYellowCards?: number;
+    totalRedCards?: number;
   };
   nationality?: string;
   age?: number;
@@ -59,12 +59,12 @@ export default async function PlayerProfilePage({
   }
 
   // Fallbacks
-  const stats = data.stats || {};
-  const goals = stats.goals || 0;
-  const assists = stats.assists || 0;
-  const matches = stats.matches || 0;
-  const yellowCards = stats.yellowCards || 0;
-  const redCards = stats.redCards || 0;
+  const stats = data.careerStats || {};
+  const goals = stats.totalGoals || 0;
+  const assists = stats.totalAssists || 0;
+  const matches = stats.totalMatches || 0;
+  const yellowCards = stats.totalYellowCards || 0;
+  const redCards = stats.totalRedCards || 0;
 
   return (
     <div className="relative min-h-screen bg-[#050505] text-white font-sans selection:bg-emerald-500/30 overflow-x-hidden">
@@ -87,9 +87,9 @@ export default async function PlayerProfilePage({
             src={data.photoUrl}
             alt={data.name}
             fill
+            className="object-cover object-[center_30%] md:object-[center_10%] opacity-40 mix-blend-luminosity"
             priority
             unoptimized
-            className="object-cover object-center opacity-40 mix-blend-luminosity"
           />
         ) : (
           <div className="absolute inset-0 bg-linear-to-b from-slate-800 to-[#050505] opacity-50" />

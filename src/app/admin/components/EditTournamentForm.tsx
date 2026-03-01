@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Button from "./Button";
 import { adminService } from "@/services/adminService";
 import { Admin, Tournament, AgeCategory, AGE_CATEGORIES, TournamentFormat, TOURNAMENT_FORMATS, UpdateTournamentPayload } from "@/types/admin";
+import TournamentSponsorsModule from "./TournamentSponsorsModule";
 
 interface EditTournamentFormProps {
   tournament: Tournament;
@@ -246,46 +247,49 @@ const EditTournamentForm = ({ tournament, admins, onSuccess, onCancel }: EditTou
         <p className="text-xs text-gray-500 mt-2">Select all age groups included in this tournament.</p>
       </div>
 
-      {/* Advanced Section */}
-      <div className="border-t border-gray-100 pt-4">
-        <button
-          type="button"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
-        >
-          <svg className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-          </svg>
-          {showAdvanced ? "Hide Advanced Settings" : "Show Advanced Settings"}
-        </button>
-        
-        {showAdvanced && (
-          <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2">
+    <div className="border-t border-gray-100 pt-4">
+      <button
+        type="button"
+        onClick={() => setShowAdvanced(!showAdvanced)}
+        className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
+      >
+        <svg className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+        </svg>
+        {showAdvanced ? "Hide Advanced Settings" : "Show Advanced Settings"}
+      </button>
+      
+      {showAdvanced && (
+        <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2">
+          <div>
+            <label className={labelClass}>Rules (Optional)</label>
+            <textarea
+              className={`${inputClass} resize-none`}
+              rows={3}
+              placeholder="Tournament rules and regulations..."
+              value={rules}
+              onChange={(e) => setRules(e.target.value)}
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className={labelClass}>Rules (Optional)</label>
-              <textarea
-                className={`${inputClass} resize-none`}
-                rows={3}
-                placeholder="Tournament rules and regulations..."
-                value={rules}
-                onChange={(e) => setRules(e.target.value)}
-              />
+              <label className={labelClass}>Logo URL (Optional)</label>
+              <input type="url" className={inputClass} placeholder="https://example.com/logo.png" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className={labelClass}>Logo URL (Optional)</label>
-                <input type="url" className={inputClass} placeholder="https://example.com/logo.png" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} />
-              </div>
-              <div>
-                <label className={labelClass}>Banner URL (Optional)</label>
-                <input type="url" className={inputClass} placeholder="https://example.com/banner.png" value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)} />
-              </div>
+            <div>
+              <label className={labelClass}>Banner URL (Optional)</label>
+              <input type="url" className={inputClass} placeholder="https://example.com/banner.png" value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)} />
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
 
-      <div className="pt-4 flex gap-4">
+    <div className="mt-8 border-t border-gray-100 pt-8">
+      <TournamentSponsorsModule tournament={tournament} onRefresh={() => {}} />
+    </div>
+
+    <div className="pt-4 flex gap-4">
         <Button 
             type="button" 
             onClick={onCancel}

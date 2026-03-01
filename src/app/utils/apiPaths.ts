@@ -179,6 +179,9 @@ export const API_PATHS = {
     ASSIGN_TOURNAMENT: (id: string) => `/api/sponsors/${id}/tournaments`,
     REMOVE_TOURNAMENT: (id: string, tournamentId: string) =>
       `/api/sponsors/${id}/tournaments/${tournamentId}`,
+    ASSIGN_TEAM: (id: string) => `/api/sponsors/${id}/teams`,
+    REMOVE_TEAM: (id: string, teamId: string) =>
+      `/api/sponsors/${id}/teams/${teamId}`,
   },
 
   AUDIT_LOGS: {

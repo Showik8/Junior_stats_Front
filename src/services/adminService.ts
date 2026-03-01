@@ -114,6 +114,8 @@ export const adminService = {
   deleteSponsor: sponsorService.delete,
   assignSponsorToTournament: sponsorService.assignToTournament,
   removeSponsorFromTournament: sponsorService.removeFromTournament,
+  assignSponsorToTeam: sponsorService.assignToTeam,
+  removeSponsorFromTeam: sponsorService.removeFromTeam,
 
   // Audit Logs
   getAuditLogs: auditService.getAuditLogs,

@@ -10,8 +10,11 @@ import CreateSponsorForm from "../components/CreateSponsorForm";
 import EditSponsorForm from "../components/EditSponsorForm";
 import Table from "../components/Table";
 import { adminService } from "@/services/adminService";
-import { Admin, Tournament, Team, Sponsor } from "@/types/admin";
+import { Admin, Tournament, Team, Sponsor, AuditLog } from "@/types/admin";
 import Button from "../components/Button";
+import Modal from "../components/Modal";
+import TeamSponsorsModule from "../components/club/TeamSponsorsModule";
+import TournamentSponsorsModule from "../components/TournamentSponsorsModule";
 
 const SuperAdminDashboard = () => {
   const [admins, setAdmins] = useState<Admin[]>([]);
@@ -20,12 +23,19 @@ const SuperAdminDashboard = () => {
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "admins" | "tournaments" | "clubs" | "sponsors">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "admins" | "tournaments" | "clubs" | "sponsors" | "logs">("overview");
   const [viewMode, setViewMode] = useState<"list" | "create" | "edit">("list");
   const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
   const [editingTournament, setEditingTournament] = useState<Tournament | null>(null);
   const [editingClub, setEditingClub] = useState<Team | null>(null);
   const [editingSponsor, setEditingSponsor] = useState<Sponsor | null>(null);
+  
+  // Audit Logs State
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [logsPage, setLogsPage] = useState(1);
+  const [logsTotalPages, setLogsTotalPages] = useState(1);
+  const [selectedLogChanges, setSelectedLogChanges] = useState<Record<string, unknown> | null>(null);
   
   const [notification, setNotification] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -53,6 +63,28 @@ const SuperAdminDashboard = () => {
   useEffect(() => {
     fetchAllData();
   }, []);
+
+  const fetchLogs = async (page: number) => {
+    try {
+      setLogsLoading(true);
+      const res = await adminService.getAuditLogs({ page, limit: 20, sortOrder: "desc" });
+      setAuditLogs(res.logs);
+      setLogsPage(res.page);
+      setLogsTotalPages(res.totalPages);
+    } catch (error) {
+           // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      console.error("Failed to fetch audit logs:", (error as any).message);
+    } finally {
+      setLogsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "logs") {
+      fetchLogs(logsPage);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, logsPage]);
 
   const refreshData = () => {
     fetchAllData();
@@ -503,6 +535,111 @@ const SuperAdminDashboard = () => {
     </div>
   );
 
+  const renderLogsSection = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-4">
+        <div>
+            <h2 className="text-xl font-bold text-gray-800">System Audit Logs</h2>
+            <p className="text-sm text-gray-500">Track all changes made to the system.</p>
+        </div>
+        <div className="flex gap-2">
+            <Button onClick={() => fetchLogs(logsPage)} className="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50">
+               Refresh
+            </Button>
+        </div>
+      </div>
+
+      <div className="animate-in fade-in slide-in-from-bottom-2">
+        {logsLoading ? (
+             <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+             </div>
+        ) : (
+          <>
+           <Table headers={["Action", "Entity", "Admin", "Date", "Details"]}>
+             {auditLogs.map((log) => (
+               <tr key={log.id} className="hover:bg-gray-50 transition-colors">
+                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                     <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                         log.action.includes('CREATE') ? 'bg-green-100 text-green-800' :
+                         (log.action.includes('DELETE') || log.action.includes('REMOVE')) ? 'bg-red-100 text-red-800' :
+                         'bg-blue-100 text-blue-800'
+                     }`}>
+                         {log.action}
+                     </span>
+                 </td>
+                 <td className="px-6 py-4 text-sm text-gray-500">
+                    <div className="font-medium text-gray-700">{log.entity}</div>
+                    <div className="text-xs text-gray-400 font-mono break-all max-w-[150px]" title={log.entityId}>{log.entityId}</div>
+                 </td>
+                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {log.admin?.email ? (
+                        <div className="text-sm">{log.admin.email}</div>
+                    ) : (
+                        <div className="text-sm text-gray-400">ID: {log.adminId || 'System'}</div>
+                    )}
+                 </td>
+                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                     {new Date(log.createdAt).toLocaleString()}
+                 </td>
+                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    {log.changes ? (
+                       <button 
+                         onClick={() => setSelectedLogChanges(log.changes as Record<string, unknown>)}
+                         className="text-blue-600 hover:text-blue-800 transition-colors text-sm font-medium"
+                       >
+                         View Details
+                       </button>
+                    ) : (
+                       <span className="text-gray-400 text-sm italic">No data</span>
+                    )}
+                 </td>
+               </tr>
+             ))}
+             {auditLogs.length === 0 && (
+               <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500 italic">No audit logs found</td></tr>
+             )}
+           </Table>
+           
+           {/* Pagination */}
+           {auditLogs.length > 0 && (
+             <div className="flex justify-between items-center mt-6">
+                <span className="text-sm text-gray-500">Page {logsPage} of {Math.max(1, logsTotalPages)}</span>
+                <div className="flex gap-2">
+                    <Button 
+                        onClick={() => setLogsPage(p => Math.max(1, p - 1))} 
+                        disabled={logsPage <= 1}
+                        className="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                        Previous
+                    </Button>
+                    <Button 
+                        onClick={() => setLogsPage(p => Math.min(logsTotalPages, p + 1))} 
+                        disabled={logsPage >= logsTotalPages}
+                        className="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                        Next
+                    </Button>
+                </div>
+             </div>
+           )}
+          </>
+        )}
+      </div>
+      
+      {/* JSON Changes Modal */}
+      {selectedLogChanges && (
+         <Modal isOpen={!!selectedLogChanges} onClose={() => setSelectedLogChanges(null)} title="Change Details">
+             <div className="p-4 bg-gray-50 rounded-lg overflow-x-auto my-4 max-h-[60vh] overflow-y-auto w-[600px] max-w-[90vw]">
+                 <pre className="text-xs text-gray-800 font-mono whitespace-pre-wrap break-all">
+                     {JSON.stringify(selectedLogChanges, null, 2)}
+                 </pre>
+             </div>
+         </Modal>
+      )}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <SuperAdminHeader />
@@ -520,11 +657,18 @@ const SuperAdminDashboard = () => {
         )}
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-gray-200 mb-8 overflow-x-auto">
-          {(["overview", "admins", "tournaments", "clubs", "sponsors"] as const).map((tab) => (
+        <div className="flex border-b border-gray-200 mb-8 overflow-x-auto scrollbar-hide">
+          {(["overview", "admins", "tournaments", "clubs", "sponsors", "logs"] as const).map((tab) => (
              <button
                 key={tab}
-                onClick={() => { setActiveTab(tab); setViewMode("list"); }}
+                onClick={() => { 
+                   if (activeTab === tab) return;
+                   setActiveTab(tab); 
+                   setViewMode("list"); 
+                   if (tab === "logs" && auditLogs.length === 0) {
+                      setLogsPage(1);
+                   }
+                }}
                 className={`py-4 px-6 font-medium text-sm focus:outline-none whitespace-nowrap capitalize transition-all border-b-2 ${
                   activeTab === tab
                     ? "border-blue-600 text-blue-600"
@@ -549,6 +693,7 @@ const SuperAdminDashboard = () => {
                     {activeTab === "tournaments" && renderTournamentsSection()}
                     {activeTab === "clubs" && renderClubsSection()}
                     {activeTab === "sponsors" && renderSponsorsSection()}
+                    {activeTab === "logs" && renderLogsSection()}
                 </>
              )}
         </div>

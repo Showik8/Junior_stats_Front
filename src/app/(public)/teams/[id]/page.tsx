@@ -477,7 +477,7 @@ export default async function TeamDetailPage({
               </div>
             )}
           </div>
-
+          
           {/* RIGHT SIDEBAR */}
           <div className="flex flex-col gap-6">
             
@@ -556,6 +556,36 @@ export default async function TeamDetailPage({
                     </div>
                   );
                 })()}
+              </div>
+            )}
+
+            {/* SPONSORS WIDGET */}
+            {data.sponsors && data.sponsors.length > 0 && (
+              <div className="bg-[#080808] border border-white/5 rounded-2xl p-6 relative overflow-hidden animate-slide-in-right">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[50px] rounded-full" />
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-6 flex items-center gap-2 relative z-10">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  ოფიციალური სპონსორები
+                </h3>
+                <div className="grid grid-cols-2 gap-3 relative z-10">
+                  {data.sponsors.map((ts) => (
+                    <div key={ts.id} className="flex flex-col items-center justify-center p-4 bg-[#030303] border border-white/5 rounded-xl hover:border-emerald-500/20 hover:bg-white/5 transition-all group">
+                      <div className="w-12 h-12 relative mb-3 group-hover:scale-110 transition-transform">
+                        {ts.logoUrl ? (
+                          <Image src={ts.logoUrl} alt={ts.name} fill className="object-contain drop-shadow-lg" unoptimized />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-white/5 rounded-full border border-white/10 text-white/50 font-bold">
+                            {ts.name.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-white text-xs font-bold text-center truncate w-full">{ts.name}</div>
+                      <div className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1">
+                        {ts.tier} TIER
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 

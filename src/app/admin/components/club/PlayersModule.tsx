@@ -21,27 +21,187 @@ const positionConfig: Record<
   string,
   { color: string; bg: string; border: string }
 > = {
-  Goalkeeper: {
-    color: "text-amber-700",
-    bg: "bg-amber-50",
-    border: "border-amber-200",
-  },
-  Defender: {
-    color: "text-blue-700",
-    bg: "bg-blue-50",
-    border: "border-blue-200",
-  },
-  Midfielder: {
-    color: "text-emerald-700",
-    bg: "bg-emerald-50",
-    border: "border-emerald-200",
-  },
-  Forward: {
-    color: "text-red-700",
-    bg: "bg-red-50",
-    border: "border-red-200",
-  },
+  GK: { color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200" },
+  CB: { color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200" },
+  LB: { color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200" },
+  RB: { color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200" },
+  LWB: { color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200" },
+  RWB: { color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200" },
+  CDM: { color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
+  CM: { color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
+  CAM: { color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
+  RM: { color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
+  LM: { color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
+  RW: { color: "text-red-700", bg: "bg-red-50", border: "border-red-200" },
+  LW: { color: "text-red-700", bg: "bg-red-50", border: "border-red-200" },
+  ST: { color: "text-red-700", bg: "bg-red-50", border: "border-red-200" },
+  CF: { color: "text-red-700", bg: "bg-red-50", border: "border-red-200" },
 };
+
+export interface PlayerFormData {
+  name: string;
+  shirtNumber: string;
+  position: string;
+  photoUrl: string;
+  birthDate: string;
+  nationality: string;
+  height: string;
+  weight: string;
+  preferredFoot: string;
+}
+
+const PlayerFormFields = ({
+  data,
+  setData,
+  error,
+}: {
+  data: PlayerFormData;
+  setData: React.Dispatch<React.SetStateAction<PlayerFormData>>;
+  error: string | null;
+}) => (
+  <>
+    {error && (
+      <div className="p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm">
+        {error}
+      </div>
+    )}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        Full Name <span className="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        required
+        className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+        value={data.name}
+        onChange={(e) => setData({ ...data, name: e.target.value })}
+        placeholder="e.g. John Doe"
+      />
+    </div>
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          Jersey #
+        </label>
+        <div className="relative">
+          <FaTshirt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+          <input
+            type="number"
+            className="w-full pl-9 pr-4 rounded-xl border border-gray-200 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            value={data.shirtNumber}
+            onChange={(e) => setData({ ...data, shirtNumber: e.target.value })}
+            placeholder="10"
+          />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          Position
+        </label>
+        <select
+          className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white transition"
+          value={data.position}
+          onChange={(e) => setData({ ...data, position: e.target.value })}
+        >
+          <option value="">Select...</option>
+          <option value="GK">GK</option>
+          <option value="CB">CB</option>
+          <option value="LB">LB</option>
+          <option value="RB">RB</option>
+          <option value="LWB">LWB</option>
+          <option value="RWB">RWB</option>
+          <option value="CDM">CDM</option>
+          <option value="CM">CM</option>
+          <option value="CAM">CAM</option>
+          <option value="RM">RM</option>
+          <option value="LM">LM</option>
+          <option value="RW">RW</option>
+          <option value="LW">LW</option>
+          <option value="ST">ST</option>
+          <option value="CF">CF</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        Photo URL
+      </label>
+      <input
+        type="url"
+        className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+        value={data.photoUrl}
+        onChange={(e) => setData({ ...data, photoUrl: e.target.value })}
+        placeholder="https://example.com/photo.jpg"
+      />
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        Birth Date
+      </label>
+      <input
+        type="date"
+        className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+        value={data.birthDate}
+        onChange={(e) => setData({ ...data, birthDate: e.target.value })}
+      />
+    </div>
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          Nationality
+        </label>
+        <input
+          type="text"
+          className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+          value={data.nationality}
+          onChange={(e) => setData({ ...data, nationality: e.target.value })}
+          placeholder="Georgia"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          Preferred Foot
+        </label>
+        <select
+          className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white transition"
+          value={data.preferredFoot}
+          onChange={(e) => setData({ ...data, preferredFoot: e.target.value })}
+        >
+          <option value="">Select...</option>
+          <option value="Right">Right</option>
+          <option value="Left">Left</option>
+          <option value="Both">Both</option>
+        </select>
+      </div>
+    </div>
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          Height (cm)
+        </label>
+        <input
+          type="number"
+          className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+          value={data.height}
+          onChange={(e) => setData({ ...data, height: e.target.value })}
+          placeholder="180"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          Weight (kg)
+        </label>
+        <input
+          type="number"
+          className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+          value={data.weight}
+          onChange={(e) => setData({ ...data, weight: e.target.value })}
+          placeholder="75"
+        />
+      </div>
+    </div>
+  </>
+);
 
 const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -230,151 +390,6 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
 
   if (!team) return null;
 
-  // Reusable form fields component
-  const PlayerFormFields = ({
-    data,
-    setData,
-    error,
-  }: {
-    data: typeof newPlayer;
-    setData: (d: typeof newPlayer) => void;
-    error: string | null;
-  }) => (
-    <>
-      {error && (
-        <div className="p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm">
-          {error}
-        </div>
-      )}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-          Full Name <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          required
-          className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-          value={data.name}
-          onChange={(e) => setData({ ...data, name: e.target.value })}
-          placeholder="e.g. John Doe"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Jersey #
-          </label>
-          <div className="relative">
-            <FaTshirt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-            <input
-              type="number"
-              className="w-full pl-9 pr-4 rounded-xl border border-gray-200 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              value={data.shirtNumber}
-              onChange={(e) =>
-                setData({ ...data, shirtNumber: e.target.value })
-              }
-              placeholder="10"
-            />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Position
-          </label>
-          <select
-            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white transition"
-            value={data.position}
-            onChange={(e) => setData({ ...data, position: e.target.value })}
-          >
-            <option value="">Select...</option>
-            <option value="Goalkeeper">Goalkeeper</option>
-            <option value="Defender">Defender</option>
-            <option value="Midfielder">Midfielder</option>
-            <option value="Forward">Forward</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-          Photo URL
-        </label>
-        <input
-          type="url"
-          className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-          value={data.photoUrl}
-          onChange={(e) => setData({ ...data, photoUrl: e.target.value })}
-          placeholder="https://example.com/photo.jpg"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-          Birth Date
-        </label>
-        <input
-          type="date"
-          className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-          value={data.birthDate}
-          onChange={(e) => setData({ ...data, birthDate: e.target.value })}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Nationality
-          </label>
-          <input
-            type="text"
-            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-            value={data.nationality}
-            onChange={(e) => setData({ ...data, nationality: e.target.value })}
-            placeholder="Georgia"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Preferred Foot
-          </label>
-          <select
-            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white transition"
-            value={data.preferredFoot}
-            onChange={(e) => setData({ ...data, preferredFoot: e.target.value })}
-          >
-            <option value="">Select...</option>
-            <option value="Right">Right</option>
-            <option value="Left">Left</option>
-            <option value="Both">Both</option>
-          </select>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Height (cm)
-          </label>
-          <input
-            type="number"
-            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-            value={data.height}
-            onChange={(e) => setData({ ...data, height: e.target.value })}
-            placeholder="180"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Weight (kg)
-          </label>
-          <input
-            type="number"
-            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-            value={data.weight}
-            onChange={(e) => setData({ ...data, weight: e.target.value })}
-            placeholder="75"
-          />
-        </div>
-      </div>
-    </>
-  );
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -561,9 +576,9 @@ const PlayersModule: React.FC<PlayersModuleProps> = ({ team }) => {
                 </div>
                 <div className="absolute inset-x-0 bottom-0 flex justify-center gap-2 p-3 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-t from-white via-white/90 to-transparent rounded-b-2xl">
                   <button
-                    className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition text-xs"
-                    title="Edit"
-                    onClick={() => openEditModal(player)}
+                     className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition text-xs"
+                     title="Edit"
+                     onClick={() => openEditModal(player)}
                   >
                     <FaEdit />
                   </button>

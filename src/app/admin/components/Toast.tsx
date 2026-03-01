@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback, createContext, useContext } from "react";
 
-type ToastType = "success" | "error" | "warning" | "info";
+export type ToastType = "success" | "error" | "warning" | "info";
 
 interface Toast {
   id: string;

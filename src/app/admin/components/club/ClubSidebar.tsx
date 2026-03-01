@@ -9,6 +9,7 @@ import {
   FaInfoCircle,
   FaBars,
   FaTimes,
+  FaRegHandshake,
 } from "react-icons/fa";
 
 interface ClubSidebarProps {
@@ -27,6 +28,7 @@ const ClubSidebar: React.FC<ClubSidebarProps> = ({
     { id: "players", label: "Squad", icon: FaUsers },
     { id: "matches", label: "Matches", icon: FaFutbol },
     { id: "tournaments", label: "Tournaments", icon: FaTrophy },
+    { id: "sponsors", label: "Sponsors", icon: FaRegHandshake },
     { id: "info", label: "Club Info", icon: FaInfoCircle },
     { id: "settings", label: "Settings", icon: FaCog },
   ];

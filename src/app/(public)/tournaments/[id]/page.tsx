@@ -273,7 +273,7 @@ export default async function TournamentDetailPage({
                 replace
                 scroll={false}
                 className={`
-                  flex items-center gap-2 px-6 py-4 text-xs font-bold uppercase tracking-[0.1em] rounded-t-xl transition-all duration-300 whitespace-nowrap border-b-2
+                  flex items-center gap-2 px-6 py-4 text-xs font-bold uppercase tracking-widest rounded-t-xl transition-all duration-300 whitespace-nowrap border-b-2
                   ${isActive
                     ? "border-emerald-500 text-emerald-400 bg-emerald-500/5 shadow-[inset_0_-10px_20px_-10px_rgba(16,185,129,0.1)]"
                     : "border-transparent text-white/40 hover:text-white/80 hover:bg-white/5"

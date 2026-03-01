@@ -41,6 +41,13 @@ export interface PublicTeam {
   ageCategory: AgeCategory;
   city?: string | null;
   playerCount?: number;
+  sponsors?: {
+    id: string;
+    name: string;
+    logoUrl: string;
+    tier: string;
+    website?: string | null;
+  }[];
 }
 
 // ─── Player ───────────────────────────────────────────────────────────────────
