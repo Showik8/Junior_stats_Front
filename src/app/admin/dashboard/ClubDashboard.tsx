@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Team } from "@/types/admin";
 import { adminService } from "@/services/adminService";
+import { getCached, setCache, invalidateDashboardCache } from "@/app/utils/dashboardCache";
 import ClubSidebar from "../components/club/ClubSidebar";
 import ClubHeader from "../components/club/ClubHeader";
 import ClubOverview from "../components/club/ClubOverview";
@@ -93,12 +94,24 @@ const ClubDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTeamInfo = async () => {
+  const fetchTeamInfo = async (skipCache = false) => {
     try {
       setLoading(true);
+
+      if (!skipCache) {
+        const cached = getCached<Team>("club_team");
+        if (cached) {
+          setTeam(cached);
+          setError(null);
+          setLoading(false);
+          return;
+        }
+      }
+
       const data = await adminService.getMyTeamInfo();
       setTeam(data);
       setError(null);
+      setCache("club_team", data);
     } catch (err: unknown) {
       console.error("Failed to fetch team info:", err);
       setError("Failed to load club information. Please try again.");
@@ -107,8 +120,14 @@ const ClubDashboard = () => {
     }
   };
 
+  const refreshTeamInfo = () => {
+    invalidateDashboardCache();
+    fetchTeamInfo(true);
+  };
+
   useEffect(() => {
     fetchTeamInfo();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleLogout = () => {
@@ -166,12 +185,12 @@ const ClubDashboard = () => {
               <ClubOverview team={team} onNavigate={setActiveTab} />
             )}
             {activeTab === "info" && (
-              <ClubInfo team={team} onUpdate={fetchTeamInfo} />
+              <ClubInfo team={team} onUpdate={refreshTeamInfo} />
             )}
             {activeTab === "players" && <PlayersModule team={team} />}
             {activeTab === "matches" && <MatchesModule team={team} />}
             {activeTab === "tournaments" && team && <TournamentsModule team={team} />}
-            {activeTab === "sponsors" && team && <TeamSponsorsModule team={team} onRefresh={fetchTeamInfo} />}
+            {activeTab === "sponsors" && team && <TeamSponsorsModule team={team} onRefresh={refreshTeamInfo} />}
             {activeTab === "settings" && (
               <div className="space-y-6">
                 <div>

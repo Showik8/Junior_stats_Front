@@ -4,6 +4,7 @@ import { FiUser } from "react-icons/fi";
 import { GiSoccerBall, GiRunningShoe, GiShield } from "react-icons/gi";
 import TopPerformers from "@/app/components/public/landing/TopPerformers";
 import PlayerFilters from "./PlayerFilters";
+import PlayerCompareButton from "./PlayerCompareButton";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -42,12 +43,19 @@ export default async function PlayersPage({
 
       {/* ═══ ALL PLAYERS ═══ */}
       <div className="max-w-[1200px] mx-auto px-6 py-10 min-h-[50vh]">
-        <h2 className="text-2xl font-black text-white mb-2 tracking-tight">
-          ყველა <span className="text-(--emerald-glow)">მოთამაშე</span>
-        </h2>
-        <p className="text-(--text-secondary) text-sm mb-8">
-          მოძებნე და გაფილტრე მოთამაშეები პოზიციის მიხედვით
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+          <div>
+            <h2 className="text-2xl font-black text-white mb-2 tracking-tight">
+              ყველა <span className="text-(--emerald-glow)">მოთამაშე</span>
+            </h2>
+            <p className="text-(--text-secondary) text-sm">
+              მოძებნე და გაფილტრე მოთამაშეები პოზიციის მიხედვით
+            </p>
+          </div>
+
+          {/* Compare Button */}
+          <PlayerCompareButton players={sorted} />
+        </div>
 
         {/* Client Component for filtering via URL */}
         <PlayerFilters />

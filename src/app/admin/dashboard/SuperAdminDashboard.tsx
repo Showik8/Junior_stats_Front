@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import SuperAdminHeader from "../components/SuperAdminHeader";
 import CreateAdminForm from "../components/CreateAdminForm";
 import EditAdminForm from "../components/EditAdminForm";
@@ -15,6 +15,7 @@ import Button from "../components/Button";
 import Modal from "../components/Modal";
 import TeamSponsorsModule from "../components/club/TeamSponsorsModule";
 import TournamentSponsorsModule from "../components/TournamentSponsorsModule";
+import { getCached, setCache, invalidateDashboardCache } from "@/app/utils/dashboardCache";
 
 const SuperAdminDashboard = () => {
   const [admins, setAdmins] = useState<Admin[]>([]);
@@ -39,9 +40,28 @@ const SuperAdminDashboard = () => {
   
   const [notification, setNotification] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const fetchAllData = async () => {
+  const fetchAllData = async (skipCache = false) => {
     try {
       setLoading(true);
+
+      // ── Try cache first ──
+      if (!skipCache) {
+        const cachedAdmins = getCached<Admin[]>("admins");
+        const cachedTournaments = getCached<Tournament[]>("tournaments");
+        const cachedClubs = getCached<Team[]>("clubs");
+        const cachedSponsors = getCached<Sponsor[]>("sponsors");
+
+        if (cachedAdmins && cachedTournaments && cachedClubs && cachedSponsors) {
+          setAdmins(cachedAdmins);
+          setTournaments(cachedTournaments);
+          setClubs(cachedClubs);
+          setSponsors(cachedSponsors);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // ── Fetch from API ──
       const [adminsData, tournamentsData, clubsData, sponsorsData] = await Promise.all([
         adminService.getAdmins(),
         adminService.getAllTournaments(),
@@ -49,10 +69,18 @@ const SuperAdminDashboard = () => {
         adminService.getSponsors()
       ]);
       
+      const sponsorsList = sponsorsData.sponsors || [];
+
       setAdmins(adminsData);
       setTournaments(tournamentsData);
       setClubs(clubsData);
-      setSponsors(sponsorsData.sponsors || []);
+      setSponsors(sponsorsList);
+
+      // ── Write to cache ──
+      setCache("admins", adminsData);
+      setCache("tournaments", tournamentsData);
+      setCache("clubs", clubsData);
+      setCache("sponsors", sponsorsList);
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
     } finally {
@@ -62,6 +90,7 @@ const SuperAdminDashboard = () => {
 
   useEffect(() => {
     fetchAllData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchLogs = async (page: number) => {
@@ -87,7 +116,8 @@ const SuperAdminDashboard = () => {
   }, [activeTab, logsPage]);
 
   const refreshData = () => {
-    fetchAllData();
+    invalidateDashboardCache();
+    fetchAllData(true);
     setViewMode("list");
     setEditingAdmin(null);
     setEditingTournament(null);
@@ -543,7 +573,7 @@ const SuperAdminDashboard = () => {
             <p className="text-sm text-gray-500">Track all changes made to the system.</p>
         </div>
         <div className="flex gap-2">
-            <Button onClick={() => fetchLogs(logsPage)} className="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50">
+            <Button onClick={() => fetchLogs(logsPage)}>
                Refresh
             </Button>
         </div>
@@ -609,14 +639,14 @@ const SuperAdminDashboard = () => {
                     <Button 
                         onClick={() => setLogsPage(p => Math.max(1, p - 1))} 
                         disabled={logsPage <= 1}
-                        className="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                        variant="secondary"
                     >
                         Previous
                     </Button>
                     <Button 
                         onClick={() => setLogsPage(p => Math.min(logsTotalPages, p + 1))} 
                         disabled={logsPage >= logsTotalPages}
-                        className="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                        variant="secondary"
                     >
                         Next
                     </Button>
@@ -657,7 +687,7 @@ const SuperAdminDashboard = () => {
         )}
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-gray-200 mb-8 overflow-x-auto scrollbar-hide">
+        <div className="flex flex-wrap border-b border-gray-200 mb-8">
           {(["overview", "admins", "tournaments", "clubs", "sponsors", "logs"] as const).map((tab) => (
              <button
                 key={tab}

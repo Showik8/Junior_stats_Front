@@ -1,33 +1,79 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { publicService } from "@/services/public.service";
-import { FiUsers, FiSearch, FiChevronRight } from "react-icons/fi";
+import { FiSearch, FiChevronRight, FiFilter, FiChevronDown } from "react-icons/fi";
 import { GiShield, GiWhistle, GiSoccerBall } from "react-icons/gi";
+import { HiOutlineScale } from "react-icons/hi";
+import { AGE_CATEGORIES } from "@/types/admin";
 import LoadingSpinner from "@/app/components/public/shared/LoadingSpinner";
+import TeamCompareModal from "@/app/components/public/compare/TeamCompareModal";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+type SortOption = "points" | "wins" | "goals" | "name";
+
 export default function TeamsPage() {
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
+  const [sortBy, setSortBy] = useState<SortOption>("points");
+  const [showFilters, setShowFilters] = useState(false);
+  const [showCompare, setShowCompare] = useState(false);
 
   const { data: teams = [], isLoading: loading } = useQuery<any[]>({
     queryKey: ["all-teams"],
     queryFn: () => publicService.getAllTeams(),
   });
 
-  const filtered = teams.filter(
-    (t) =>
-      t.name.toLowerCase().includes(search.toLowerCase()) ||
-      t.coach?.toLowerCase().includes(search.toLowerCase())
-  );
+  // Extract unique categories from the data
+  const availableCategories = useMemo(() => {
+    const cats = new Set<string>();
+    teams.forEach((t) => {
+      if (t.ageCategory) cats.add(t.ageCategory);
+    });
+    // Sort by the predefined order
+    return AGE_CATEGORIES.filter((c) => cats.has(c));
+  }, [teams]);
 
-  const sorted = [...filtered].sort(
-    (a, b) => (b.stats?.points || 0) - (a.stats?.points || 0)
-  );
+  // Filter + Sort
+  const processed = useMemo(() => {
+    let result = [...teams];
+
+    // Search filter
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (t) =>
+          t.name.toLowerCase().includes(q) ||
+          t.coach?.toLowerCase().includes(q)
+      );
+    }
+
+    // Age category filter
+    if (selectedCategory !== "ALL") {
+      result = result.filter((t) => t.ageCategory === selectedCategory);
+    }
+
+    // Sorting
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case "wins":
+          return (b.stats?.wins || 0) - (a.stats?.wins || 0);
+        case "goals":
+          return (b.stats?.goalsFor || 0) - (a.stats?.goalsFor || 0);
+        case "name":
+          return a.name.localeCompare(b.name);
+        case "points":
+        default:
+          return (b.stats?.points || 0) - (a.stats?.points || 0);
+      }
+    });
+
+    return result;
+  }, [teams, search, selectedCategory, sortBy]);
 
   if (loading) {
     return <LoadingSpinner icon={GiShield} />;
@@ -35,20 +81,27 @@ export default function TeamsPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] selection:bg-blue-500/30">
-
-      {/* ═══ ALL TEAMS ═══ */}
       <div className="max-w-6xl mx-auto px-6 py-16">
-        
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 mb-12">
+
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 mb-10">
           <div>
             <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight drop-shadow-lg [text-shadow:0_4px_24px_rgb(0_0_0/50%)]">
               ყველა <span className="text-transparent bg-clip-text bg-linear-to-r from-[#6ee7b7] to-blue-400">გუნდი</span>
             </h2>
             <p className="text-white/40 text-sm mt-3 font-medium tracking-wide">
-              მოძებნე გუნდი ან მწვრთნელი სახელით
+              მოძებნე, გაფილტრე ასაკობრივი კატეგორიით ან დაალაგე შედეგების მიხედვით
             </p>
           </div>
+
+          {/* Compare Button */}
+          <button
+            onClick={() => setShowCompare(true)}
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold hover:bg-emerald-500/20 transition-all shadow-[0_0_20px_-4px_rgba(110,231,183,0.15)] whitespace-nowrap"
+          >
+            <HiOutlineScale size={18} />
+            შედარება
+          </button>
 
           {/* Search */}
           <div className="relative w-full md:w-80 group">
@@ -63,14 +116,95 @@ export default function TeamsPage() {
           </div>
         </div>
 
+        {/* Filters Bar */}
+        <div className="mb-8 space-y-4">
+          {/* Toggle filters on mobile + Sort dropdown */}
+          <div className="flex items-center justify-between gap-4">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/60 text-sm font-semibold hover:bg-white/10 transition-all md:hidden"
+            >
+              <FiFilter size={14} />
+              ფილტრი
+              <FiChevronDown size={14} className={`transition-transform ${showFilters ? "rotate-180" : ""}`} />
+            </button>
+
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-black text-white/20 uppercase tracking-widest hidden sm:inline">დალაგება:</span>
+              <div className="flex gap-1 bg-white/5 rounded-xl p-1 border border-white/5">
+                {([
+                  { key: "points", label: "ქულები" },
+                  { key: "wins", label: "მოგებები" },
+                  { key: "goals", label: "გოლები" },
+                  { key: "name", label: "სახელი" },
+                ] as { key: SortOption; label: string }[]).map((opt) => (
+                  <button
+                    key={opt.key}
+                    onClick={() => setSortBy(opt.key)}
+                    className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${
+                      sortBy === opt.key
+                        ? "bg-emerald-500/20 text-emerald-400 shadow-sm"
+                        : "text-white/30 hover:text-white/60"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Age Category Pills — always visible on desktop, toggleable on mobile */}
+          <div className={`flex flex-wrap gap-2 ${showFilters ? "block" : "hidden md:flex"}`}>
+            <button
+              onClick={() => setSelectedCategory("ALL")}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${
+                selectedCategory === "ALL"
+                  ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_-4px_rgba(110,231,183,0.2)]"
+                  : "bg-white/5 border-white/5 text-white/30 hover:text-white/60 hover:bg-white/10"
+              }`}
+            >
+              ყველა
+            </button>
+            {availableCategories.map((cat) => {
+              const count = teams.filter((t) => t.ageCategory === cat).length;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border flex items-center gap-2 ${
+                    selectedCategory === cat
+                      ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_-4px_rgba(110,231,183,0.2)]"
+                      : "bg-white/5 border-white/5 text-white/30 hover:text-white/60 hover:bg-white/10"
+                  }`}
+                >
+                  {cat.replace("_", "-")}
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
+                    selectedCategory === cat ? "bg-emerald-500/20 text-emerald-300" : "bg-white/5 text-white/20"
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Results Count */}
         <div className="flex items-center gap-3 text-xs text-white/30 font-bold uppercase tracking-widest mb-8 border-b border-white/5 pb-4">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/80" />
-          {sorted.length} გუნდი ნაპოვნია
+          {processed.length} გუნდი ნაპოვნია
+          {selectedCategory !== "ALL" && (
+            <span className="text-emerald-400/60 ml-1">
+              • {selectedCategory.replace("_", "-")}
+            </span>
+          )}
         </div>
 
         {/* Teams Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sorted.map((team, idx) => (
+          {processed.map((team, idx) => (
             <Link
               key={team.id}
               href={`/teams/${team.id}`}
@@ -108,7 +242,7 @@ export default function TeamsPage() {
                   <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                     {team.ageCategory && (
                       <span className="px-2.5 py-1 rounded-full bg-black/50 border border-white/10 text-[9px] font-black uppercase text-white/50 tracking-widest backdrop-blur-sm">
-                        {team.ageCategory}
+                        {team.ageCategory.replace("_", "-")}
                       </span>
                     )}
                     {team.coach && (
@@ -145,13 +279,26 @@ export default function TeamsPage() {
           ))}
         </div>
 
-        {sorted.length === 0 && (
+        {processed.length === 0 && (
           <div className="text-center py-24 bg-[#030303] border border-white/5 rounded-3xl mt-6">
             <GiShield size={64} className="text-white/5 mx-auto mb-6" />
             <p className="text-white/30 text-sm font-bold uppercase tracking-widest">დაემთხვევა ვერ მოიძებნა</p>
+            {selectedCategory !== "ALL" && (
+              <button
+                onClick={() => setSelectedCategory("ALL")}
+                className="mt-4 text-xs text-emerald-400/60 hover:text-emerald-400 font-semibold transition-colors"
+              >
+                ყველა კატეგორიის ჩვენება →
+              </button>
+            )}
           </div>
         )}
       </div>
+
+      {/* Compare Modal */}
+      {showCompare && (
+        <TeamCompareModal teams={teams} onClose={() => setShowCompare(false)} />
+      )}
     </div>
   );
 }
