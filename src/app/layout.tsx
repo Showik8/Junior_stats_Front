@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ka" className={inter.variable}>
-      <body className={`${inter.className} antialiased`}>
+      <body suppressHydrationWarning className={`${inter.className} antialiased`}>
         <QueryProvider>
           {children}
         </QueryProvider>
