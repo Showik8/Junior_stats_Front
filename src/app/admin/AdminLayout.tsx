@@ -1,48 +1,59 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getUserRole } from "../utils/auth";
 import ClubDashboard from "./dashboard/ClubDashboard";
 import TournamentDashboard from "./dashboard/TournamentDashboard";
-import Header from "./ui/Header";
-
+import SuperAdminDashboard from "./dashboard/SuperAdminDashboard";
 
 const AdminLayout = () => {
+  const router = useRouter();
   const [role, setRole] = useState<string | undefined>(undefined);
-  const [loading, setLoading] = useState(true);
-
-  
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    const userRole = getUserRole();
-    setRole(userRole);
-    setLoading(false);
-  }, []);
+    const checkAuth = () => {
+      const userRole = getUserRole();
+      if (!userRole) {
+        router.push("/sign-in");
+      } else {
+        setRole(userRole);
+      }
+      setIsChecking(false);
+    };
 
-  if (loading) {
-    return <div>Loading...</div>;
+    checkAuth();
+  }, [router]);
+
+  if (isChecking) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
-  if(!role){
-    return window.location.href = "/sign-in"
+  if (!role) {
+    return null; // Will redirect
   }
 
   if (role === "CLUB_ADMIN") {
-    return <>
-    <Header/>
-    <ClubDashboard />
-    </>;
+    return <ClubDashboard />;
   }
 
   if (role === "TOURNAMENT_ADMIN") {
-    return <>
-      <Header/>
-      <TournamentDashboard />
-    </>;
+    return <TournamentDashboard />;
   }
-  
 
+  if (role === "SUPER_ADMIN") {
+    return <SuperAdminDashboard />;
+  }
 
-  return <div>Unauthorized access</div>;
+  return (
+    <div className="flex justify-center items-center h-screen bg-gray-50 text-gray-600 font-medium">
+      Unauthorized access
+    </div>
+  );
 };
 
 export default AdminLayout;

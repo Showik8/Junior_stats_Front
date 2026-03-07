@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import axiosInstance from "@/app/utils/axios";
 import { API_PATHS } from "@/app/utils/apiPaths";
-import { setToken, setUserRole } from "@/app/utils/auth";
+import { setToken, setRefreshToken, setUserRole } from "@/app/utils/auth";
 import { useRouter } from 'next/navigation'
 
 export default function SignInPage() {
@@ -18,22 +18,27 @@ export default function SignInPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    const signInData = {
-      email,
-      password,
-    };
-
     try {
-      const response = await axiosInstance.post(API_PATHS.ADMIN.LOGIN, signInData);
-      const { token, role } = response.data;
-      
-      if (token) {
-        setToken(token);
+      const response = await axiosInstance.post<{
+        success: boolean;
+        data?: { accessToken: string; refreshToken: string; role: string };
+        error?: { message: string };
+      }>(API_PATHS.ADMIN.LOGIN, { email, password });
+
+      if (response.data.success && response.data.data) {
+        const { accessToken, refreshToken, role } = response.data.data;
+        setToken(accessToken);
+        setRefreshToken(refreshToken);
         if (role) setUserRole(role);
-        router.push("/admin" )
+        router.push("/admin");
+      } else {
+        const errorMessage = response.data.error?.message || "Login failed";
+        alert(errorMessage);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Login failed:", error);
+      const errorMessage = (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || (error as Error)?.message || "Login failed. Please try again.";
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -116,6 +121,17 @@ export default function SignInPage() {
             </button>
           </form>
 
+          <div className="mt-6 text-center">
+            <Link
+              href="/"
+              className="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors inline-flex items-center gap-1.5"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Return to Homepage
+            </Link>
+          </div>
         </div>
       </div>
     </div>
