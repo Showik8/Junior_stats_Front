@@ -164,7 +164,7 @@ export default function PlayerCompareModal({ players, onClose }: Props) {
   const bothSelected = playerA && playerB;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
@@ -216,7 +216,7 @@ export default function PlayerCompareModal({ players, onClose }: Props) {
               </div>
 
               {/* Stat Bars */}
-              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5">
+              <div className="bg-white/2 border border-white/5 rounded-2xl p-5">
                 <StatBar label="გოლი" valueA={statsA.goals || 0} valueB={statsB.goals || 0} />
                 <StatBar label="ასისტი" valueA={statsA.assists || 0} valueB={statsB.assists || 0} />
                 <StatBar label="მატჩი" valueA={statsA.matches || 0} valueB={statsB.matches || 0} />
@@ -225,7 +225,7 @@ export default function PlayerCompareModal({ players, onClose }: Props) {
               </div>
 
               {/* Physical comparison */}
-              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 mt-3">
+              <div className="bg-white/2 border border-white/5 rounded-2xl p-5 mt-3">
                 <div className="text-[10px] text-white/20 font-bold uppercase tracking-widest text-center mb-3">ფიზიკური მონაცემები</div>
                 <div className="grid grid-cols-3 gap-4">
                   {[
