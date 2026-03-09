@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { Tournament, Team, Match, AgeCategory } from "@/types/admin";
 import { adminService } from "@/services/adminService";
 import { removeToken } from "@/app/utils/auth";
+import { getCached, setCache, invalidateDashboardCache } from "@/app/utils/dashboardCache";
 import TournamentInfo from "../components/TournamentInfo";
 import MembersManagement from "../components/MembersManagement";
 import MatchManagement from "../components/MatchManagement";
@@ -113,10 +114,28 @@ const TournamentDashboard: React.FC = () => {
   const [activeAgeCategory, setActiveAgeCategory] = useState<AgeCategory | null>(null);
   const [activeTab, setActiveTab] = useState<DashboardTab>("matches");
 
-  const fetchTournamentInfo = async () => {
+  const fetchTournamentInfo = async (skipCache = false) => {
     try {
+      if (!skipCache) {
+        const cached = getCached<Tournament[]>("tourn_managed");
+        if (cached && cached.length > 0) {
+          setTournaments(cached);
+          const activeTourn = cached[0];
+          setTournament(activeTourn);
+          if (!activeAgeCategory && activeTourn) {
+            if (activeTourn.ageCategories && activeTourn.ageCategories.length > 0) {
+              setActiveAgeCategory(activeTourn.ageCategories[0].ageCategory);
+            } else if (activeTourn.ageCategory) {
+              setActiveAgeCategory(activeTourn.ageCategory as AgeCategory);
+            }
+          }
+          return cached;
+        }
+      }
+
       const fetchedTournaments = await adminService.getMyManagedTournaments();
       setTournaments(fetchedTournaments);
+      setCache("tourn_managed", fetchedTournaments);
       
       const activeTourn = fetchedTournaments.length > 0 ? fetchedTournaments[0] : null;
       setTournament(activeTourn);
@@ -137,15 +156,28 @@ const TournamentDashboard: React.FC = () => {
     }
   };
 
-  const fetchCategoryData = async (tournId: string, category: AgeCategory) => {
+  const fetchCategoryData = async (tournId: string, category: AgeCategory, skipCache = false) => {
     try {
       setLoading(true);
+
+      const cacheKey = `tourn_cat_${tournId}_${category}`;
+      if (!skipCache) {
+        const cached = getCached<{ teams: Team[]; matches: Match[] }>(cacheKey);
+        if (cached) {
+          setTeams(cached.teams);
+          setMatches(cached.matches);
+          setLoading(false);
+          return;
+        }
+      }
+
       const [fetchedTeams, fetchedMatches] = await Promise.all([
         adminService.getTeams(tournId, category),
         adminService.getMatches(tournId, category),
       ]);
       setTeams(fetchedTeams);
       setMatches(fetchedMatches);
+      setCache(cacheKey, { teams: fetchedTeams, matches: fetchedMatches });
     } catch (err: unknown) {
       console.error("Category data fetch error:", err);
     } finally {
@@ -171,8 +203,9 @@ const TournamentDashboard: React.FC = () => {
   }, [activeAgeCategory, tournament]);
 
   const handleRefresh = () => {
+    invalidateDashboardCache();
     if (tournament && activeAgeCategory) {
-      fetchCategoryData(tournament.id, activeAgeCategory);
+      fetchCategoryData(tournament.id, activeAgeCategory, true);
     }
   };
 

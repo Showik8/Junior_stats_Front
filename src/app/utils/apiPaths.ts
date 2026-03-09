@@ -191,4 +191,26 @@ export const API_PATHS = {
     ENTITY: (entity: string, entityId: string) =>
       `/api/audit-logs/entity/${entity}/${entityId}`,
   },
+
+  REFEREES: {
+    // GET /api/referees - List all referees
+    LIST: "/api/referees",
+    // POST /api/referees - Create referee
+    CREATE: "/api/referees",
+    // GET /api/referees/:id - Get referee by ID
+    GET_BY_ID: (id: number) => `/api/referees/${id}`,
+    // PUT /api/referees/:id - Update referee
+    UPDATE: (id: number) => `/api/referees/${id}`,
+    // DELETE /api/referees/:id - Delete referee
+    DELETE: (id: number) => `/api/referees/${id}`,
+    // POST /api/referees/assign - Assign referee to match
+    ASSIGN: "/api/referees/assign",
+    // DELETE /api/referees/assign/:matchId/:refereeId - Remove assignment
+    REMOVE_ASSIGNMENT: (matchId: string, refereeId: number) =>
+      `/api/referees/assign/${matchId}/${refereeId}`,
+    // GET /api/referees/match/:matchId - Get referees for a match
+    BY_MATCH: (matchId: string) => `/api/referees/match/${matchId}`,
+    // GET /api/referees/my-matches - Get matches for logged-in referee
+    MY_MATCHES: "/api/referees/my-matches",
+  },
 };

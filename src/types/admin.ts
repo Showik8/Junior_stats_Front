@@ -24,7 +24,7 @@ export const AGE_CATEGORIES: AgeCategory[] = [
 /**
  * Roles matching backend Enum
  */
-export type Role = "SUPER_ADMIN" | "CLUB_ADMIN" | "TOURNAMENT_ADMIN";
+export type Role = "SUPER_ADMIN" | "CLUB_ADMIN" | "TOURNAMENT_ADMIN" | "REFEREE";
 
 /**
  * Match status values from backend Prisma schema
@@ -254,6 +254,7 @@ export interface Match {
   tournament?: Tournament;
   playerStats?: MatchPlayerStatistic[];
   events?: MatchEvent[];
+  referees?: MatchReferee[];
   
   createdAt?: string;
   updatedAt?: string;
@@ -643,4 +644,69 @@ export interface KnockoutMatch {
   status: MatchStatus;
   date: string;
   nextMatchId?: string | null;
+}
+
+/**
+ * Referee role in a match
+ */
+export type RefereeRole = "MAIN" | "ASSISTANT_1" | "ASSISTANT_2" | "FOURTH_OFFICIAL";
+
+export const REFEREE_ROLES: { value: RefereeRole; label: string }[] = [
+  { value: "MAIN", label: "მთავარი მსაჯი" },
+  { value: "ASSISTANT_1", label: "ასისტენტი 1" },
+  { value: "ASSISTANT_2", label: "ასისტენტი 2" },
+  { value: "FOURTH_OFFICIAL", label: "მეოთხე მსაჯი" },
+];
+
+/**
+ * Referee interface matching backend Prisma Referee model
+ */
+export interface Referee {
+  id: number;
+  adminId: number;
+  firstName: string;
+  lastName: string;
+  phone?: string | null;
+  photoUrl?: string | null;
+  admin?: Admin;
+  matches?: MatchReferee[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * MatchReferee join interface
+ */
+export interface MatchReferee {
+  id: string;
+  matchId: string;
+  refereeId: number;
+  role: RefereeRole;
+  referee?: Referee;
+  match?: Match;
+  createdAt?: string;
+}
+
+/**
+ * CreateRefereePayload
+ */
+export interface CreateRefereePayload {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  photoUrl?: string;
+}
+
+/**
+ * UpdateRefereePayload
+ */
+export interface UpdateRefereePayload {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  photoUrl?: string;
+  email?: string;
+  password?: string;
 }

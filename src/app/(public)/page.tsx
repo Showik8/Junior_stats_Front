@@ -1,8 +1,7 @@
 import HeroSection from "@/app/components/public/landing/HeroSection";
-import WeeklyMatchesTeaser from "@/app/components/public/landing/WeeklyMatchesTeaser";
 import TopPerformers from "@/app/components/public/landing/TopPerformers";
-import ScoutInfoSection from "@/app/components/public/landing/ScoutInfoSection";
 import PlatformStats from "@/app/components/public/landing/PlatformStats";
+import WeeklyMatchesTeaser from "@/app/components/public/landing/WeeklyMatchesTeaser";
 import SponsorsMarquee from "@/app/components/public/landing/SponsorsMarquee";
 
 export const metadata = {
@@ -12,25 +11,22 @@ export const metadata = {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-(--bg-deep) text-white">
-      
-      {/* 1. Hero / Video Background */}
+    <main className="min-h-screen bg-[#060c1a] text-white">
+
+      {/* 1. Hero — split layout */}
       <HeroSection />
+      <SponsorsMarquee />
 
-      {/* 2. Animated Platform Statistics */}
-      <PlatformStats />
-
-      {/* 3. Weekly Live/Upcoming Matches */}
-      <WeeklyMatchesTeaser />
-
-      {/* 4. Top Performers (Players / Teams by Age) */}
+      {/* 2. Top Performers — player cards with rank badges */}
       <TopPerformers />
 
-      {/* 5. Scout / Agent Information Split */}
-      <ScoutInfoSection />
+      {/* 3. Platform Indicators — 4 stats cards */}
+      <PlatformStats />
 
-      {/* 6. Sponsors Scrolling Marquee */}
-      <SponsorsMarquee />
+      {/* 4. Matches of the week — horizontal scroll */}
+      <WeeklyMatchesTeaser />
+
+      {/* 5. Sponsors Scrolling Marquee */}
 
     </main>
   );
