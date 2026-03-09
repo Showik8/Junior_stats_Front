@@ -8,9 +8,12 @@ import CreateClubForm from "../components/CreateClubForm";
 import EditClubForm from "../components/EditClubForm";
 import CreateSponsorForm from "../components/CreateSponsorForm";
 import EditSponsorForm from "../components/EditSponsorForm";
+import CreateRefereeForm from "../components/CreateRefereeForm";
+import EditRefereeForm from "../components/EditRefereeForm";
 import Table from "../components/Table";
 import { adminService } from "@/services/adminService";
-import { Admin, Tournament, Team, Sponsor, AuditLog } from "@/types/admin";
+import { refereeService } from "@/services/referee.service";
+import { Admin, Tournament, Team, Sponsor, AuditLog, Referee } from "@/types/admin";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
 import TeamSponsorsModule from "../components/club/TeamSponsorsModule";
@@ -24,12 +27,14 @@ const SuperAdminDashboard = () => {
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "admins" | "tournaments" | "clubs" | "sponsors" | "logs">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "admins" | "tournaments" | "clubs" | "sponsors" | "referees" | "logs">("overview");
   const [viewMode, setViewMode] = useState<"list" | "create" | "edit">("list");
   const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
   const [editingTournament, setEditingTournament] = useState<Tournament | null>(null);
   const [editingClub, setEditingClub] = useState<Team | null>(null);
   const [editingSponsor, setEditingSponsor] = useState<Sponsor | null>(null);
+  const [editingReferee, setEditingReferee] = useState<Referee | null>(null);
+  const [referees, setReferees] = useState<Referee[]>([]);
   
   // Audit Logs State
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -118,12 +123,27 @@ const SuperAdminDashboard = () => {
   const refreshData = () => {
     invalidateDashboardCache();
     fetchAllData(true);
+    fetchReferees();
     setViewMode("list");
     setEditingAdmin(null);
     setEditingTournament(null);
     setEditingClub(null);
     setEditingSponsor(null);
+    setEditingReferee(null);
   };
+
+  const fetchReferees = async () => {
+    try {
+      const data = await refereeService.getReferees();
+      setReferees(data);
+    } catch (e) {
+      console.error("Failed to fetch referees:", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchReferees();
+  }, []);
 
   const handleEditAdmin = (admin: Admin) => {
     setEditingAdmin(admin);
@@ -193,6 +213,23 @@ const SuperAdminDashboard = () => {
     } catch (error) {
            // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const msg = (error as any).message || "Failed to delete sponsor";
+      setNotification({ type: "error", text: msg });
+    }
+  };
+
+  const handleEditReferee = (referee: Referee) => {
+    setEditingReferee(referee);
+    setViewMode("edit");
+  };
+
+  const handleDeleteReferee = async (id: number) => {
+    if (!window.confirm("ნამდვილად გსურთ ამ მსაჯის წაშლა?")) return;
+    try {
+      await refereeService.deleteReferee(id);
+      setNotification({ type: "success", text: "მსაჯი წაიშალა" });
+      refreshData();
+    } catch (error) {
+      const msg = (error as Error).message || "Failed to delete referee";
       setNotification({ type: "error", text: msg });
     }
   };
@@ -565,6 +602,72 @@ const SuperAdminDashboard = () => {
     </div>
   );
 
+  const renderRefereesSection = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-4">
+        <div>
+           <h2 className="text-xl font-bold text-gray-800">მსაჯების მართვა</h2>
+           <p className="text-sm text-gray-500">დაარეგისტრირეთ და მართეთ მსაჯები.</p>
+        </div>
+        <Button onClick={() => setViewMode(viewMode === "list" ? "create" : "list")}>
+          {viewMode === "list" ? "ახალი მსაჯის დამატება" : "სიაზე დაბრუნება"}
+        </Button>
+      </div>
+
+      {viewMode === "create" ? (
+        <CreateRefereeForm onSuccess={refreshData} />
+      ) : viewMode === "edit" && editingReferee ? (
+        <EditRefereeForm
+          referee={editingReferee}
+          onSuccess={refreshData}
+          onCancel={() => { setViewMode("list"); setEditingReferee(null); }}
+        />
+      ) : (
+        <div className="animate-in fade-in slide-in-from-bottom-2">
+           <Table headers={["სახელი", "ელ-ფოსტა", "ტელეფონი", "შექმნის თარიღი", "მოქმედებები"]}>
+             {referees.map((referee) => (
+               <tr key={referee.id} className="hover:bg-gray-50 transition-colors">
+                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                   {referee.firstName} {referee.lastName}
+                 </td>
+                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                   {referee.admin?.email || "—"}
+                 </td>
+                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                   {referee.phone || "—"}
+                 </td>
+                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                   {referee.createdAt ? new Date(referee.createdAt).toLocaleDateString() : "N/A"}
+                 </td>
+                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                   <div className="flex space-x-2">
+                       <button
+                         onClick={() => handleEditReferee(referee)}
+                         className="text-gray-400 hover:text-blue-600 transition-colors"
+                         title="რედაქტირება"
+                       >
+                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                       </button>
+                       <button
+                         onClick={() => handleDeleteReferee(referee.id)}
+                         className="text-gray-400 hover:text-red-600 transition-colors"
+                         title="წაშლა"
+                       >
+                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                       </button>
+                   </div>
+                 </td>
+               </tr>
+             ))}
+             {referees.length === 0 && (
+               <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500 italic">მსაჯები ვერ მოიძებნა</td></tr>
+             )}
+           </Table>
+        </div>
+      )}
+    </div>
+  );
+
   const renderLogsSection = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-4">
@@ -688,7 +791,7 @@ const SuperAdminDashboard = () => {
 
         {/* Navigation Tabs */}
         <div className="flex flex-wrap border-b border-gray-200 mb-8">
-          {(["overview", "admins", "tournaments", "clubs", "sponsors", "logs"] as const).map((tab) => (
+          {(["overview", "admins", "tournaments", "clubs", "sponsors", "referees", "logs"] as const).map((tab) => (
              <button
                 key={tab}
                 onClick={() => { 
@@ -723,6 +826,7 @@ const SuperAdminDashboard = () => {
                     {activeTab === "tournaments" && renderTournamentsSection()}
                     {activeTab === "clubs" && renderClubsSection()}
                     {activeTab === "sponsors" && renderSponsorsSection()}
+                    {activeTab === "referees" && renderRefereesSection()}
                     {activeTab === "logs" && renderLogsSection()}
                 </>
              )}

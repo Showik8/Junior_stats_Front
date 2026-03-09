@@ -93,9 +93,9 @@ export default function DashboardClient({ allMatches }: { allMatches: any[] }) {
             {todayMatches.length === 0 ? (
               <div className="glass-card rounded-2xl p-12 text-center border border-dashed border-white/10">
                 <GiSoccerBall size={48} className="text-slate-700 mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-slate-500 mb-2">
+                <h2 className="text-lg font-bold text-slate-500 mb-2">
                   მატჩები არ არის
-                </h3>
+                </h2>
                 <p className="text-sm text-slate-600">
                   ამ თარიღზე დაგეგმილი მატჩი არ არის. აირჩიე სხვა თარიღი კალენდარიდან.
                 </p>
@@ -189,6 +189,7 @@ export default function DashboardClient({ allMatches }: { allMatches: any[] }) {
               <div className="flex items-center justify-between mb-5">
                 <button
                   onClick={prevMonth}
+                  aria-label="წინა თვე"
                   className="w-8 h-8 rounded-lg bg-white/5 border border-white/8 flex items-center justify-center text-slate-400 hover:bg-white/10 hover:text-white transition-all"
                 >
                   <FiChevronLeft size={16} />
@@ -196,6 +197,7 @@ export default function DashboardClient({ allMatches }: { allMatches: any[] }) {
                 <span className="text-sm font-bold text-white capitalize">{monthLabel}</span>
                 <button
                   onClick={nextMonth}
+                  aria-label="შემდეგი თვე"
                   className="w-8 h-8 rounded-lg bg-white/5 border border-white/8 flex items-center justify-center text-slate-400 hover:bg-white/10 hover:text-white transition-all"
                 >
                   <FiChevronRight size={16} />
@@ -225,6 +227,7 @@ export default function DashboardClient({ allMatches }: { allMatches: any[] }) {
                     <button
                       key={day}
                       onClick={() => setSelectedDate(dateObj)}
+                      aria-label={`${day} ${monthLabel}`}
                       className={`
                         relative w-full aspect-square rounded-lg text-sm font-semibold transition-all duration-200
                         ${isSelected

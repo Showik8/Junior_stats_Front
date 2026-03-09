@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
@@ -22,6 +22,7 @@ export default function TeamsPage() {
   const [sortBy, setSortBy] = useState<SortOption>("points");
   const [showFilters, setShowFilters] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(24);
 
   const { data: teams = [], isLoading: loading } = useQuery<any[]>({
     queryKey: ["all-teams"],
@@ -74,6 +75,13 @@ export default function TeamsPage() {
 
     return result;
   }, [teams, search, selectedCategory, sortBy]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setVisibleCount(24);
+  }, [search, selectedCategory, sortBy]);
+
+  const visibleTeams = useMemo(() => processed.slice(0, visibleCount), [processed, visibleCount]);
 
   if (loading) {
     return <LoadingSpinner icon={GiShield} />;
@@ -204,12 +212,12 @@ export default function TeamsPage() {
 
         {/* Teams Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {processed.map((team, idx) => (
+          {visibleTeams.map((team, idx) => (
             <Link
               key={team.id}
               href={`/teams/${team.id}`}
               className="group relative bg-[#030303] border border-white/5 rounded-3xl p-6 hover:border-white/10 hover:bg-[#080808] transition-all duration-300 animate-fade-in-up overflow-hidden"
-              style={{ animationDelay: `${idx * 50}ms` }}
+              style={{ animationDelay: idx < 24 ? `${idx * 50}ms` : '0ms' }}
             >
               {/* Subtle background glow on hover */}
               <div className="absolute inset-0 bg-linear-to-b from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -221,7 +229,7 @@ export default function TeamsPage() {
                   <div className="relative w-16 h-16 rounded-2xl bg-[#0a0a0a] border border-white/10 flex items-center justify-center overflow-hidden group-hover:border-emerald-500/30 transition-colors shadow-xl">
                     {team.logo ? (
                       <div className="relative w-[70%] h-[70%] drop-shadow-md">
-                        <Image src={team.logo} alt="" fill unoptimized className="object-contain" />
+                        <Image src={team.logo} alt="" fill className="object-contain" />
                       </div>
                     ) : (
                       <GiShield size={28} className="text-white/10" />
@@ -291,6 +299,18 @@ export default function TeamsPage() {
                 ყველა კატეგორიის ჩვენება →
               </button>
             )}
+          </div>
+        )}
+
+        {/* Load More Button */}
+        {visibleCount < processed.length && (
+          <div className="mt-12 flex justify-center">
+            <button
+              onClick={() => setVisibleCount((prev) => prev + 24)}
+              className="px-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white/70 font-bold hover:bg-white/10 hover:text-white transition-all shadow-sm"
+            >
+              მეტის ნახვა
+            </button>
           </div>
         )}
       </div>

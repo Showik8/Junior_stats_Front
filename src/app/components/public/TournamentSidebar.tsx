@@ -231,6 +231,7 @@ export default function TournamentSidebar() {
             <h2 className="text-lg font-black text-white">ნავიგაცია</h2>
             <button
               onClick={handleClose}
+              aria-label="დახურვა"
               className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
             >
               <FiX size={18} />
@@ -250,6 +251,7 @@ export default function TournamentSidebar() {
             {search && (
               <button
                 onClick={handleClearSearch}
+                aria-label="ძიების გასუფთავება"
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors"
               >
                 <FiX size={14} />

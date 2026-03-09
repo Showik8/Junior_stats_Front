@@ -113,7 +113,7 @@ function StatItem({ item }: { item: (typeof STATS)[0] }) {
       >
         <Icon
           className={`text-2xl transition-colors duration-400 ${
-            item.highlighted ? "text-[#10b981]" : "text-white/40 group-hover:text-[#10b981]"
+            item.highlighted ? "text-[#10b981]" : "text-white/70 group-hover:text-[#10b981]"
           }`}
         />
       </div>
@@ -126,7 +126,7 @@ function StatItem({ item }: { item: (typeof STATS)[0] }) {
       >
         <span>{count.toLocaleString()}</span>
         {item.suffix && (
-          <span className={`text-xl ml-1 font-bold ${item.highlighted ? "text-[#10b981]" : "text-white/50"}`}>
+          <span className={`text-xl ml-1 font-bold ${item.highlighted ? "text-[#10b981]" : "text-white/70"}`}>
             {item.suffix}
           </span>
         )}
@@ -135,7 +135,7 @@ function StatItem({ item }: { item: (typeof STATS)[0] }) {
       {/* Label */}
       <div
         className={`text-xs font-bold uppercase tracking-widest mt-1 ${
-          item.highlighted ? "text-[#10b981]/80" : "text-white/35 group-hover:text-white/60"
+          item.highlighted ? "text-[#10b981]/80" : "text-white/70 group-hover:text-white"
         } transition-colors`}
       >
         {item.label}

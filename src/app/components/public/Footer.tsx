@@ -17,25 +17,25 @@ export default function Footer() {
           <div className="flex flex-wrap items-center gap-6">
             <Link
               href="#"
-              className="text-sm text-white/40 hover:text-white transition-colors"
+              className="text-sm text-white/70 hover:text-white transition-colors"
             >
               ჩვენს შესახებ
             </Link>
             <Link
               href="#"
-              className="text-sm text-white/40 hover:text-white transition-colors"
+              className="text-sm text-white/70 hover:text-white transition-colors"
             >
               კონტაქტი
             </Link>
             <Link
               href="#"
-              className="text-sm text-white/40 hover:text-white transition-colors"
+              className="text-sm text-white/70 hover:text-white transition-colors"
             >
               კონფიდენციალურობა
             </Link>
             <Link
               href="#"
-              className="text-sm text-white/40 hover:text-white transition-colors"
+              className="text-sm text-white/70 hover:text-white transition-colors"
             >
               მოხმარების წესები
             </Link>
@@ -46,28 +46,28 @@ export default function Footer() {
             <a
               href="#"
               aria-label="Facebook"
-              className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 border border-white/8 flex items-center justify-center text-white/50 hover:text-white transition-all"
+              className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 border border-white/8 flex items-center justify-center text-white/70 hover:text-white transition-all"
             >
               <FaFacebookF size={13} />
             </a>
             <a
               href="#"
               aria-label="Telegram"
-              className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 border border-white/8 flex items-center justify-center text-white/50 hover:text-white transition-all"
+              className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 border border-white/8 flex items-center justify-center text-white/70 hover:text-white transition-all"
             >
               <FaTelegramPlane size={13} />
             </a>
             <a
               href="#"
               aria-label="Instagram"
-              className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 border border-white/8 flex items-center justify-center text-white/50 hover:text-white transition-all"
+              className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 border border-white/8 flex items-center justify-center text-white/70 hover:text-white transition-all"
             >
               <FaInstagram size={13} />
             </a>
             <a
               href="#"
               aria-label="YouTube"
-              className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 border border-white/8 flex items-center justify-center text-white/50 hover:text-white transition-all"
+              className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 border border-white/8 flex items-center justify-center text-white/70 hover:text-white transition-all"
             >
               <FaYoutube size={13} />
             </a>
@@ -77,7 +77,7 @@ export default function Footer() {
         {/* Bottom copyright */}
         <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-center gap-2">
           <GiSoccerBall className="text-[#10b981] text-sm opacity-60" />
-          <p className="text-xs text-white/25 text-center">
+          <p className="text-xs text-white/70 text-center">
             საავტორო უფლებები დაცულია © 2022-{currentYear} · Junior Stats
           </p>
         </div>

@@ -5,6 +5,7 @@ import { getUserRole } from "../utils/auth";
 import ClubDashboard from "./dashboard/ClubDashboard";
 import TournamentDashboard from "./dashboard/TournamentDashboard";
 import SuperAdminDashboard from "./dashboard/SuperAdminDashboard";
+import RefereeDashboard from "./dashboard/RefereeDashboard";
 
 const AdminLayout = () => {
   const router = useRouter();
@@ -47,6 +48,10 @@ const AdminLayout = () => {
 
   if (role === "SUPER_ADMIN") {
     return <SuperAdminDashboard />;
+  }
+
+  if (role === "REFEREE") {
+    return <RefereeDashboard />;
   }
 
   return (

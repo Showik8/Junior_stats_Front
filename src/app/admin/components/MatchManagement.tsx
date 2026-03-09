@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { Match, Team, CreateMatchPayload, Tournament, AgeCategory } from "@/types/admin";
+import React, { useState, useEffect } from "react";
+import { Match, Team, CreateMatchPayload, Tournament, AgeCategory, Referee, MatchReferee, REFEREE_ROLES, RefereeRole } from "@/types/admin";
 import { adminService } from "@/services/adminService";
-import { FaCalendar, FaEdit, FaTrash, FaCheck, FaTimes, FaPlus, FaFileAlt, FaSearch, FaMapMarkerAlt, FaExclamationTriangle } from "react-icons/fa";
+import { refereeService } from "@/services/referee.service";
+import { FaCalendar, FaEdit, FaTrash, FaCheck, FaTimes, FaPlus, FaFileAlt, FaSearch, FaMapMarkerAlt, FaExclamationTriangle, FaUserTie } from "react-icons/fa";
 import MatchReportForm from "./MatchReportForm";
 
 interface MatchManagementProps {
@@ -42,6 +43,59 @@ const MatchManagement: React.FC<MatchManagementProps> = ({
 
   // Confirmation modal state
   const [confirmDelete, setConfirmDelete] = useState<Match | null>(null);
+
+  // Referee state
+  const [allReferees, setAllReferees] = useState<Referee[]>([]);
+  const [matchReferees, setMatchReferees] = useState<Record<string, MatchReferee[]>>({});
+  const [assigningMatch, setAssigningMatch] = useState<string | null>(null);
+  const [selectedRefereeId, setSelectedRefereeId] = useState<number | "">("")
+  const [selectedRefereeRole, setSelectedRefereeRole] = useState<RefereeRole>("MAIN");
+
+  // Fetch referees on mount
+  useEffect(() => {
+    refereeService.getReferees().then(setAllReferees).catch(console.error);
+  }, []);
+
+  // Fetch referees for all matches
+  useEffect(() => {
+    const fetchAll = async () => {
+      const result: Record<string, MatchReferee[]> = {};
+      await Promise.all(
+        matches.map(async (m) => {
+          try {
+            const refs = await refereeService.getMatchReferees(m.id);
+            result[m.id] = refs;
+          } catch { /* ignore */ }
+        })
+      );
+      setMatchReferees(result);
+    };
+    if (matches.length > 0) fetchAll();
+  }, [matches]);
+
+  const handleAssignReferee = async (matchId: string) => {
+    if (!selectedRefereeId) return;
+    try {
+      await refereeService.assignToMatch(matchId, Number(selectedRefereeId), selectedRefereeRole);
+      const refs = await refereeService.getMatchReferees(matchId);
+      setMatchReferees(prev => ({ ...prev, [matchId]: refs }));
+      setAssigningMatch(null);
+      setSelectedRefereeId("");
+      setSelectedRefereeRole("MAIN");
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+
+  const handleRemoveReferee = async (matchId: string, refereeId: number) => {
+    try {
+      await refereeService.removeFromMatch(matchId, refereeId);
+      const refs = await refereeService.getMatchReferees(matchId);
+      setMatchReferees(prev => ({ ...prev, [matchId]: refs }));
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
 
   // Filter Matches
   const filteredMatches = matches.filter(m => {
@@ -364,6 +418,77 @@ const MatchManagement: React.FC<MatchManagementProps> = ({
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Assigned Referees */}
+                                {matchReferees[match.id] && matchReferees[match.id].length > 0 && (
+                                  <div className="mt-3 pt-3 border-t border-gray-50">
+                                    <div className="flex flex-wrap gap-2">
+                                      {matchReferees[match.id].map((mr) => (
+                                        <span key={mr.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-medium border border-purple-100">
+                                          <FaUserTie className="text-[10px]" />
+                                          {mr.referee?.firstName} {mr.referee?.lastName}
+                                          <span className="text-purple-400">({REFEREE_ROLES.find(r => r.value === mr.role)?.label || mr.role})</span>
+                                          <button
+                                            onClick={(e) => { e.stopPropagation(); handleRemoveReferee(match.id, mr.refereeId); }}
+                                            className="ml-1 text-purple-300 hover:text-red-500 transition-colors"
+                                            title="წაშლა"
+                                          >
+                                            <FaTimes className="text-[8px]" />
+                                          </button>
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Assign Referee Button / Form */}
+                                {assigningMatch === match.id ? (
+                                  <div className="mt-3 pt-3 border-t border-gray-50 flex flex-wrap items-center gap-2">
+                                    <select
+                                      className="p-2 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-200 outline-none"
+                                      value={selectedRefereeId}
+                                      onChange={(e) => setSelectedRefereeId(Number(e.target.value) || "")}
+                                    >
+                                      <option value="">აირჩიეთ მსაჯი</option>
+                                      {allReferees
+                                        .filter(r => !matchReferees[match.id]?.some(mr => mr.refereeId === r.id))
+                                        .map(r => (
+                                          <option key={r.id} value={r.id}>{r.firstName} {r.lastName}</option>
+                                        ))}
+                                    </select>
+                                    <select
+                                      className="p-2 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-200 outline-none"
+                                      value={selectedRefereeRole}
+                                      onChange={(e) => setSelectedRefereeRole(e.target.value as RefereeRole)}
+                                    >
+                                      {REFEREE_ROLES.map(r => (
+                                        <option key={r.value} value={r.value}>{r.label}</option>
+                                      ))}
+                                    </select>
+                                    <button
+                                      onClick={() => handleAssignReferee(match.id)}
+                                      disabled={!selectedRefereeId}
+                                      className="p-2 text-white bg-purple-500 hover:bg-purple-600 rounded-lg text-xs font-semibold disabled:opacity-50 transition-all"
+                                    >
+                                      მინიჭება
+                                    </button>
+                                    <button
+                                      onClick={() => { setAssigningMatch(null); setSelectedRefereeId(""); }}
+                                      className="p-2 text-gray-400 hover:text-gray-600 rounded-lg text-xs transition-colors"
+                                    >
+                                      გაუქმება
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="mt-2">
+                                    <button
+                                      onClick={() => setAssigningMatch(match.id)}
+                                      className="text-xs text-purple-500 hover:text-purple-700 font-medium flex items-center gap-1 transition-colors"
+                                    >
+                                      <FaUserTie className="text-[10px]" /> მსაჯის მინიჭება
+                                    </button>
+                                  </div>
+                                )}
                             </div>
                         ))
                     )}

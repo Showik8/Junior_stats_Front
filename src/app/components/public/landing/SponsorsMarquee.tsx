@@ -60,9 +60,9 @@ export default function SponsorsMarquee() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-linear-to-r from-transparent via-white/20 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-6 mb-12 text-center">
-        <h3 className="text-sm font-bold uppercase tracking-[0.3em] text-(--text-secondary) bg-white/5 inline-block px-6 py-2 rounded-full border border-white/10 shadow-sm">
+        <h2 className="text-sm font-bold uppercase tracking-[0.3em] text-white/80 bg-white/5 inline-block px-6 py-2 rounded-full border border-white/10 shadow-sm">
           სპონსორები და პარტნიორები
-        </h3>
+        </h2>
       </div>
 
       {/* Marquee Container */}
@@ -87,7 +87,7 @@ export default function SponsorsMarquee() {
                          <Image src={sponsor.logoUrl} alt={sponsor.name} fill className="object-contain" unoptimized />
                       </div>
                     ) : (
-                      <span className="text-xl md:text-3xl font-black tracking-widest text-transparent bg-clip-text bg-linear-to-r from-white/80 to-white/60 hover:from-white hover:to-[#ecc94b] transition-colors">
+                      <span className="text-xl md:text-3xl font-black tracking-widest text-transparent bg-clip-text bg-linear-to-r from-white to-white/80 hover:from-white hover:to-[#ecc94b] transition-colors">
                         {sponsor.name}
                       </span>
                     )}
@@ -97,7 +97,7 @@ export default function SponsorsMarquee() {
             ))}
           </div>
         ) : (
-          <div className="flex justify-center w-full py-8 text-white/30 text-sm font-bold tracking-widest uppercase">
+          <div className="flex justify-center w-full py-8 text-white/70 text-sm font-bold tracking-widest uppercase">
             სპონსორები არ მოიძებნა
           </div>
         )}

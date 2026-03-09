@@ -57,7 +57,7 @@ export default function HeroSection() {
           </h1>
 
           {/* Subtitle */}
-          <p className="text-white/50 text-base md:text-lg font-light leading-relaxed mb-8 max-w-lg">
+          <p className="text-white/70 text-base md:text-lg font-light leading-relaxed mb-8 max-w-lg">
             აღმოაჩინე ნიჭიერი მოთამაშეები, თვალი ადევნე ჩემპიონატებს და
             გაეცანი სრულ სტატისტიკას ერთ სივრცეში.
           </p>
@@ -67,16 +67,16 @@ export default function HeroSection() {
             {/* Primary CTA */}
             <Link
               href="/players"
-              className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#10b981] hover:bg-[#059669] text-white rounded-xl font-bold text-sm uppercase tracking-wider transition-all duration-300 shadow-[0_0_30px_-5px_rgba(16,185,129,0.5)] hover:shadow-[0_0_45px_-5px_rgba(16,185,129,0.7)] w-full sm:w-auto"
+              className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#10b981] hover:bg-[#059669] text-[#060c1a] rounded-xl font-black text-sm uppercase tracking-wider transition-all duration-300 shadow-[0_0_30px_-5px_rgba(16,185,129,0.5)] hover:shadow-[0_0_45px_-5px_rgba(16,185,129,0.7)] w-full sm:w-auto"
             >
-              <FaUsers className="text-base text-white/70 group-hover:text-white transition-colors" />
+              <FaUsers className="text-base text-[#060c1a]/80 group-hover:text-[#060c1a] transition-colors" />
               <span>მოთამაშეების ბაზა</span>
             </Link>
             <Link
               href="/dashboard"
               className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/20 hover:border-white/40 rounded-xl font-bold text-sm uppercase tracking-wider transition-all duration-300 backdrop-blur-md w-full sm:w-auto"
             >
-              <FaCalendarAlt className="text-base text-white/60 group-hover:text-white transition-colors" />
+              <FaCalendarAlt className="text-base text-white/80 group-hover:text-white transition-colors" />
               <span>მიმდინარე მატჩები</span>
             </Link>
           </div>
@@ -117,7 +117,7 @@ export default function HeroSection() {
             </div>
             <div>
               <p className="text-white text-xs font-black leading-none">ლაივ ჩემპიონატები</p>
-              <p className="text-white/40 text-[10px] mt-0.5">განახლება რეალურ დროში</p>
+              <p className="text-white/70 text-[10px] mt-0.5">განახლება რეალურ დროში</p>
             </div>
           </div>
         </div>
@@ -125,7 +125,7 @@ export default function HeroSection() {
 
       {/* Scroll-down indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2">
-        <span className="text-[10px] uppercase tracking-[0.3em] text-white/30">გაიგე მეტი</span>
+        <span className="text-[10px] uppercase tracking-[0.3em] text-white/70">გაიგე მეტი</span>
         <div className="w-5 h-8 rounded-full border-2 border-white/15 flex justify-center pt-1.5">
           <div className="w-1 h-2 rounded-full bg-white/50 animate-bounce" />
         </div>

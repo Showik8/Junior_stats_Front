@@ -36,7 +36,7 @@ interface PerformerStat {
 const RANK_STYLES: Record<number, { border: string; badge: string }> = {
   1: {
     border: "border-[#10b981] shadow-[0_0_20px_-4px_rgba(16,185,129,0.5)]",
-    badge: "bg-[#10b981] text-white",
+    badge: "bg-[#10b981] text-[#060c1a]",
   },
   2: {
     border: "border-white/20",
@@ -143,8 +143,8 @@ export default function TopPerformers() {
                 onClick={() => handleAgeChange(age)}
                 className={`px-5 py-1.5 rounded-full text-sm font-bold transition-all duration-250 ${
                   activeAge === age
-                    ? "bg-[#10b981] text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]"
-                    : "text-white/40 hover:text-white"
+                    ? "bg-[#10b981] text-[#060c1a] shadow-[0_0_15px_rgba(16,185,129,0.4)]"
+                    : "text-white/70 hover:text-white"
                 }`}
               >
                 {age}
@@ -164,7 +164,7 @@ export default function TopPerformers() {
                 className={`flex items-center gap-2 px-5 py-2 rounded-full border text-sm font-semibold transition-all duration-300 ${
                   activeCategory === cat.id
                     ? "border-[#10b981]/50 bg-[#10b981]/10 text-white shadow-[0_0_12px_rgba(16,185,129,0.2)]"
-                    : "border-white/10 text-white/40 hover:border-white/25 hover:text-white"
+                    : "border-white/10 text-white/70 hover:border-white/25 hover:text-white"
                 }`}
               >
                 <Icon className={activeCategory === cat.id ? "text-[#10b981]" : ""} />
@@ -181,7 +181,7 @@ export default function TopPerformers() {
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#10b981]" />
             </div>
           ) : activeItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-white/40">
+            <div className="flex flex-col items-center justify-center py-16 text-white/70">
               <span className="text-4xl mb-3">🏆</span>
               <p className="text-sm">მონაცემები ჯერ არ არის</p>
             </div>
@@ -190,7 +190,7 @@ export default function TopPerformers() {
               {activeItems.slice(0, 4).map((item, index) => {
                 const { player, team, statistics } = item;
                 const rank = index + 1;
-                const style = RANK_STYLES[rank] || { border: "border-white/10", badge: "bg-white/10 text-white/60" };
+                const style = RANK_STYLES[rank] || { border: "border-white/10", badge: "bg-white/10 text-white/80" };
 
                 return (
                   <Link
@@ -228,19 +228,19 @@ export default function TopPerformers() {
                       <h3 className="font-bold text-white text-sm leading-tight line-clamp-1">
                         {player.name}
                       </h3>
-                      <p className="text-white/40 text-xs line-clamp-1">
+                      <p className="text-white/70 text-xs line-clamp-1">
                         {team?.name || "უცნობი გუნდი"} · {team?.ageCategory?.replace("U_", "U") || activeAge}
                       </p>
 
                       {/* Stats row */}
                       <div className="flex items-center gap-3 mt-2 pt-2 border-t border-white/8">
-                        <span className="text-xs text-white/40">
+                        <span className="text-xs text-white/70">
                           {getStatLabel()}:{" "}
                           <span className="font-bold text-[#10b981]">{getStatValue(statistics)}</span>
                         </span>
-                        <span className="text-xs text-white/40">
+                        <span className="text-xs text-white/70">
                           {activeCategory === "matches" ? "წუთები" : "მატჩები"}:{" "}
-                          <span className="font-bold text-white/70">
+                          <span className="font-bold text-white/90">
                             {activeCategory === "matches"
                               ? (statistics?.minutesPlayed ?? 0)
                               : (statistics?.matchesPlayed ?? 0)}

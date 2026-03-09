@@ -60,7 +60,7 @@ export default function WeeklyMatchesTeaser() {
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#10b981]" />
           </div>
         ) : matches.length === 0 ? (
-          <div className="text-center text-white/40 py-8 text-sm">
+          <div className="text-center text-white/70 py-8 text-sm">
             ამჟამად მატჩები არ მოიძებნა
           </div>
         ) : (
@@ -109,7 +109,7 @@ export default function WeeklyMatchesTeaser() {
                         {formattedTime}
                       </span>
                     )}
-                    <span className="text-[11px] font-bold text-white/40 mt-1 uppercase">{formattedDate}</span>
+                    <span className="text-[11px] font-bold text-white/70 mt-1 uppercase">{formattedDate}</span>
                   </div>
 
                   {/* Away team logo */}
