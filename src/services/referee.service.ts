@@ -143,4 +143,18 @@ export const refereeService = {
       throw new Error(extractErrorMessage(error, "Failed to fetch matches"));
     }
   },
+
+  getMyProfile: async (): Promise<Referee> => {
+    try {
+      const response = await axiosInstance.get<ApiResponse<Referee>>(
+        API_PATHS.REFEREES.ME
+      );
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.error?.message || "Failed to fetch profile");
+      }
+      return response.data.data;
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to fetch profile"));
+    }
+  },
 };

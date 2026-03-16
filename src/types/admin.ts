@@ -30,7 +30,7 @@ export type Role = "SUPER_ADMIN" | "CLUB_ADMIN" | "TOURNAMENT_ADMIN" | "REFEREE"
  * Match status values from backend Prisma schema
  * Default: "SCHEDULED"
  */
-export type MatchStatus = "SCHEDULED" | "CANCELLED" | "FINISHED";
+export type MatchStatus = "SCHEDULED" | "IN_PROGRESS" | "FINISHED" | "CANCELLED";
 
 /**
  * Tournament status values from backend Prisma schema
@@ -459,6 +459,19 @@ export interface MatchReportPlayerStat {
   shotsOnTarget?: number;
   fouls?: number;
   saves?: number;
+}
+
+export interface SaveMatchReportDraftPayload {
+  matchId: string;
+  homeScore: number;
+  awayScore: number;
+  referee?: string;
+  venue?: string;
+  attendees?: number;
+  weatherNotes?: string;
+  notes?: string;
+  events: MatchReportEvent[];
+  playerStats: MatchReportPlayerStat[];
 }
 
 export interface SubmitMatchReportPayload {

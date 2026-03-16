@@ -141,6 +141,8 @@ export const API_PATHS = {
   MATCH_REPORTS: {
     // POST /api/match-reports/:matchId/submit
     SUBMIT: (matchId: string) => `/api/match-reports/${matchId}/submit`,
+    // POST /api/match-reports/:matchId/draft
+    DRAFT: (matchId: string) => `/api/match-reports/${matchId}/draft`,
   },
 
   TOURNAMENT_ADMINS: {
@@ -212,5 +214,15 @@ export const API_PATHS = {
     BY_MATCH: (matchId: string) => `/api/referees/match/${matchId}`,
     // GET /api/referees/my-matches - Get matches for logged-in referee
     MY_MATCHES: "/api/referees/my-matches",
+    // GET /api/referees/me - Get logged-in referee profile
+    ME: "/api/referees/me",
+  },
+
+  LINEUPS: {
+    GET_MATCH_LINEUPS: (matchId: string) => `/api/lineups/match/${matchId}`,
+    GET_TEAM_LINEUP: (matchId: string, teamId: string) =>
+      `/api/lineups/match/${matchId}/team/${teamId}`,
+    SUBMIT: (matchId: string, teamId: string) =>
+      `/api/lineups/match/${matchId}/team/${teamId}/submit`,
   },
 };

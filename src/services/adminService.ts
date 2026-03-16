@@ -80,6 +80,7 @@ export const adminService = {
   updateMatch: matchService.updateMatch,
   deleteMatch: matchService.deleteMatch,
   submitMatchReport: matchService.submitMatchReport,
+  saveMatchReportDraft: matchService.saveMatchReportDraft,
   getMatchStats: matchService.getMatchStats,
   getKnockoutBracket: matchService.getKnockoutBracket,
 

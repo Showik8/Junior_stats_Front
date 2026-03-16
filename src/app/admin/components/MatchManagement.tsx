@@ -106,7 +106,7 @@ const MatchManagement: React.FC<MatchManagementProps> = ({
   });
 
   const plannedMatches = filteredMatches.filter(m => m.status === "SCHEDULED" || m.status === "CANCELLED"); 
-  const playedMatches = filteredMatches.filter(m => m.status === "FINISHED");
+  const playedMatches = filteredMatches.filter(m => m.status === "FINISHED" || m.status === "IN_PROGRESS");
 
   const resetForm = () => {
     setHomeTeamId("");
@@ -354,8 +354,8 @@ const MatchManagement: React.FC<MatchManagementProps> = ({
                         : "text-gray-500 hover:text-gray-700"
                  }`}
               >
-                  Results
-                  <span className="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">{matches.filter(m => m.status === "FINISHED").length}</span>
+                  Results / Live
+                  <span className="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">{matches.filter(m => m.status === "FINISHED" || m.status === "IN_PROGRESS").length}</span>
               </button>
           </div>
       )}
@@ -536,9 +536,9 @@ const MatchManagement: React.FC<MatchManagementProps> = ({
                                           (match.awayScore || 0) > (match.homeScore || 0) ? 'text-gray-900' : 'text-gray-500'
                                       }`}>{match.awayTeam?.name}</div>
                                 </div>
-                                 <div className="text-xs text-slate-400 mt-4 sm:mt-0 flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm ml-0 md:ml-6">
-                                        <span className="font-bold text-slate-500 tracking-wider">FT</span>
-                                        <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                                 <div className={`text-xs mt-4 sm:mt-0 flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-sm ml-0 md:ml-6 ${match.status === 'IN_PROGRESS' ? 'bg-purple-50 text-purple-600 border-purple-100' : 'bg-white text-slate-400 border-slate-100'}`}>
+                                        <span className={`font-bold tracking-wider ${match.status === 'IN_PROGRESS' ? 'animate-pulse' : 'text-slate-500'}`}>{match.status === 'IN_PROGRESS' ? 'LIVE' : 'FT'}</span>
+                                        <span className={`w-1 h-1 rounded-full ${match.status === 'IN_PROGRESS' ? 'bg-purple-300' : 'bg-slate-300'}`}></span>
                                         <span className="font-mono">{new Date(match.date).toLocaleDateString()}</span>
                                  </div>
                             </div>

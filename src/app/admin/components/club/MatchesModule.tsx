@@ -12,7 +12,9 @@ import {
   FaChevronDown,
   FaChevronUp,
   FaExchangeAlt,
+  FaUsers,
 } from "react-icons/fa";
+import LineupForm from "../LineupForm";
 
 interface MatchesModuleProps {
   team: Team | null;
@@ -31,6 +33,9 @@ const MatchesModule: React.FC<MatchesModuleProps> = ({ team }) => {
   const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
   const [expandedMatchData, setExpandedMatchData] = useState<Match | null>(null);
   const [expandLoading, setExpandLoading] = useState(false);
+
+  // Lineup modal state
+  const [lineupMatchId, setLineupMatchId] = useState<string | null>(null);
 
   useEffect(() => {
     if (team?.id) {
@@ -158,6 +163,7 @@ const MatchesModule: React.FC<MatchesModuleProps> = ({ team }) => {
   };
 
   return (
+    <>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -397,6 +403,22 @@ const MatchesModule: React.FC<MatchesModuleProps> = ({ team }) => {
                   </div>
                 </button>
 
+                {/* Lineup button for scheduled matches */}
+                {match.status === "SCHEDULED" && (
+                  <div className="px-4 py-2.5 border-t border-gray-100 flex items-center justify-end">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLineupMatchId(match.id);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all"
+                    >
+                      <FaUsers className="text-[10px]" />
+                      შემადგენლობა
+                    </button>
+                  </div>
+                )}
+
                 {/* Win/Loss indicator */}
                 {isFinished &&
                   match.homeScore != null &&
@@ -451,6 +473,22 @@ const MatchesModule: React.FC<MatchesModuleProps> = ({ team }) => {
         </div>
       )}
     </div>
+
+    {/* Lineup Modal */}
+    {lineupMatchId && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setLineupMatchId(null)} />
+        <div className="relative w-full max-w-3xl max-h-[95vh] z-10 mx-4">
+          <LineupForm
+            match={matches.find(m => m.id === lineupMatchId)!}
+            teamId={team!.id}
+            onClose={() => setLineupMatchId(null)}
+            onSuccess={() => {}}
+          />
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 

@@ -6,6 +6,7 @@ import {
   AgeCategory,
   ApiResponse,
   SubmitMatchReportPayload,
+  SaveMatchReportDraftPayload,
 } from "@/types/admin";
 import { extractErrorMessage, formatMatchDate } from "./helpers";
 
@@ -174,6 +175,25 @@ export const matchService = {
       }
     } catch (error: unknown) {
       throw new Error(extractErrorMessage(error, "Failed to submit match report"));
+    }
+  },
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  saveMatchReportDraft: async (matchId: string, payload: SaveMatchReportDraftPayload): Promise<void> => {
+    try {
+      if (!matchId) throw new Error("Match ID is required");
+      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const response = await axiosInstance.post<ApiResponse<any>>(
+        API_PATHS.MATCH_REPORTS.DRAFT(matchId),
+        payload
+      );
+
+      if (!response.data.success) {
+        throw new Error(response.data.error?.message || "Failed to save match report draft");
+      }
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error, "Failed to save match report draft"));
     }
   },
 
