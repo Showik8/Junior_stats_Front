@@ -19,7 +19,7 @@ const RefereeOverview: React.FC<RefereeOverviewProps> = ({ myMatches, refereePro
   return (
     <div className="space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
+      <div className="bg-linear-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
         <div className="relative z-10">
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">
@@ -65,7 +65,7 @@ const RefereeOverview: React.FC<RefereeOverviewProps> = ({ myMatches, refereePro
           >
             <div className="flex items-center gap-4">
               <div
-                className={`p-3 rounded-xl flex-shrink-0 ${
+                className={`p-3 rounded-xl shrink-0 ${
                   stat.color === "blue"
                     ? "bg-blue-50 text-blue-600"
                     : stat.color === "amber"
@@ -122,7 +122,7 @@ const RefereeOverview: React.FC<RefereeOverviewProps> = ({ myMatches, refereePro
                 <p className="font-bold text-lg text-gray-900 truncate">{nextMatch.match.homeTeam?.name || "Home Team"}</p>
                 <p className="text-xs text-gray-500 uppercase">Home</p>
               </div>
-              <div className="px-4 py-2 bg-gray-100 rounded-xl text-xs font-bold text-gray-400 flex-shrink-0">
+              <div className="px-4 py-2 bg-gray-100 rounded-xl text-xs font-bold text-gray-400 shrink-0">
                 VS
               </div>
               <div className="flex-1 text-left">

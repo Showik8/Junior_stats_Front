@@ -21,7 +21,7 @@ const RefereeProfileModule: React.FC<RefereeProfileModuleProps> = ({
       {/* Profile Header Card */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
         {/* Cover */}
-        <div className="h-32 bg-gradient-to-r from-purple-500 to-indigo-600 relative overflow-hidden">
+        <div className="h-32 bg-linear-to-r from-purple-500 to-indigo-600 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
         </div>
         

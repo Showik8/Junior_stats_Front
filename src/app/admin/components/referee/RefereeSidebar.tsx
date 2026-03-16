@@ -14,7 +14,7 @@ const RefereeSidebar: React.FC<RefereeSidebarProps> = ({ activeTab, setActiveTab
   ];
 
   return (
-    <aside className="hidden md:flex h-full w-[260px] flex-col bg-white border-r border-gray-100 p-5 shrink-0">
+    <aside className="flex h-full w-[260px] flex-col bg-white border-r border-gray-100 p-5 shrink-0">
       {/* Club Identity */}
       <div className="flex items-center gap-3 mb-8 px-2">
         {refereeProfile?.photoUrl ? (
