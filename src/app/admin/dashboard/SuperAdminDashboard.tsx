@@ -13,11 +13,17 @@ import EditRefereeForm from "../components/EditRefereeForm";
 import Table from "../components/Table";
 import { adminService } from "@/services/adminService";
 import { refereeService } from "@/services/referee.service";
+import { schoolService } from "@/services/school.service";
 import { Admin, Tournament, Team, Sponsor, AuditLog, Referee } from "@/types/admin";
+import { FootballSchool } from "@/types/school.types";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
 import TeamSponsorsModule from "../components/club/TeamSponsorsModule";
 import TournamentSponsorsModule from "../components/TournamentSponsorsModule";
+import SchoolsTable from "../components/SchoolsTable";
+import CreateSchoolForm from "../components/CreateSchoolForm";
+import EditSchoolForm from "../components/EditSchoolForm";
+import AssignTeamToSchoolModal from "../components/AssignTeamToSchoolModal";
 import { getCached, setCache, invalidateDashboardCache } from "@/app/utils/dashboardCache";
 
 const SuperAdminDashboard = () => {
@@ -25,15 +31,18 @@ const SuperAdminDashboard = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [clubs, setClubs] = useState<Team[]>([]);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
-  
+  const [schools, setSchools] = useState<FootballSchool[]>([]);
+
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "admins" | "tournaments" | "clubs" | "sponsors" | "referees" | "logs">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "admins" | "tournaments" | "clubs" | "sponsors" | "referees" | "schools" | "logs">("overview");
   const [viewMode, setViewMode] = useState<"list" | "create" | "edit">("list");
   const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
   const [editingTournament, setEditingTournament] = useState<Tournament | null>(null);
   const [editingClub, setEditingClub] = useState<Team | null>(null);
   const [editingSponsor, setEditingSponsor] = useState<Sponsor | null>(null);
   const [editingReferee, setEditingReferee] = useState<Referee | null>(null);
+  const [editingSchool, setEditingSchool] = useState<FootballSchool | null>(null);
+  const [managingSchool, setManagingSchool] = useState<FootballSchool | null>(null);
   const [referees, setReferees] = useState<Referee[]>([]);
   
   // Audit Logs State
@@ -55,23 +64,26 @@ const SuperAdminDashboard = () => {
         const cachedTournaments = getCached<Tournament[]>("tournaments");
         const cachedClubs = getCached<Team[]>("clubs");
         const cachedSponsors = getCached<Sponsor[]>("sponsors");
+        const cachedSchools = getCached<FootballSchool[]>("schools");
 
-        if (cachedAdmins && cachedTournaments && cachedClubs && cachedSponsors) {
+        if (cachedAdmins && cachedTournaments && cachedClubs && cachedSponsors && cachedSchools) {
           setAdmins(cachedAdmins);
           setTournaments(cachedTournaments);
           setClubs(cachedClubs);
           setSponsors(cachedSponsors);
+          setSchools(cachedSchools);
           setLoading(false);
           return;
         }
       }
 
       // ── Fetch from API ──
-      const [adminsData, tournamentsData, clubsData, sponsorsData] = await Promise.all([
+      const [adminsData, tournamentsData, clubsData, sponsorsData, schoolsData] = await Promise.all([
         adminService.getAdmins(),
         adminService.getAllTournaments(),
         adminService.getAllClubs(),
-        adminService.getSponsors()
+        adminService.getSponsors(),
+        schoolService.getSchools()
       ]);
       
       const sponsorsList = sponsorsData.sponsors || [];
@@ -80,12 +92,14 @@ const SuperAdminDashboard = () => {
       setTournaments(tournamentsData);
       setClubs(clubsData);
       setSponsors(sponsorsList);
+      setSchools(schoolsData.schools);
 
       // ── Write to cache ──
       setCache("admins", adminsData);
       setCache("tournaments", tournamentsData);
       setCache("clubs", clubsData);
       setCache("sponsors", sponsorsList);
+      setCache("schools", schoolsData.schools);
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
     } finally {
@@ -165,6 +179,11 @@ const SuperAdminDashboard = () => {
     setViewMode("edit");
   };
 
+  const handleEditSchool = (school: FootballSchool) => {
+    setEditingSchool(school);
+    setViewMode("edit");
+  };
+
   const handleDeleteAdmin = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this admin?")) return;
     try {
@@ -230,6 +249,18 @@ const SuperAdminDashboard = () => {
       refreshData();
     } catch (error) {
       const msg = (error as Error).message || "Failed to delete referee";
+      setNotification({ type: "error", text: msg });
+    }
+  };
+
+  const handleDeleteSchool = async (school: FootballSchool) => {
+    if (!window.confirm(`ნამდვილად გსურთ სკოლის "${school.name}" წაშლა?`)) return;
+    try {
+      await schoolService.deleteSchool(school.id);
+      setNotification({ type: "success", text: "სკოლა წარმატებით წაიშალა" });
+      refreshData();
+    } catch (error) {
+      const msg = (error as Error).message || "შეცდომა სკოლის წაშლისას";
       setNotification({ type: "error", text: msg });
     }
   };
@@ -668,6 +699,52 @@ const SuperAdminDashboard = () => {
     </div>
   );
 
+  const renderSchoolsSection = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-4">
+        <div>
+           <h2 className="text-xl font-bold text-gray-800">სკოლების მართვა</h2>
+           <p className="text-sm text-gray-500">დაამატეთ და მართეთ საფეხბურთო სკოლები და აკადემიები.</p>
+        </div>
+        <Button onClick={() => setViewMode(viewMode === "list" ? "create" : "list")}>
+          {viewMode === "list" ? "ახალი სკოლის დამატება" : "სიაზე დაბრუნება"}
+        </Button>
+      </div>
+
+      {viewMode === "create" ? (
+        <CreateSchoolForm 
+          onSuccess={() => { refreshData(); setViewMode("list"); }} 
+          onCancel={() => setViewMode("list")} 
+        />
+      ) : viewMode === "edit" && editingSchool ? (
+        <EditSchoolForm
+          school={editingSchool}
+          onSuccess={() => { refreshData(); setViewMode("list"); setEditingSchool(null); }}
+          onCancel={() => { setViewMode("list"); setEditingSchool(null); }}
+        />
+      ) : (
+        <div className="animate-in fade-in slide-in-from-bottom-2">
+           <SchoolsTable 
+             schools={schools} 
+             onEdit={handleEditSchool}
+             onDelete={handleDeleteSchool}
+             onManage={(school) => setManagingSchool(school)}
+           />
+        </div>
+      )}
+
+      {managingSchool && (
+         <Modal isOpen={!!managingSchool} onClose={() => setManagingSchool(null)} title={`სკოლის მართვა: ${managingSchool.name}`} size="lg">
+            <AssignTeamToSchoolModal 
+               school={managingSchool} 
+               onSuccess={() => { refreshData(); setManagingSchool(null); }} 
+               onClose={() => setManagingSchool(null)} 
+            />
+         </Modal>
+      )}
+    </div>
+  );
+
   const renderLogsSection = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-4">
@@ -790,8 +867,8 @@ const SuperAdminDashboard = () => {
         )}
 
         {/* Navigation Tabs */}
-        <div className="flex flex-wrap border-b border-gray-200 mb-8">
-          {(["overview", "admins", "tournaments", "clubs", "sponsors", "referees", "logs"] as const).map((tab) => (
+        <div className="flex flex-wrap border-b border-gray-200 mb-8 overflow-x-auto">
+          {(["overview", "admins", "tournaments", "clubs", "sponsors", "referees", "schools", "logs"] as const).map((tab) => (
              <button
                 key={tab}
                 onClick={() => { 
@@ -827,6 +904,7 @@ const SuperAdminDashboard = () => {
                     {activeTab === "clubs" && renderClubsSection()}
                     {activeTab === "sponsors" && renderSponsorsSection()}
                     {activeTab === "referees" && renderRefereesSection()}
+                    {activeTab === "schools" && renderSchoolsSection()}
                     {activeTab === "logs" && renderLogsSection()}
                 </>
              )}

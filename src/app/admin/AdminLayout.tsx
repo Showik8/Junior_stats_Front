@@ -6,6 +6,7 @@ import ClubDashboard from "./dashboard/ClubDashboard";
 import TournamentDashboard from "./dashboard/TournamentDashboard";
 import SuperAdminDashboard from "./dashboard/SuperAdminDashboard";
 import RefereeDashboard from "./dashboard/RefereeDashboard";
+import SchoolAdminDashboard from "./dashboard/SchoolAdminDashboard";
 
 const AdminLayout = () => {
   const router = useRouter();
@@ -52,6 +53,10 @@ const AdminLayout = () => {
 
   if (role === "REFEREE") {
     return <RefereeDashboard />;
+  }
+
+  if (role === "SCHOOL_ADMIN") {
+    return <SchoolAdminDashboard />;
   }
 
   return (

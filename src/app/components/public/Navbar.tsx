@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/dashboard", label: "ტურნირები" },
   { href: "/players", label: "მოთამაშეები" },
   { href: "/teams", label: "გუნდები" },
+  { href: "/schools", label: "სკოლები" },
 ];
 
 export default function Navbar() {

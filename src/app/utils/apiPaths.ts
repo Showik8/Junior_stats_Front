@@ -173,6 +173,8 @@ export const API_PATHS = {
     TEAM_DETAIL: (id: string) => `/api/public/teams/${id}`,
     PLAYER_DETAIL: (id: string) => `/api/public/players/${id}`,
     MATCH_DETAIL: (id: string) => `/api/public/matches/${id}`,
+    SCHOOLS: "/api/public/schools",
+    SCHOOL_DETAIL: (id: string) => `/api/public/schools/${id}`,
   },
 
   SPONSORS: {
@@ -224,5 +226,22 @@ export const API_PATHS = {
       `/api/lineups/match/${matchId}/team/${teamId}`,
     SUBMIT: (matchId: string, teamId: string) =>
       `/api/lineups/match/${matchId}/team/${teamId}/submit`,
+  },
+
+  SCHOOLS: {
+    LIST: "/api/schools",
+    CREATE: "/api/schools",
+    MY_SCHOOL: "/api/schools/my-school",
+    DETAIL: (id: string) => `/api/schools/${id}`,
+    UPDATE: (id: string) => `/api/schools/${id}`,
+    DELETE: (id: string) => `/api/schools/${id}`,
+    STATS: (id: string) => `/api/schools/${id}/stats`,
+    ASSIGN_TEAM: (id: string) => `/api/schools/${id}/teams`,
+    REMOVE_TEAM: (id: string, teamId: string) => `/api/schools/${id}/teams/${teamId}`,
+    TRANSFER: (id: string) => `/api/schools/${id}/transfer`,
+    TRANSFERS: (id: string) => `/api/schools/${id}/transfers`,
+    ASSIGN_ADMIN: "/api/schools/admins/assign",
+    REMOVE_ADMIN: (schoolId: string, adminId: number) =>
+      `/api/schools/${schoolId}/admins/${adminId}`,
   },
 };

@@ -23,6 +23,10 @@ const POSITION_GROUPS = [
   { label: "FWD", value: "FWD" },
 ];
 
+const MIN_STARTING = 7;
+const MAX_STARTING = 11;
+const MAX_SUBS = 12;
+
 const LineupForm: React.FC<LineupFormProps> = ({ match, teamId, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -105,7 +109,7 @@ const LineupForm: React.FC<LineupFormProps> = ({ match, teamId, onClose, onSucce
 
   const startingCount = startingPlayers.length;
   const subCount = substitutePlayers.length;
-  const canSubmit = startingCount === 11 && subCount <= 7 && !isReadOnly;
+  const canSubmit = startingCount >= MIN_STARTING && startingCount <= MAX_STARTING && subCount <= MAX_SUBS && !isReadOnly;
 
   // Handlers
   const togglePlayer = useCallback((playerId: string) => {
@@ -122,10 +126,10 @@ const LineupForm: React.FC<LineupFormProps> = ({ match, teamId, onClose, onSucce
         let role: LineupRole = "RESERVE";
         let startingOrder: number | undefined;
 
-        if (currentStarting < 11) {
+        if (currentStarting < MAX_STARTING) {
           role = "STARTING";
           startingOrder = currentStarting + 1;
-        } else if (currentSub < 7) {
+        } else if (currentSub < MAX_SUBS) {
           role = "SUBSTITUTE";
         }
 
@@ -144,7 +148,7 @@ const LineupForm: React.FC<LineupFormProps> = ({ match, teamId, onClose, onSucce
 
       if (newRole === "STARTING") {
         const currentStarting = Array.from(next.values()).filter(v => v.role === "STARTING").length;
-        if (currentStarting >= 11) return prev;
+        if (currentStarting >= MAX_STARTING) return prev;
         next.set(playerId, { ...existing, role: "STARTING", startingOrder: currentStarting + 1 });
       } else {
         next.set(playerId, { ...existing, role: newRole, startingOrder: undefined });
@@ -250,15 +254,15 @@ const LineupForm: React.FC<LineupFormProps> = ({ match, teamId, onClose, onSucce
       {/* Progress bar */}
       <div className="px-6 py-3 bg-gray-50 border-b border-gray-100">
         <div className="flex items-center justify-between text-sm mb-2">
-          <span className="font-bold text-gray-700">სასტარტო: {startingCount}/11</span>
-          <span className="text-gray-500">სათადარიგო: {subCount}/7</span>
+          <span className="font-bold text-gray-700">სასტარტო: {startingCount}/{MAX_STARTING} (მინ. {MIN_STARTING})</span>
+          <span className="text-gray-500">სათადარიგო: {subCount}/{MAX_SUBS}</span>
         </div>
         <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-300 ${
-              startingCount === 11 ? "bg-emerald-500" : startingCount > 11 ? "bg-red-500" : "bg-blue-500"
+              startingCount >= MIN_STARTING && startingCount <= MAX_STARTING ? "bg-emerald-500" : startingCount > MAX_STARTING ? "bg-red-500" : "bg-blue-500"
             }`}
-            style={{ width: `${Math.min((startingCount / 11) * 100, 100)}%` }}
+            style={{ width: `${Math.min((startingCount / MAX_STARTING) * 100, 100)}%` }}
           />
         </div>
       </div>
@@ -284,7 +288,7 @@ const LineupForm: React.FC<LineupFormProps> = ({ match, teamId, onClose, onSucce
             <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
               <FaUsers className="text-emerald-600 text-[10px]" />
             </div>
-            სასტარტო შემადგენლობა ({startingCount}/11)
+            სასტარტო შემადგენლობა ({startingCount}/{MAX_STARTING})
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {startingPlayers.map(({ playerId, player, startingOrder, isCaptain }) => (
@@ -337,9 +341,9 @@ const LineupForm: React.FC<LineupFormProps> = ({ match, teamId, onClose, onSucce
                 )}
               </div>
             ))}
-            {startingCount < 11 && !isReadOnly && (
+            {startingCount < MAX_STARTING && !isReadOnly && (
               <div className="flex items-center justify-center p-3 rounded-xl border-2 border-dashed border-gray-200 text-gray-300 text-sm">
-                <FaUserPlus className="mr-2" /> {11 - startingCount} ადგილი დარჩენილი
+                <FaUserPlus className="mr-2" /> {MAX_STARTING - startingCount} ადგილი დარჩენილი
               </div>
             )}
           </div>
@@ -351,7 +355,7 @@ const LineupForm: React.FC<LineupFormProps> = ({ match, teamId, onClose, onSucce
             <div className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center">
               <FaExchangeAlt className="text-blue-600 text-[10px]" />
             </div>
-            სათადარიგო ({subCount}/7)
+            სათადარიგო ({subCount}/{MAX_SUBS})
           </h3>
           {substitutePlayers.length === 0 && (
             <p className="text-xs text-gray-400 italic">სათადარიგო მოთამაშეები არ არის შერჩეული</p>

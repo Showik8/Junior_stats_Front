@@ -24,7 +24,7 @@ export const AGE_CATEGORIES: AgeCategory[] = [
 /**
  * Roles matching backend Enum
  */
-export type Role = "SUPER_ADMIN" | "CLUB_ADMIN" | "TOURNAMENT_ADMIN" | "REFEREE";
+export type Role = "SUPER_ADMIN" | "CLUB_ADMIN" | "TOURNAMENT_ADMIN" | "REFEREE" | "SCHOOL_ADMIN";
 
 /**
  * Match status values from backend Prisma schema

@@ -9,7 +9,7 @@ interface CreateAdminFormProps {
 const CreateAdminForm = ({ onSuccess }: CreateAdminFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"TOURNAMENT_ADMIN" | "CLUB_ADMIN">("TOURNAMENT_ADMIN");
+  const [role, setRole] = useState<"TOURNAMENT_ADMIN" | "CLUB_ADMIN" | "SCHOOL_ADMIN">("TOURNAMENT_ADMIN");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -78,10 +78,11 @@ const CreateAdminForm = ({ onSuccess }: CreateAdminFormProps) => {
             <select
               className="w-full rounded-lg border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none"
               value={role}
-              onChange={(e) => setRole(e.target.value as "TOURNAMENT_ADMIN" | "CLUB_ADMIN")}
+              onChange={(e) => setRole(e.target.value as "TOURNAMENT_ADMIN" | "CLUB_ADMIN" | "SCHOOL_ADMIN")}
             >
               <option value="TOURNAMENT_ADMIN">Tournament Admin</option>
               <option value="CLUB_ADMIN">Club Admin</option>
+              <option value="SCHOOL_ADMIN">School Admin</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>

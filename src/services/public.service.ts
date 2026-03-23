@@ -39,15 +39,19 @@ export const publicService = {
     if (params?.search) queryParams.set("search", params.search);
     if (params?.ageCategory) queryParams.set("ageCategory", params.ageCategory);
 
-    const url = `${API_PATHS.PUBLIC.TOURNAMENTS}?${queryParams.toString()}`;
-    const response = await publicAxios.get<ApiResponse<PublicTournament[]>>(url);
+    const url = `${BASE_URL}${API_PATHS.PUBLIC.TOURNAMENTS}?${queryParams.toString()}`;
+    const response = await fetch(url, {
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      next: { revalidate: 60 },
+    });
+    const data: ApiResponse<PublicTournament[]> = await response.json();
 
     return {
-      tournaments: response.data.data || [],
-      total: response.data.meta?.total || 0,
-      page: response.data.meta?.page || 1,
-      limit: response.data.meta?.limit || 12,
-      totalPages: response.data.meta?.totalPages || 0,
+      tournaments: data.data || [],
+      total: data.meta?.total || 0,
+      page: data.meta?.page || 1,
+      limit: data.meta?.limit || 12,
+      totalPages: data.meta?.totalPages || 0,
     };
   },
 
@@ -55,52 +59,64 @@ export const publicService = {
    * Get full tournament details for public page
    */
   getTournamentDetail: async (id: string): Promise<PublicTournament> => {
-    const response = await publicAxios.get<ApiResponse<PublicTournament>>(
-      API_PATHS.PUBLIC.TOURNAMENT_DETAIL(id)
-    );
-    if (!response.data.success || !response.data.data) {
+    const url = `${BASE_URL}${API_PATHS.PUBLIC.TOURNAMENT_DETAIL(id)}`;
+    const response = await fetch(url, {
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      next: { revalidate: 60 },
+    });
+    const data: ApiResponse<PublicTournament> = await response.json();
+    if (!data.success || !data.data) {
       throw new Error("Tournament not found");
     }
-    return response.data.data;
+    return data.data;
   },
 
   /**
    * Get full team details for public page
    */
   getTeamDetail: async (id: string): Promise<PublicTeam> => {
-    const response = await publicAxios.get<ApiResponse<PublicTeam>>(
-      API_PATHS.PUBLIC.TEAM_DETAIL(id)
-    );
-    if (!response.data.success || !response.data.data) {
+    const url = `${BASE_URL}${API_PATHS.PUBLIC.TEAM_DETAIL(id)}`;
+    const response = await fetch(url, {
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      next: { revalidate: 60 },
+    });
+    const data: ApiResponse<PublicTeam> = await response.json();
+    if (!data.success || !data.data) {
       throw new Error("Team not found");
     }
-    return response.data.data;
+    return data.data;
   },
 
   /**
    * Get full player profile for public page
    */
   getPlayerDetail: async (id: string): Promise<PublicPlayer> => {
-    const response = await publicAxios.get<ApiResponse<PublicPlayer>>(
-      API_PATHS.PUBLIC.PLAYER_DETAIL(id)
-    );
-    if (!response.data.success || !response.data.data) {
+    const url = `${BASE_URL}${API_PATHS.PUBLIC.PLAYER_DETAIL(id)}`;
+    const response = await fetch(url, {
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      next: { revalidate: 60 },
+    });
+    const data: ApiResponse<PublicPlayer> = await response.json();
+    if (!data.success || !data.data) {
       throw new Error("Player not found");
     }
-    return response.data.data;
+    return data.data;
   },
 
   /**
    * Get full match details for public page
    */
   getMatchDetail: async (id: string): Promise<PublicMatch> => {
-    const response = await publicAxios.get<ApiResponse<PublicMatch>>(
-      API_PATHS.PUBLIC.MATCH_DETAIL(id)
-    );
-    if (!response.data.success || !response.data.data) {
+    const url = `${BASE_URL}${API_PATHS.PUBLIC.MATCH_DETAIL(id)}`;
+    const response = await fetch(url, {
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      next: { revalidate: 60 },
+    });
+    const data: ApiResponse<PublicMatch> = await response.json();
+    if (!data.success || !data.data) {
       throw new Error("Match not found");
     }
-    return response.data.data;
+    return data.data;
   },
 
   /**
@@ -129,10 +145,13 @@ export const publicService = {
         if (value !== undefined) queryParams.set(key, String(value));
       });
     }
-    const response = await publicAxios.get<ApiResponse<PublicPlayer[]>>(
-      `${API_PATHS.PLAYERS.GET_PLAYERS}?${queryParams.toString()}`
-    );
-    return response.data.data || [];
+    const url = `${BASE_URL}${API_PATHS.PLAYERS.GET_PLAYERS}?${queryParams.toString()}`;
+    const response = await fetch(url, {
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      next: { revalidate: 60 },
+    });
+    const data: ApiResponse<PublicPlayer[]> = await response.json();
+    return data.data || [];
   },
 
   /**
@@ -145,10 +164,13 @@ export const publicService = {
         if (value !== undefined) queryParams.set(key, String(value));
       });
     }
-    const response = await publicAxios.get<ApiResponse<PublicMatch[]>>(
-      `${API_PATHS.MATCH.GET_MATCHES}?${queryParams.toString()}`
-    );
-    return response.data.data || [];
+    const url = `${BASE_URL}${API_PATHS.MATCH.GET_MATCHES}?${queryParams.toString()}`;
+    const response = await fetch(url, {
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      next: { revalidate: 60 },
+    });
+    const data: ApiResponse<PublicMatch[]> = await response.json();
+    return data.data || [];
   },
 
   /**
